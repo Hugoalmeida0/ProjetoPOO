@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import SubjectCard from "@/components/SubjectCard";
+import GraduationCard from "@/components/GraduationCard";
 import MentorCard from "@/components/MentorCard";
 import { Button } from "@/components/ui/button";
 import { 
@@ -10,64 +10,76 @@ import {
   PenTool, 
   Globe, 
   TrendingUp,
-  ArrowRight 
+  ArrowRight,
+  Zap,
+  Heart,
+  Scale,
+  Building2,
+  Briefcase,
+  Users
 } from "lucide-react";
 
 const Index = () => {
-  const subjects = [
+  const graduations = [
     {
-      name: "Cálculo I",
-      description: "Limites, derivadas e aplicações fundamentais",
+      name: "Engenharia Civil",
+      description: "Construção, infraestrutura e desenvolvimento urbano",
+      students: 450,
+      subjects: 38,
       mentors: 25,
-      duration: "1-2h",
-      rating: 4.8,
       color: "bg-blue-500/10 text-blue-600",
-      icon: <Calculator className="h-6 w-6" />
+      icon: <Building2 className="h-6 w-6" />,
+      slug: "engenharia-civil"
     },
     {
-      name: "Física Geral",
-      description: "Mecânica, termodinâmica e ondas",
-      mentors: 18,
-      duration: "1-2h",
-      rating: 4.7,
-      color: "bg-purple-500/10 text-purple-600",
-      icon: <Atom className="h-6 w-6" />
-    },
-    {
-      name: "Programação",
-      description: "Python, Java, C++ e desenvolvimento web",
-      mentors: 32,
-      duration: "1-3h",
-      rating: 4.9,
+      name: "Ciência da Computação",
+      description: "Programação, sistemas e tecnologia da informação",
+      students: 380,
+      subjects: 32,
+      mentors: 35,
       color: "bg-green-500/10 text-green-600",
-      icon: <Laptop className="h-6 w-6" />
+      icon: <Laptop className="h-6 w-6" />,
+      slug: "ciencia-computacao"
     },
     {
-      name: "Desenho Técnico",
-      description: "CAD, AutoCAD e projetos técnicos",
-      mentors: 12,
-      duration: "2-3h",
-      rating: 4.6,
-      color: "bg-orange-500/10 text-orange-600",
-      icon: <PenTool className="h-6 w-6" />
+      name: "Engenharia Elétrica",
+      description: "Energia, automação e sistemas eletrônicos",
+      students: 290,
+      subjects: 36,
+      mentors: 18,
+      color: "bg-yellow-500/10 text-yellow-600",
+      icon: <Zap className="h-6 w-6" />,
+      slug: "engenharia-eletrica"
     },
     {
-      name: "Inglês Técnico",
-      description: "Inglês para engenharia e negócios",
-      mentors: 15,
-      duration: "1h",
-      rating: 4.5,
+      name: "Medicina",
+      description: "Cuidado da saúde e ciências médicas",
+      students: 320,
+      subjects: 45,
+      mentors: 42,
       color: "bg-red-500/10 text-red-600",
-      icon: <Globe className="h-6 w-6" />
+      icon: <Heart className="h-6 w-6" />,
+      slug: "medicina"
     },
     {
-      name: "Estatística",
-      description: "Análise de dados e probabilidade",
-      mentors: 20,
-      duration: "1-2h",
-      rating: 4.7,
+      name: "Direito",
+      description: "Ciências jurídicas e advocacia",
+      students: 520,
+      subjects: 28,
+      mentors: 30,
+      color: "bg-purple-500/10 text-purple-600",
+      icon: <Scale className="h-6 w-6" />,
+      slug: "direito"
+    },
+    {
+      name: "Administração",
+      description: "Gestão, negócios e empreendedorismo",
+      students: 410,
+      subjects: 25,
+      mentors: 22,
       color: "bg-indigo-500/10 text-indigo-600",
-      icon: <TrendingUp className="h-6 w-6" />
+      icon: <Briefcase className="h-6 w-6" />,
+      slug: "administracao"
     }
   ];
 
@@ -109,25 +121,25 @@ const Index = () => {
       <Header />
       <Hero />
       
-      {/* Subjects Section */}
-      <section id="materias" className="py-20 bg-muted/20">
+      {/* Graduations Section */}
+      <section id="graduacoes" className="py-20 bg-muted/20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Matérias Disponíveis</h2>
+            <h2 className="text-4xl font-bold mb-4">Graduações Disponíveis</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Encontre mentores especializados nas disciplinas que você precisa dominar
+              Explore as graduações e encontre mentores especializados na sua área de estudo
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {subjects.map((subject, index) => (
-              <SubjectCard key={index} {...subject} />
+            {graduations.map((graduation, index) => (
+              <GraduationCard key={index} {...graduation} />
             ))}
           </div>
 
           <div className="text-center">
             <Button variant="outline" size="lg">
-              Ver Todas as Matérias
+              Ver Todas as Graduações
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
