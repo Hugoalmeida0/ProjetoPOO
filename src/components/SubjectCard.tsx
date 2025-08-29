@@ -14,7 +14,7 @@ interface SubjectCardProps {
 
 const SubjectCard = ({ name, description, mentors, duration, rating, color, icon }: SubjectCardProps) => {
   return (
-    <Card className="group hover:shadow-card transition-smooth hover:-translate-y-1 bg-gradient-card border-0">
+    <Card className="group hover:shadow-card transition-smooth hover:-translate-y-1 bg-gradient-card border-0 cursor-pointer">
       <CardHeader>
         <div className="flex items-center gap-3 mb-2">
           <div className={`p-3 rounded-lg ${color}`}>
@@ -47,7 +47,11 @@ const SubjectCard = ({ name, description, mentors, duration, rating, color, icon
       </CardContent>
       
       <CardFooter>
-        <Button variant="default" className="w-full">
+        <Button 
+          variant="default" 
+          className="w-full"
+          onClick={() => window.location.href = `/mentor/1`}
+        >
           Ver Mentores
         </Button>
       </CardFooter>

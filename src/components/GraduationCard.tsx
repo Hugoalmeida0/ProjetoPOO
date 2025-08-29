@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, BookOpen, GraduationCap } from "lucide-react";
+import { Users, BookOpen, GraduationCap, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface GraduationCardProps {
@@ -31,46 +31,55 @@ const GraduationCard = ({
   };
 
   return (
-    <Card className="group hover:shadow-card transition-smooth hover:-translate-y-1 bg-gradient-card border-0 cursor-pointer" onClick={handleClick}>
-      <CardHeader>
-        <div className="flex items-center gap-3 mb-2">
-          <div className={`p-3 rounded-lg ${color}`}>
+    <Card className="group hover:shadow-pink transition-glow hover:-translate-y-2 bg-gradient-card border-0 cursor-pointer relative overflow-hidden" onClick={handleClick}>
+      {/* Gradient border effect */}
+      <div className="absolute inset-0 bg-gradient-accent opacity-0 group-hover:opacity-100 transition-glow -z-10 blur-xl"></div>
+      <div className="absolute inset-[1px] bg-card rounded-lg"></div>
+      
+      <CardHeader className="relative z-10">
+        <div className="flex items-center gap-4 mb-4">
+          <div className={`w-16 h-16 rounded-xl ${color} flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-bounce shadow-soft`}>
             {icon}
           </div>
           <div className="flex-1">
-            <CardTitle className="text-lg group-hover:text-primary transition-smooth">
+            <CardTitle className="text-2xl font-bold group-hover:text-primary transition-smooth mb-2 group-hover:bg-gradient-primary group-hover:bg-clip-text group-hover:text-transparent">
               {name}
             </CardTitle>
           </div>
         </div>
-        <p className="text-muted-foreground text-sm">{description}</p>
+        <p className="text-muted-foreground leading-relaxed">{description}</p>
       </CardHeader>
       
-      <CardContent>
-        <div className="grid grid-cols-3 gap-2 text-sm">
-          <div className="flex flex-col items-center text-center">
-            <Users className="h-4 w-4 text-muted-foreground mb-1" />
-            <span className="font-semibold">{students}</span>
-            <span className="text-xs text-muted-foreground">Alunos</span>
+      <CardContent className="relative z-10">
+        <div className="grid grid-cols-3 gap-6">
+          <div className="text-center p-3 rounded-lg bg-muted/30 group-hover:bg-primary/5 transition-smooth">
+            <div className="flex flex-col items-center">
+              <Users className="h-5 w-5 text-primary mb-2" />
+              <span className="text-2xl font-bold text-primary mb-1">{students}</span>
+              <span className="text-sm text-muted-foreground font-medium">Alunos</span>
+            </div>
           </div>
-          <div className="flex flex-col items-center text-center">
-            <BookOpen className="h-4 w-4 text-muted-foreground mb-1" />
-            <span className="font-semibold">{subjects}</span>
-            <span className="text-xs text-muted-foreground">Matérias</span>
+          <div className="text-center p-3 rounded-lg bg-muted/30 group-hover:bg-primary/5 transition-smooth">
+            <div className="flex flex-col items-center">
+              <BookOpen className="h-5 w-5 text-primary mb-2" />
+              <span className="text-2xl font-bold text-primary mb-1">{subjects}</span>
+              <span className="text-sm text-muted-foreground font-medium">Matérias</span>
+            </div>
           </div>
-          <div className="flex flex-col items-center text-center">
-            <GraduationCap className="h-4 w-4 text-muted-foreground mb-1" />
-            <span className="font-semibold">{mentors}</span>
-            <span className="text-xs text-muted-foreground">Mentores</span>
+          <div className="text-center p-3 rounded-lg bg-muted/30 group-hover:bg-primary/5 transition-smooth">
+            <div className="flex flex-col items-center">
+              <GraduationCap className="h-5 w-5 text-primary mb-2" />
+              <span className="text-2xl font-bold text-primary mb-1">{mentors}</span>
+              <span className="text-sm text-muted-foreground font-medium">Mentores</span>
+            </div>
           </div>
         </div>
+        
+        <div className="mt-6 flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Explorar curso</span>
+          <ArrowUpRight className="h-5 w-5 text-primary group-hover:translate-x-1 group-hover:-translate-y-1 transition-smooth" />
+        </div>
       </CardContent>
-      
-      <CardFooter>
-        <Button variant="default" className="w-full">
-          Ver Detalhes
-        </Button>
-      </CardFooter>
     </Card>
   );
 };

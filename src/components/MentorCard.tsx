@@ -80,7 +80,11 @@ const MentorCard = ({
       </CardContent>
       
       <CardFooter className="flex gap-2">
-        <Button variant="outline" className="flex-1">
+        <Button 
+          variant="outline" 
+          className="flex-1"
+          onClick={() => window.location.href = `/mentor/1`}
+        >
           Ver Perfil
         </Button>
         <Button variant="hero" className="flex-1">

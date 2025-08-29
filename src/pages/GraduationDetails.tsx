@@ -38,6 +38,15 @@ const GraduationDetails = () => {
           icon: <Calculator className="h-6 w-6" />
         },
         {
+          name: "Cálculo II",
+          description: "Integrais e séries matemáticas",
+          mentors: 7,
+          duration: "1-2h",
+          rating: 4.7,
+          color: "bg-blue-600/10 text-blue-700",
+          icon: <Calculator className="h-6 w-6" />
+        },
+        {
           name: "Física Geral",
           description: "Mecânica, termodinâmica e ondas",
           mentors: 6,
@@ -63,6 +72,33 @@ const GraduationDetails = () => {
           rating: 4.5,
           color: "bg-green-500/10 text-green-600",
           icon: <PenTool className="h-6 w-6" />
+        },
+        {
+          name: "Mecânica dos Solos",
+          description: "Análise e comportamento do solo",
+          mentors: 6,
+          duration: "2-3h",
+          rating: 4.4,
+          color: "bg-yellow-500/10 text-yellow-600",
+          icon: <Wrench className="h-6 w-6" />
+        },
+        {
+          name: "Estruturas de Concreto",
+          description: "Projeto e dimensionamento em concreto armado",
+          mentors: 5,
+          duration: "2-3h",
+          rating: 4.6,
+          color: "bg-gray-500/10 text-gray-600",
+          icon: <Building className="h-6 w-6" />
+        },
+        {
+          name: "Hidráulica",
+          description: "Sistemas hidráulicos e saneamento",
+          mentors: 4,
+          duration: "2h",
+          rating: 4.3,
+          color: "bg-cyan-500/10 text-cyan-600",
+          icon: <Globe className="h-6 w-6" />
         }
       ],
       mentors: [
@@ -102,6 +138,15 @@ const GraduationDetails = () => {
           icon: <Laptop className="h-6 w-6" />
         },
         {
+          name: "Programação II",
+          description: "Programação orientada a objetos",
+          mentors: 10,
+          duration: "2-3h",
+          rating: 4.8,
+          color: "bg-green-600/10 text-green-700",
+          icon: <Laptop className="h-6 w-6" />
+        },
+        {
           name: "Estrutura de Dados",
           description: "Listas, pilhas, filas e árvores",
           mentors: 8,
@@ -109,6 +154,15 @@ const GraduationDetails = () => {
           rating: 4.7,
           color: "bg-blue-500/10 text-blue-600",
           icon: <TrendingUp className="h-6 w-6" />
+        },
+        {
+          name: "Algoritmos e Complexidade",
+          description: "Análise de algoritmos e teoria da computação",
+          mentors: 6,
+          duration: "2-3h",
+          rating: 4.6,
+          color: "bg-indigo-500/10 text-indigo-600",
+          icon: <Calculator className="h-6 w-6" />
         },
         {
           name: "Banco de Dados",
@@ -127,6 +181,24 @@ const GraduationDetails = () => {
           rating: 4.6,
           color: "bg-orange-500/10 text-orange-600",
           icon: <Globe className="h-6 w-6" />
+        },
+        {
+          name: "Engenharia de Software",
+          description: "Metodologias ágeis e padrões de projeto",
+          mentors: 7,
+          duration: "2-3h",
+          rating: 4.5,
+          color: "bg-pink-500/10 text-pink-600",
+          icon: <Wrench className="h-6 w-6" />
+        },
+        {
+          name: "Inteligência Artificial",
+          description: "Machine Learning e redes neurais",
+          mentors: 5,
+          duration: "2-3h",
+          rating: 4.7,
+          color: "bg-violet-500/10 text-violet-600",
+          icon: <Zap className="h-6 w-6" />
         }
       ],
       mentors: [
@@ -157,12 +229,21 @@ const GraduationDetails = () => {
       description: "Domine a energia que move o mundo moderno",
       subjects: [
         {
-          name: "Circuitos Elétricos",
+          name: "Circuitos Elétricos I",
           description: "Análise de circuitos DC e AC",
           mentors: 6,
           duration: "2-3h",
           rating: 4.8,
           color: "bg-yellow-500/10 text-yellow-600",
+          icon: <Zap className="h-6 w-6" />
+        },
+        {
+          name: "Circuitos Elétricos II",
+          description: "Análise avançada de circuitos",
+          mentors: 5,
+          duration: "2-3h",
+          rating: 4.7,
+          color: "bg-yellow-600/10 text-yellow-700",
           icon: <Zap className="h-6 w-6" />
         },
         {
@@ -191,6 +272,33 @@ const GraduationDetails = () => {
           rating: 4.5,
           color: "bg-green-500/10 text-green-600",
           icon: <Calculator className="h-6 w-6" />
+        },
+        {
+          name: "Eletrônica Digital",
+          description: "Sistemas digitais e microcontroladores",
+          mentors: 4,
+          duration: "2-3h",
+          rating: 4.6,
+          color: "bg-red-500/10 text-red-600",
+          icon: <Laptop className="h-6 w-6" />
+        },
+        {
+          name: "Máquinas Elétricas",
+          description: "Motores e geradores elétricos",
+          mentors: 3,
+          duration: "2-3h",
+          rating: 4.4,
+          color: "bg-indigo-500/10 text-indigo-600",
+          icon: <Wrench className="h-6 w-6" />
+        },
+        {
+          name: "Sistemas de Potência",
+          description: "Geração e distribuição de energia",
+          mentors: 2,
+          duration: "2-3h",
+          rating: 4.3,
+          color: "bg-orange-500/10 text-orange-600",
+          icon: <Building className="h-6 w-6" />
         }
       ],
       mentors: [
