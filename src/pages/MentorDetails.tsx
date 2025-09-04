@@ -217,7 +217,11 @@ const MentorDetails = () => {
 
               {/* Action Buttons */}
               <div className="space-y-3">
-                <Button className="w-full" size="lg">
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={() => navigate(`/agendar/${id}`)}
+                >
                   <Calendar className="mr-2 h-4 w-4" />
                   Agendar Mentoria
                 </Button>
