@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +18,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 const bookingSchema = z.object({
@@ -38,6 +41,19 @@ const BookingMentorship = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!user) {
+      toast({
+        title: "Acesso negado",
+        description: "Você precisa estar logado para agendar uma mentoria.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+    }
+  }, [user, navigate, toast]);
 
   // Mock mentor data - in a real app, this would come from an API based on the ID
   const mentor = {
@@ -65,24 +81,54 @@ const BookingMentorship = () => {
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
-      studentName: "",
-      studentEmail: "",
+      studentName: user?.user_metadata?.full_name || "",
+      studentEmail: user?.email || "",
       studentPhone: "",
       objective: "",
     },
   });
 
-  const onSubmit = (data: BookingFormData) => {
-    // In a real app, this would make an API call
-    console.log("Booking data:", data);
-    
-    toast({
-      title: "Mentoria agendada com sucesso!",
-      description: `Sua mentoria com ${mentor.name} foi agendada para ${format(data.date, "dd/MM/yyyy", { locale: ptBR })} às ${data.time}.`,
-    });
+  const onSubmit = async (data: BookingFormData) => {
+    if (!user) return;
 
-    // Navigate back or to a confirmation page
-    navigate(-1);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .insert({
+          student_id: user.id,
+          mentor_id: id || mentor.name, // In real app, this would be the actual mentor ID
+          subject_id: data.subject, // This would be mapped to actual subject ID
+          date: data.date.toISOString().split('T')[0],
+          time: data.time,
+          duration: parseInt(data.duration),
+          objective: data.objective,
+          student_name: data.studentName,
+          student_email: data.studentEmail,
+          student_phone: data.studentPhone
+        });
+
+      if (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao agendar mentoria. Tente novamente.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Mentoria agendada com sucesso!",
+        description: `Sua mentoria com ${mentor.name} foi agendada para ${format(data.date, "dd/MM/yyyy", { locale: ptBR })} às ${data.time}.`,
+      });
+      
+      navigate(-1);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro inesperado. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

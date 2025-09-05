@@ -3,6 +3,8 @@ import Hero from "@/components/Hero";
 import GraduationCard from "@/components/GraduationCard";
 import MentorCard from "@/components/MentorCard";
 import { Button } from "@/components/ui/button";
+import { useGraduations } from "@/hooks/useGraduations";
+import { useSubjects } from "@/hooks/useSubjects";
 import { 
   Calculator, 
   Atom, 
@@ -20,68 +22,7 @@ import {
 } from "lucide-react";
 
 const Index = () => {
-  const graduations = [
-    {
-      name: "Engenharia Civil",
-      description: "Construção, infraestrutura e desenvolvimento urbano",
-      students: 450,
-      subjects: 38,
-      mentors: 25,
-      color: "bg-blue-500/10 text-blue-600",
-      icon: <Building2 className="h-6 w-6" />,
-      slug: "engenharia-civil"
-    },
-    {
-      name: "Ciência da Computação",
-      description: "Programação, sistemas e tecnologia da informação",
-      students: 380,
-      subjects: 32,
-      mentors: 35,
-      color: "bg-green-500/10 text-green-600",
-      icon: <Laptop className="h-6 w-6" />,
-      slug: "ciencia-computacao"
-    },
-    {
-      name: "Engenharia Elétrica",
-      description: "Energia, automação e sistemas eletrônicos",
-      students: 290,
-      subjects: 36,
-      mentors: 18,
-      color: "bg-yellow-500/10 text-yellow-600",
-      icon: <Zap className="h-6 w-6" />,
-      slug: "engenharia-eletrica"
-    },
-    {
-      name: "Medicina",
-      description: "Cuidado da saúde e ciências médicas",
-      students: 320,
-      subjects: 45,
-      mentors: 42,
-      color: "bg-red-500/10 text-red-600",
-      icon: <Heart className="h-6 w-6" />,
-      slug: "medicina"
-    },
-    {
-      name: "Direito",
-      description: "Ciências jurídicas e advocacia",
-      students: 520,
-      subjects: 28,
-      mentors: 30,
-      color: "bg-purple-500/10 text-purple-600",
-      icon: <Scale className="h-6 w-6" />,
-      slug: "direito"
-    },
-    {
-      name: "Administração",
-      description: "Gestão, negócios e empreendedorismo",
-      students: 410,
-      subjects: 25,
-      mentors: 22,
-      color: "bg-indigo-500/10 text-indigo-600",
-      icon: <Briefcase className="h-6 w-6" />,
-      slug: "administracao"
-    }
-  ];
+  const { data: graduations = [], isLoading: graduationsLoading } = useGraduations();
 
   const mentors = [
     {
@@ -131,11 +72,29 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {graduations.map((graduation, index) => (
-              <GraduationCard key={index} {...graduation} />
-            ))}
-          </div>
+          {graduationsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {graduations.map((graduation) => (
+                <GraduationCard 
+                  key={graduation.id} 
+                  name={graduation.name}
+                  description={graduation.description}
+                  students={graduation.students_count}
+                  subjects={graduation.subjects_count}
+                  mentors={graduation.mentors_count}
+                  color={graduation.color}
+                  icon={graduation.icon}
+                  slug={graduation.slug}
+                />
+              ))}
+            </div>
+          )}
 
           <div className="text-center">
             <Button variant="outline" size="lg">
