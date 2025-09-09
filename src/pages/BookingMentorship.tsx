@@ -142,67 +142,67 @@ const BookingMentorship = () => {
   });
 
   const onSubmit = async (data: BookingFormData) => {
-  if (!user || !id) return;
+    if (!user || !id) return;
 
-  setIsSubmitting(true); // Inicia o loading
+    setIsSubmitting(true); // Inicia o loading
 
-  try {
-    const mentorId = id === "1" ? user.id : id; // Lógica de teste
-    const dateString = data.date.toISOString().split('T')[0];
+    try {
+      const mentorId = id === "1" ? user.id : id; // Lógica de teste
+      const dateString = data.date.toISOString().split('T')[0];
 
-    // Passo 1: Buscar o ID da matéria
-    const { data: subjectData, error: subjectError } = await supabase
-      .from('subjects')
-      .select('id')
-      .eq('name', data.subject)
-      .single();
+      // Passo 1: Buscar o ID da matéria
+      const { data: subjectData, error: subjectError } = await supabase
+        .from('subjects')
+        .select('id')
+        .eq('name', data.subject)
+        .single();
 
-    // Se a matéria não for encontrada, lançamos um erro que será capturado pelo catch
-    if (subjectError) {
-      throw new Error(`Matéria "${data.subject}" não encontrada no banco de dados.`);
+      // Se a matéria não for encontrada, lançamos um erro que será capturado pelo catch
+      if (subjectError) {
+        throw new Error(`Matéria "${data.subject}" não encontrada no banco de dados.`);
+      }
+
+      // Passo 2: Montar o objeto final do agendamento
+      const bookingData = {
+        student_id: user.id,
+        mentor_id: mentorId,
+        subject_id: subjectData.id,
+        date: dateString,
+        time: data.time,
+        duration: parseInt(data.duration),
+        objective: data.objective,
+        student_name: data.studentName,
+        student_email: data.studentEmail,
+        student_phone: data.studentPhone,
+        status: 'pending' as const
+      };
+
+      // Passo 3: Chamar a função do seu hook para criar o agendamento
+      // (A sua função createBooking já faz o insert no banco, então o teste direto que você tinha é redundante)
+      await createBooking(bookingData);
+
+      // Se tudo deu certo até aqui:
+      toast({
+        title: "Mentoria agendada com sucesso!",
+        description: `Sua mentoria com ${mentor.name} foi agendada para ${format(data.date, "dd/MM/yyyy", { locale: ptBR })} às ${data.time}.`,
+      });
+
+      navigate(-1); // Navega para a página anterior
+
+    } catch (error) {
+      // QUALQUER ERRO nos passos acima será capturado aqui, IMPEDINDO A TELA BRANCA
+      console.error("Falha na submissão do agendamento:", error);
+      toast({
+        title: "Erro ao agendar",
+        description: error instanceof Error ? error.message : "Ocorreu um erro inesperado. Tente novamente.",
+        variant: "destructive",
+      });
+
+    } finally {
+      // Este bloco é executado sempre, seja em caso de sucesso ou erro
+      setIsSubmitting(false); // Finaliza o loading
     }
-
-    // Passo 2: Montar o objeto final do agendamento
-    const bookingData = {
-      student_id: user.id,
-      mentor_id: mentorId,
-      subject_id: subjectData.id,
-      date: dateString,
-      time: data.time,
-      duration: parseInt(data.duration),
-      objective: data.objective,
-      student_name: data.studentName,
-      student_email: data.studentEmail,
-      student_phone: data.studentPhone,
-      status: 'pending' as const
-    };
-
-    // Passo 3: Chamar a função do seu hook para criar o agendamento
-    // (A sua função createBooking já faz o insert no banco, então o teste direto que você tinha é redundante)
-    await createBooking(bookingData);
-
-    // Se tudo deu certo até aqui:
-    toast({
-      title: "Mentoria agendada com sucesso!",
-      description: `Sua mentoria com ${mentor.name} foi agendada para ${format(data.date, "dd/MM/yyyy", { locale: ptBR })} às ${data.time}.`,
-    });
-
-    navigate(-1); // Navega para a página anterior
-
-  } catch (error) {
-    // QUALQUER ERRO nos passos acima será capturado aqui, IMPEDINDO A TELA BRANCA
-    console.error("Falha na submissão do agendamento:", error);
-    toast({
-      title: "Erro ao agendar",
-      description: error instanceof Error ? error.message : "Ocorreu um erro inesperado. Tente novamente.",
-      variant: "destructive",
-    });
-
-  } finally {
-    // Este bloco é executado sempre, seja em caso de sucesso ou erro
-    setIsSubmitting(false); // Finaliza o loading
-  }
-};
+  };
 
   // Error boundary para capturar erros
   if (!id) {
