@@ -62,7 +62,6 @@ const BookingMentorship = () => {
     period: "8º período",
     subjects: ["Cálculo I", "Física Geral", "Resistência dos Materiais", "Desenho Técnico"],
     rating: 4.9,
-    price: "R$ 35",
     avatar: undefined,
   };
 
@@ -184,8 +183,8 @@ const BookingMentorship = () => {
                     </div>
                     
                     <div className="pt-3 border-t">
-                      <div className="text-2xl font-bold text-primary">
-                        {mentor.price}<span className="text-base text-muted-foreground">/hora</span>
+                      <div className="px-3 py-2 bg-gradient-primary text-white rounded-lg text-center">
+                        <span className="text-sm font-medium">Mentoria Voluntária</span>
                       </div>
                     </div>
                   </div>

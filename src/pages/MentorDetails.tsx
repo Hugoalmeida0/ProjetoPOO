@@ -20,7 +20,6 @@ const MentorDetails = () => {
     rating: 4.9,
     reviews: 45,
     location: "Campus Vila Velha",
-    price: "R$ 35",
     avatar: undefined,
     bio: "Estudante dedicada de Engenharia Civil com paixão por ensinar. Já ajudei mais de 200 alunos a melhorarem suas notas em matérias de exatas. Metodologia focada na prática e resolução de exercícios.",
     experience: "2 anos",
@@ -95,8 +94,8 @@ const MentorDetails = () => {
                           <span className="font-bold text-lg">{mentor.rating}</span>
                           <span className="text-muted-foreground">({mentor.reviews} avaliações)</span>
                         </div>
-                        <div className="text-2xl font-bold text-primary">
-                          {mentor.price}<span className="text-base text-muted-foreground">/hora</span>
+                        <div className="px-4 py-2 bg-gradient-primary text-white rounded-lg text-center">
+                          <span className="font-bold">Mentoria Voluntária</span>
                         </div>
                       </div>
                     </div>

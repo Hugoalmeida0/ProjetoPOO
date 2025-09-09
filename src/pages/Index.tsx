@@ -32,8 +32,7 @@ const Index = () => {
       subjects: ["Cálculo I", "Física", "Resistência"],
       rating: 4.9,
       reviews: 45,
-      location: "Campus Vila Velha",
-      price: "R$ 35"
+      location: "Campus Vila Velha"
     },
     {
       name: "Pedro Santos",
@@ -42,8 +41,7 @@ const Index = () => {
       subjects: ["Python", "Java", "Estruturas"],
       rating: 4.8,
       reviews: 38,
-      location: "Online",
-      price: "R$ 40"
+      location: "Online"
     },
     {
       name: "Maria Costa",
@@ -52,8 +50,7 @@ const Index = () => {
       subjects: ["Física", "Circuitos", "Controle"],
       rating: 4.9,
       reviews: 52,
-      location: "Campus Vila Velha",
-      price: "R$ 45"
+      location: "Campus Vila Velha"
     }
   ];
 
@@ -135,7 +132,7 @@ const Index = () => {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold mb-4">Pronto para Começar?</h2>
           <p className="text-xl mb-8 text-white/90 max-w-2xl mx-auto">
-            Junte-se a centenas de alunos que já melhoraram suas notas com nossos mentores
+            Junte-se a centenas de alunos que já melhoraram suas notas com nossos mentores voluntários
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="outline" size="lg" className="bg-white text-primary hover:bg-white/90">
@@ -168,8 +165,8 @@ const Index = () => {
               <h4 className="font-semibold mb-4">Plataforma</h4>
               <ul className="space-y-2 text-muted-foreground">
                 <li><a href="#" className="hover:text-primary transition-smooth">Como Funciona</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Preços</a></li>
                 <li><a href="#" className="hover:text-primary transition-smooth">Para Mentores</a></li>
+                <li><a href="#" className="hover:text-primary transition-smooth">Guias de Estudo</a></li>
               </ul>
             </div>
             
