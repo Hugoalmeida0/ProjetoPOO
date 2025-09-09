@@ -34,6 +34,13 @@ const Header = () => {
             <a href="#mentores" className="text-foreground hover:text-primary transition-smooth">
               Mentores
             </a>
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate("/tornar-se-mentor")}
+              className="text-foreground hover:text-primary transition-smooth"
+            >
+              Ser Mentor
+            </Button>
             <a href="#sobre" className="text-foreground hover:text-primary transition-smooth">
               Sobre
             </a>

@@ -123,7 +123,6 @@ export type Database = {
           graduation_id: string | null
           id: string
           location: string | null
-          price_per_hour: number | null
           rating: number | null
           total_sessions: number | null
           updated_at: string
@@ -136,7 +135,6 @@ export type Database = {
           graduation_id?: string | null
           id?: string
           location?: string | null
-          price_per_hour?: number | null
           rating?: number | null
           total_sessions?: number | null
           updated_at?: string
@@ -149,7 +147,6 @@ export type Database = {
           graduation_id?: string | null
           id?: string
           location?: string | null
-          price_per_hour?: number | null
           rating?: number | null
           total_sessions?: number | null
           updated_at?: string

@@ -13,7 +13,6 @@ interface MentorCardProps {
   reviews: number;
   location: string;
   avatar?: string;
-  price: string;
 }
 
 const MentorCard = ({ 
@@ -24,8 +23,7 @@ const MentorCard = ({
   rating, 
   reviews, 
   location, 
-  avatar, 
-  price 
+  avatar
 }: MentorCardProps) => {
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
 
@@ -74,8 +72,7 @@ const MentorCard = ({
         </div>
 
         <div className="text-center">
-          <span className="text-2xl font-bold text-primary">{price}</span>
-          <span className="text-muted-foreground">/hora</span>
+          <span className="text-sm font-medium text-primary">Mentoria Voluntária</span>
         </div>
       </CardContent>
       
