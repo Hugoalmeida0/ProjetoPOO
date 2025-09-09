@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Search, User, LogOut } from "lucide-react";
+import { GraduationCap, Search, User, LogOut, Calendar } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -34,8 +34,8 @@ const Header = () => {
             <a href="#mentores" className="text-foreground hover:text-primary transition-smooth">
               Mentores
             </a>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => navigate("/tornar-se-mentor")}
               className="text-foreground hover:text-primary transition-smooth"
             >
@@ -50,7 +50,7 @@ const Header = () => {
             <Button variant="ghost" size="icon">
               <Search className="h-4 w-4" />
             </Button>
-            
+
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -59,6 +59,10 @@ const Header = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate("/meus-agendamentos")}>
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Meus Agendamentos
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Sair

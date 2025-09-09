@@ -1,0 +1,237 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import Header from "@/components/Header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { useBookings, Booking } from "@/hooks/useBookings";
+import { cn } from "@/lib/utils";
+
+const MyBookings = () => {
+    const navigate = useNavigate();
+    const { toast } = useToast();
+    const { user } = useAuth();
+    const { bookings, loading, cancelBooking, completeBooking } = useBookings();
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+    const getStatusBadge = (status: Booking['status']) => {
+        const statusConfig = {
+            pending: { label: "Pendente", variant: "secondary" as const, icon: AlertCircle },
+            confirmed: { label: "Confirmado", variant: "default" as const, icon: CheckCircle },
+            cancelled: { label: "Cancelado", variant: "destructive" as const, icon: XCircle },
+            completed: { label: "Finalizado", variant: "outline" as const, icon: CheckCircle },
+        };
+
+        const config = statusConfig[status];
+        const Icon = config.icon;
+
+        return (
+            <Badge variant={config.variant} className="flex items-center gap-1">
+                <Icon className="h-3 w-3" />
+                {config.label}
+            </Badge>
+        );
+    };
+
+    const handleCancelBooking = async (bookingId: string) => {
+        setActionLoading(bookingId);
+        try {
+            await cancelBooking(bookingId);
+            toast({
+                title: "Agendamento cancelado",
+                description: "Seu agendamento foi cancelado com sucesso.",
+            });
+        } catch (error) {
+            toast({
+                title: "Erro",
+                description: "Erro ao cancelar agendamento. Tente novamente.",
+                variant: "destructive",
+            });
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleCompleteBooking = async (bookingId: string) => {
+        setActionLoading(bookingId);
+        try {
+            await completeBooking(bookingId);
+            toast({
+                title: "Mentoria finalizada",
+                description: "Sua mentoria foi marcada como finalizada.",
+            });
+        } catch (error) {
+            toast({
+                title: "Erro",
+                description: "Erro ao finalizar mentoria. Tente novamente.",
+                variant: "destructive",
+            });
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const canCancel = (booking: Booking) => {
+        const bookingDate = new Date(booking.date + 'T' + booking.time);
+        const now = new Date();
+        const hoursUntilBooking = (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+        return ['pending', 'confirmed'].includes(booking.status) && hoursUntilBooking > 2;
+    };
+
+    const canComplete = (booking: Booking) => {
+        const bookingDate = new Date(booking.date + 'T' + booking.time);
+        const now = new Date();
+        const hoursAfterBooking = (now.getTime() - bookingDate.getTime()) / (1000 * 60 * 60);
+
+        return booking.status === 'confirmed' && hoursAfterBooking >= 0;
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-background">
+                <Header />
+                <div className="container mx-auto px-4 py-8">
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                            <p>Carregando seus agendamentos...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-background">
+            <Header />
+
+            <section className="py-8">
+                <div className="container mx-auto px-4 max-w-4xl">
+                    <Button
+                        variant="ghost"
+                        onClick={() => navigate(-1)}
+                        className="mb-6"
+                    >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Voltar
+                    </Button>
+
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-foreground mb-2">Meus Agendamentos</h1>
+                        <p className="text-muted-foreground">
+                            Gerencie suas mentorias agendadas e finalize as que já foram realizadas.
+                        </p>
+                    </div>
+
+                    {bookings.length === 0 ? (
+                        <Card className="bg-gradient-card border-0 shadow-card">
+                            <CardContent className="text-center py-12">
+                                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                <h3 className="text-lg font-semibold mb-2">Nenhum agendamento encontrado</h3>
+                                <p className="text-muted-foreground mb-4">
+                                    Você ainda não possui agendamentos de mentoria.
+                                </p>
+                                <Button onClick={() => navigate("/")}>
+                                    Buscar Mentores
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <div className="space-y-4">
+                            {bookings.map((booking) => {
+                                const initials = booking.student_name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
+                                const bookingDate = new Date(booking.date + 'T' + booking.time);
+                                const isPast = bookingDate < new Date();
+
+                                return (
+                                    <Card key={booking.id} className="bg-gradient-card border-0 shadow-card">
+                                        <CardContent className="p-6">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex items-start gap-4">
+                                                    <Avatar className="h-12 w-12 ring-2 ring-primary/20">
+                                                        <AvatarFallback className="text-sm font-bold bg-gradient-primary text-white">
+                                                            {initials}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <h3 className="font-semibold text-lg">{booking.student_name}</h3>
+                                                            {getStatusBadge(booking.status)}
+                                                        </div>
+
+                                                        <div className="space-y-2 text-sm text-muted-foreground">
+                                                            <div className="flex items-center gap-2">
+                                                                <Calendar className="h-4 w-4" />
+                                                                <span>
+                                                                    {format(bookingDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                <Clock className="h-4 w-4" />
+                                                                <span>
+                                                                    {booking.time} - {booking.duration} minutos
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                <User className="h-4 w-4" />
+                                                                <span>Matéria: {booking.subject_id}</span>
+                                                            </div>
+
+                                                            {booking.objective && (
+                                                                <div className="mt-3">
+                                                                    <p className="font-medium text-foreground mb-1">Objetivo:</p>
+                                                                    <p className="text-sm">{booking.objective}</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-col gap-2">
+                                                    {canCancel(booking) && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => handleCancelBooking(booking.id)}
+                                                            disabled={actionLoading === booking.id}
+                                                            className="text-red-600 hover:text-red-700"
+                                                        >
+                                                            {actionLoading === booking.id ? "Cancelando..." : "Cancelar"}
+                                                        </Button>
+                                                    )}
+
+                                                    {canComplete(booking) && (
+                                                        <Button
+                                                            size="sm"
+                                                            onClick={() => handleCompleteBooking(booking.id)}
+                                                            disabled={actionLoading === booking.id}
+                                                        >
+                                                            {actionLoading === booking.id ? "Finalizando..." : "Finalizar"}
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </section>
+        </div>
+    );
+};
+
+export default MyBookings;
