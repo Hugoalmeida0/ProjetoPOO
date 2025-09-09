@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { GraduationCap, Mail, Lock, User, ArrowLeft } from "lucide-react";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isResendingEmail, setIsResendingEmail] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -46,7 +47,9 @@ const Auth = () => {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      console.log("Tentando criar conta com:", { email, fullName });
+
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -57,7 +60,10 @@ const Auth = () => {
         }
       });
 
+      console.log("Resposta do cadastro:", { data, error });
+
       if (error) {
+        console.error("Erro no cadastro:", error);
         if (error.message.includes("already registered")) {
           toast({
             title: "Erro",
@@ -72,6 +78,7 @@ const Auth = () => {
           });
         }
       } else {
+        console.log("Cadastro bem-sucedido:", data);
         toast({
           title: "Sucesso!",
           description: "Conta criada com sucesso! Verifique seu email para confirmar a conta.",
@@ -88,6 +95,40 @@ const Auth = () => {
     }
   };
 
+  const handleResendConfirmation = async (email: string) => {
+    setIsResendingEmail(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Erro",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Email reenviado!",
+          description: "Verifique sua caixa de entrada.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro inesperado. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResendingEmail(false);
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -97,17 +138,39 @@ const Auth = () => {
     const password = formData.get("signin-password") as string;
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("Tentando fazer login com:", { email });
+
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
+      console.log("Resposta do login:", { data, error });
+
       if (error) {
+        console.error("Erro no login:", error);
         if (error.message.includes("Invalid login credentials")) {
           toast({
             title: "Erro",
             description: "Email ou senha incorretos.",
             variant: "destructive",
+          });
+        } else if (error.message.includes("Email not confirmed") || error.message.includes("email_not_confirmed")) {
+          toast({
+            title: "Email não confirmado",
+            description: "Verifique sua caixa de entrada e clique no link de confirmação antes de fazer login.",
+            variant: "destructive",
+            action: (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleResendConfirmation(email)}
+                disabled={isResendingEmail}
+                className="text-red-600 hover:text-red-700"
+              >
+                {isResendingEmail ? "Reenviando..." : "Reenviar email"}
+              </Button>
+            ),
           });
         } else {
           toast({
@@ -117,6 +180,7 @@ const Auth = () => {
           });
         }
       } else {
+        console.log("Login bem-sucedido:", data);
         toast({
           title: "Sucesso!",
           description: "Login realizado com sucesso!",
@@ -137,15 +201,15 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => navigate("/")}
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar ao início
         </Button>
-        
+
         <div className="flex items-center justify-center mb-8">
           <div className="p-3 bg-gradient-primary rounded-lg">
             <GraduationCap className="h-8 w-8 text-white" />

@@ -2,6 +2,7 @@
 CREATE TABLE public.profiles (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  senha TEXT NOT NULL, -- senha do usuario
   full_name TEXT,
   email TEXT,
   phone TEXT,
