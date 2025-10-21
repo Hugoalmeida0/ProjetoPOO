@@ -141,7 +141,7 @@ const BookingMentorship = () => {
   // Mapear disponibilidade do mentor para horários
   const timeSlots = useMemo(() => {
     if (!mentor?.availability) return [];
-    const avail = mentor.availability.toLowerCase();
+    const avail = String(mentor.availability).toLowerCase();
     if (avail.includes('manhã') || avail.includes('flexível')) return ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
     if (avail.includes('tarde')) return ["14:00", "15:00", "16:00", "17:00"];
     if (avail.includes('noite')) return ["18:00", "19:00", "20:00"];
