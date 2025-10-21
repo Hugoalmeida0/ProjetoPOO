@@ -12,6 +12,7 @@ import authRouter from './rotas/autenticacao';
 import usersRouter from './rotas/usuarios';
 import messagesRouter from './rotas/mensagens';
 import notificationsRouter from './rotas/notificacoes';
+import ratingsRouter from './rotas/avaliacoes';
 import { ensureSchema } from './bootstrap';
 
 dotenv.config();
@@ -47,6 +48,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/notifications', notificationsRouter);
+app.use('/api/ratings', ratingsRouter);
 
 // Para desenvolvimento local
 if (process.env.NODE_ENV !== 'production') {
