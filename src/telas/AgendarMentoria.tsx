@@ -53,7 +53,7 @@ const BookingMentorship = () => {
   const [subjectsList, setSubjectsList] = useState<any[]>([]);
 
 
-  // Carregar dados reais do mentor
+  // Carregar dados reais do mentora
   useEffect(() => {
     const loadMentor = async () => {
       if (!id) return;
