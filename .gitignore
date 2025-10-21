@@ -30,8 +30,8 @@ dist-ssr
 backend/.env
 backend/.env.production
 
-# Backend build
-backend/dist
+# Backend build - NÃO ignorar para Vercel conseguir usar
+# backend/dist
 
 # API node_modules (Vercel instala automaticamente)
 api/node_modules
