@@ -228,11 +228,11 @@ const MyBookings = () => {
                                                             </div>
 
                                                             <div className="flex flex-col gap-2">
-                                                                <ChatDialog 
+                                                                <ChatDialog
                                                                     bookingId={booking.id}
                                                                     bookingTitle={`Chat - ${booking.student_name}`}
                                                                 />
-                                                                
+
                                                                 {canCancel(booking) && (
                                                                     <CancelBookingDialog
                                                                         onConfirm={(message) => handleCancelBooking(booking.id, message)}
@@ -318,11 +318,11 @@ const MyBookings = () => {
                                                             </div>
 
                                                             <div className="flex flex-col gap-2">
-                                                                <ChatDialog 
+                                                                <ChatDialog
                                                                     bookingId={booking.id}
                                                                     bookingTitle={`Chat - ${booking.student_name}`}
                                                                 />
-                                                                
+
                                                                 {canCancel(booking) && (
                                                                     <CancelBookingDialog
                                                                         onConfirm={(message) => handleCancelBooking(booking.id, message)}

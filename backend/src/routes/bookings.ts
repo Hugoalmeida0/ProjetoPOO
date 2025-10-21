@@ -183,7 +183,7 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
         if (status === 'cancelled' && cancel_message && user_id) {
             // Determinar quem deve receber a notificação
             const recipientId = booking.mentor_id === user_id ? booking.student_id : booking.mentor_id;
-            
+
             try {
                 await pool.query(
                     `INSERT INTO notifications (user_id, message, booking_id, created_at)

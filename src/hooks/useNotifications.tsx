@@ -27,7 +27,7 @@ export const useNotifications = () => {
             setLoading(true);
             const data = await apiClient.notifications.getAll();
             setNotifications(data as Notification[]);
-            
+
             // Atualizar contador de não lidas
             const count = (data as Notification[]).filter(n => !n.read).length;
             setUnreadCount(count);
@@ -75,7 +75,7 @@ export const useNotifications = () => {
 
     useEffect(() => {
         fetchNotifications();
-        
+
         // Polling a cada 30 segundos para atualizar notificações
         const interval = setInterval(() => {
             fetchUnreadCount();

@@ -67,7 +67,7 @@ const Header = () => {
                   <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-4 w-4" />
                     {unreadCount > 0 && (
-                      <Badge 
+                      <Badge
                         className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                         variant="destructive"
                       >
@@ -81,9 +81,9 @@ const Header = () => {
                     <div className="flex items-center justify-between">
                       <DialogTitle>Notificações</DialogTitle>
                       {unreadCount > 0 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={markAllAsRead}
                           className="text-xs"
                         >
@@ -92,7 +92,7 @@ const Header = () => {
                       )}
                     </div>
                   </DialogHeader>
-                  
+
                   <ScrollArea className="max-h-[400px] pr-4">
                     {notifications.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
@@ -106,8 +106,8 @@ const Header = () => {
                             key={notification.id}
                             className={cn(
                               "p-3 rounded-lg border transition-colors cursor-pointer",
-                              notification.read 
-                                ? "bg-background hover:bg-muted/50" 
+                              notification.read
+                                ? "bg-background hover:bg-muted/50"
                                 : "bg-primary/5 border-primary/20 hover:bg-primary/10"
                             )}
                             onClick={() => !notification.read && markAsRead(notification.id)}
