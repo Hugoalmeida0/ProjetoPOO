@@ -2,13 +2,19 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://yiywaejqmbkncvwjtzlc.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeXdhZWpxbWJrbmN2d2p0emxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMzk0MDEsImV4cCI6MjA3MjYxNTQwMX0.N7rZ4169n0fG5iwvgNe1iR6-NSdEc0XckBH5oiRdJQU";
+// Prefer using Vite env variables so the app works in Vercel (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY).
+// Fall back to the embedded values for local dev if needed.
+const FALLBACK_SUPABASE_URL = "https://yiywaejqmbkncvwjtzlc.supabase.co";
+const FALLBACK_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeXdhZWpxbWJrbmN2d2p0emxjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwMzk0MDEsImV4cCI6MjA3MjYxNTQwMX0.N7rZ4169n0fG5iwvgNe1iR6-NSdEc0XckBH5oiRdJQU";
+
+// Vite exposes env vars on import.meta.env. Use VITE_ prefix for variables that should be embedded in the client build.
+const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string) || FALLBACK_SUPABASE_URL;
+const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || FALLBACK_SUPABASE_ANON_KEY;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
