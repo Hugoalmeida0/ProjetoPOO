@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useBookings } from "@/hooks/useBookings";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/integrations/api/client";
 import { cn } from "@/lib/utils";
 
 const bookingSchema = z.object({
@@ -134,7 +134,7 @@ const BookingMentorship = () => {
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
-      studentName: user?.user_metadata?.full_name || "",
+      studentName: (user as any)?.full_name || "",
       studentEmail: user?.email || "",
       studentPhone: "",
       objective: "",
@@ -150,15 +150,12 @@ const BookingMentorship = () => {
       const mentorId = id === "1" ? user.id : id; // Lógica de teste
       const dateString = data.date.toISOString().split('T')[0];
 
-      // Passo 1: Buscar o ID da matéria
-      const { data: subjectData, error: subjectError } = await supabase
-        .from('subjects')
-        .select('id')
-        .eq('name', data.subject)
-        .single();
+      // Passo 1: Buscar o ID da matéria - usar API
+      const subjects = await apiClient.subjects.getAll();
+      const subject = subjects.find(s => s.name === data.subject);
 
       // Se a matéria não for encontrada, lançamos um erro que será capturado pelo catch
-      if (subjectError) {
+      if (!subject) {
         throw new Error(`Matéria "${data.subject}" não encontrada no banco de dados.`);
       }
 
@@ -166,7 +163,7 @@ const BookingMentorship = () => {
       const bookingData = {
         student_id: user.id,
         mentor_id: mentorId,
-        subject_id: subjectData.id,
+        subject_id: subject.id,
         date: dateString,
         time: data.time,
         duration: parseInt(data.duration),

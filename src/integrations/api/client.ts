@@ -1,0 +1,131 @@
+// API client com suporte a Auth (JWT)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+
+// Armazenamento simples do token no localStorage
+const TOKEN_KEY = 'auth_token';
+function getToken(): string | null {
+    try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
+}
+export function setToken(token: string | null) {
+    try {
+        if (token) localStorage.setItem(TOKEN_KEY, token);
+        else localStorage.removeItem(TOKEN_KEY);
+    } catch { }
+}
+
+class APIError extends Error {
+    constructor(public status: number, message: string) {
+        super(message);
+        this.name = 'APIError';
+    }
+}
+
+async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const url = `${API_BASE_URL}${endpoint}`;
+
+    const token = getToken();
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...options?.headers,
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new APIError(response.status, error.error || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+}
+
+export const apiClient = {
+    // Auth
+    auth: {
+        register: (payload: { email: string; password: string; full_name?: string }) =>
+            fetchAPI<{ token: string; user: any }>(`/api/auth/register`, { method: 'POST', body: JSON.stringify(payload) }),
+        login: (payload: { email: string; password: string }) =>
+            fetchAPI<{ token: string; user: any }>(`/api/auth/login`, { method: 'POST', body: JSON.stringify(payload) }),
+        me: () => fetchAPI<{ user: any }>(`/api/auth/me`),
+    },
+    // Subjects
+    subjects: {
+        getAll: (graduationId?: string) => {
+            const params = graduationId ? `?graduation_id=${graduationId}` : '';
+            return fetchAPI<any[]>(`/api/subjects${params}`);
+        },
+        getById: (id: string) => fetchAPI<any>(`/api/subjects/${id}`),
+    },
+
+    // Graduations
+    graduations: {
+        getAll: () => fetchAPI<any[]>('/api/graduations'),
+    },
+
+    // Profiles
+    profiles: {
+        getAll: () => fetchAPI<any[]>('/api/profiles'),
+        getByUserId: (userId: string) => fetchAPI<any>(`/api/profiles/${userId}`),
+        create: (data: any) => fetchAPI<any>('/api/profiles', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+        update: (userId: string, data: any) => fetchAPI<any>(`/api/profiles/${userId}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+        delete: (userId: string) => fetchAPI<any>(`/api/profiles/${userId}`, {
+            method: 'DELETE',
+        }),
+    },
+
+    // Students
+    students: {
+        getAll: () => fetchAPI<any[]>('/api/students'),
+        getByUserId: (userId: string) => fetchAPI<any>(`/api/students/${userId}`),
+        create: (data: any) => fetchAPI<any>('/api/students', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+        update: (userId: string, data: any) => fetchAPI<any>(`/api/students/${userId}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+        delete: (userId: string) => fetchAPI<any>(`/api/students/${userId}`, {
+            method: 'DELETE',
+        }),
+    },
+
+    // Mentors
+    mentors: {
+        getAll: () => fetchAPI<any[]>('/api/mentors'),
+        getByUserId: (userId: string) => fetchAPI<any>(`/api/mentors/${userId}`),
+        create: (data: any) => fetchAPI<any>('/api/mentors', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+        update: (userId: string, data: any) => fetchAPI<any>(`/api/mentors/${userId}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+        delete: (userId: string) => fetchAPI<any>(`/api/mentors/${userId}`, {
+            method: 'DELETE',
+        }),
+    },
+
+    // Bookings
+    bookings: {
+        getByUserId: (userId: string) => fetchAPI<any[]>(`/api/bookings/user/${userId}`),
+        getByMentorId: (mentorId: string) => fetchAPI<any[]>(`/api/bookings/mentor/${mentorId}`),
+        create: (data: any) => fetchAPI<any>('/api/bookings', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+        updateStatus: (bookingId: string, status: string) => fetchAPI<any>(`/api/bookings/${bookingId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status }),
+        }),
+    },
+};

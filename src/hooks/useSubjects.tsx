@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/integrations/api/client";
 
 export interface Subject {
   id: string;
@@ -17,21 +17,7 @@ export const useSubjects = (graduationId?: string) => {
   return useQuery({
     queryKey: ["subjects", graduationId],
     queryFn: async () => {
-      let query = supabase
-        .from("subjects")
-        .select("*")
-        .order("name");
-
-      if (graduationId) {
-        query = query.eq("graduation_id", graduationId);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        throw error;
-      }
-
+      const data = await apiClient.subjects.getAll(graduationId);
       return data as Subject[];
     },
   });

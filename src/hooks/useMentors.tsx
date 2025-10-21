@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient } from '@/integrations/api/client';
 
 export interface MentorProfile {
     id: string; // mentor_profiles.id
@@ -23,13 +23,7 @@ export const useMentors = () => {
     const fetchMentors = async () => {
         try {
             setLoading(true);
-            // Busca mentor_profiles juntando com profiles para nome/email
-            const { data, error } = await supabase
-                .from('mentor_profiles')
-                .select('*, profiles:profiles(user_id, full_name, email)')
-                .order('rating', { ascending: false });
-
-            if (error) throw error;
+            const data = await apiClient.mentors.getAll();
             setMentors((data || []) as any);
         } catch (err: any) {
             setError(err?.message || 'Erro ao buscar mentores');
@@ -39,26 +33,14 @@ export const useMentors = () => {
     };
 
     const getMentor = async (userId: string) => {
-        const { data, error } = await supabase
-            .from('mentor_profiles')
-            .select('*')
-            .eq('user_id', userId)
-            .single();
-
-        if (error) throw error;
+        const data = await apiClient.mentors.getByUserId(userId);
         return data as MentorProfile;
     };
 
     // user_id é obrigatório ao criar um mentor
     const createMentor = async (payload: Partial<MentorProfile> & { user_id: string }) => {
         try {
-            const { data, error } = await supabase
-                .from('mentor_profiles')
-                .insert([payload])
-                .select()
-                .single();
-
-            if (error) throw error;
+            const data = await apiClient.mentors.create(payload);
             setMentors(prev => [...prev, data as MentorProfile]);
             return data;
         } catch (err: any) {
@@ -68,14 +50,7 @@ export const useMentors = () => {
 
     const updateMentor = async (userId: string, updates: Partial<MentorProfile>) => {
         try {
-            const { data, error } = await supabase
-                .from('mentor_profiles')
-                .update(updates)
-                .eq('user_id', userId)
-                .select()
-                .single();
-
-            if (error) throw error;
+            const data = await apiClient.mentors.update(userId, updates);
             setMentors(prev => prev.map(m => (m.user_id === userId ? (data as MentorProfile) : m)));
             return data;
         } catch (err: any) {
@@ -85,14 +60,7 @@ export const useMentors = () => {
 
     const deleteMentor = async (userId: string) => {
         try {
-            const { data, error } = await supabase
-                .from('mentor_profiles')
-                .delete()
-                .eq('user_id', userId)
-                .select()
-                .single();
-
-            if (error) throw error;
+            const data = await apiClient.mentors.delete(userId);
             setMentors(prev => prev.filter(m => m.user_id !== userId));
             return data;
         } catch (err: any) {

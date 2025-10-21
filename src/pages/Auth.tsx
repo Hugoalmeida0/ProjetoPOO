@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/integrations/api/client";
+import { useAuth } from "@/hooks/useAuth";
 import { GraduationCap, Mail, Lock, User, ArrowLeft } from "lucide-react";
 
 const Auth = () => {
@@ -15,16 +16,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if user is already logged in
+  const { user, signIn, signUp } = useAuth();
+
+  // Redireciona se já logado
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/");
-      }
-    };
-    checkUser();
-  }, [navigate]);
+    if (user) navigate("/");
+  }, [user, navigate]);
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -49,41 +46,9 @@ const Auth = () => {
     try {
       console.log("Tentando criar conta com:", { email, fullName });
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: fullName,
-          }
-        }
-      });
-
-      console.log("Resposta do cadastro:", { data, error });
-
-      if (error) {
-        console.error("Erro no cadastro:", error);
-        if (error.message.includes("already registered")) {
-          toast({
-            title: "Erro",
-            description: "Este email já está cadastrado. Tente fazer login.",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Erro",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
-      } else {
-        console.log("Cadastro bem-sucedido:", data);
-        toast({
-          title: "Sucesso!",
-          description: "Conta criada com sucesso! Verifique seu email para confirmar a conta.",
-        });
-      }
+      await signUp(email, password, fullName);
+      toast({ title: "Sucesso!", description: "Conta criada e autenticada." });
+      navigate("/");
     } catch (error) {
       toast({
         title: "Erro",
@@ -95,38 +60,9 @@ const Auth = () => {
     }
   };
 
-  const handleResendConfirmation = async (email: string) => {
-    setIsResendingEmail(true);
-    try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-        }
-      });
-
-      if (error) {
-        toast({
-          title: "Erro",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Email reenviado!",
-          description: "Verifique sua caixa de entrada.",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro inesperado. Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsResendingEmail(false);
-    }
+  const handleResendConfirmation = async (_email: string) => {
+    // Não aplicável no fluxo de auth próprio
+    toast({ title: "Info", description: "Confirmação de email não é necessária." });
   };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -140,46 +76,9 @@ const Auth = () => {
     try {
       console.log("Tentando fazer login com:", { email });
 
-      const result = await supabase.auth.signInWithPassword({ email, password });
-      console.log("Resposta do login (raw):", result);
-
-      // result can have data.session or data.user, or error
-      const { data, error } = result as any;
-
-      if (error) {
-        console.error("Erro no login:", error);
-        // Mostrar erro completo para diagnóstico
-        toast({
-          title: "Erro no login",
-          description: error.message || JSON.stringify(error),
-          variant: "destructive",
-        });
-        // Offer resend if looks like confirmation issue
-        if ((error.message && error.message.includes('confirm')) || (error?.status === 400 && /confirm/i.test(error?.message || ''))) {
-          toast({
-            title: "Email não confirmado",
-            description: "Verifique seu email. Deseja reenviar o link de confirmação?",
-            action: (
-              <Button variant="outline" size="sm" onClick={() => handleResendConfirmation(email)} disabled={isResendingEmail}>
-                {isResendingEmail ? 'Reenviando...' : 'Reenviar email'}
-              </Button>
-            ),
-            variant: 'destructive',
-          });
-        }
-      } else {
-        console.log('Login response data:', data);
-        // If no session present, inform user that email confirmation may be required
-        if (!data?.session) {
-          toast({
-            title: 'Sem sessão ativa',
-            description: 'Login efetuado, mas nenhuma sessão foi retornada — verifique confirmação de email.',
-          });
-        } else {
-          toast({ title: 'Sucesso!', description: 'Login realizado com sucesso!' });
-          navigate('/');
-        }
-      }
+      await signIn(email, password);
+      toast({ title: 'Sucesso!', description: 'Login realizado com sucesso!' });
+      navigate('/');
     } catch (err: any) {
       console.error('Exceção ao fazer login:', err);
       toast({ title: 'Erro inesperado', description: err?.message || JSON.stringify(err), variant: 'destructive' });
@@ -188,14 +87,11 @@ const Auth = () => {
     }
   };
 
-  // Debug helper: testar conexão com Supabase
+  // Debug helper: testar conexão com API
   const handleTestConnection = async () => {
     try {
-      const s = await supabase.auth.getSession();
-      console.log('getSession():', s);
-      const { data, error } = await supabase.from('profiles').select('id, user_id').limit(1);
-      console.log('profiles select:', { data, error });
-      if (error) throw error;
+      const data = await apiClient.profiles.getAll();
+      console.log('profiles from API:', data);
       toast({ title: 'Conexão OK', description: `profiles rows: ${data?.length || 0}` });
     } catch (err: any) {
       console.error('Erro de conexão:', err);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { apiClient } from '@/integrations/api/client';
 import { useAuth } from './useAuth';
 
 export interface Booking {
@@ -31,14 +31,7 @@ export const useBookings = () => {
 
         try {
             setLoading(true);
-            const { data, error } = await supabase
-                .from('bookings')
-                .select('*')
-                .or(`student_id.eq.${user.id},mentor_id.eq.${user.id}`)
-                .order('date', { ascending: true })
-                .order('time', { ascending: true });
-
-            if (error) throw error;
+            const data = await apiClient.bookings.getByUserId(user.id);
             setBookings((data || []) as Booking[]);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao carregar agendamentos');
@@ -59,19 +52,7 @@ export const useBookings = () => {
                 return [];
             }
 
-            const { data, error } = await supabase
-                .from('bookings')
-                .select('*')
-                .eq('mentor_id', mentorId)
-                .in('status', ['pending', 'confirmed'])
-                .order('date', { ascending: true })
-                .order('time', { ascending: true });
-
-            if (error) {
-                console.error('Erro do Supabase:', error);
-                throw error;
-            }
-
+            const data = await apiClient.bookings.getByMentorId(mentorId);
             console.log('Agendamentos encontrados:', data);
             return data || [];
         } catch (err) {
@@ -114,24 +95,8 @@ export const useBookings = () => {
                 }
             }
 
-            const { data, error } = await supabase
-                .from('bookings')
-                .insert([bookingData])
-                .select()
-                .single();
-
-            console.log("Resposta do Supabase:", { data, error });
-
-            if (error) {
-                console.error("Erro do Supabase:", error);
-                console.error("Detalhes do erro:", {
-                    message: error.message,
-                    details: error.details,
-                    hint: error.hint,
-                    code: error.code
-                });
-                throw error;
-            }
+            const data = await apiClient.bookings.create(bookingData);
+            console.log("Resposta da API:", data);
 
             setBookings(prev => [...prev, data as Booking]);
             return data;
@@ -145,14 +110,7 @@ export const useBookings = () => {
     // Atualizar status do agendamento
     const updateBookingStatus = async (bookingId: string, status: Booking['status']) => {
         try {
-            const { data, error } = await supabase
-                .from('bookings')
-                .update({ status, updated_at: new Date().toISOString() })
-                .eq('id', bookingId)
-                .select()
-                .single();
-
-            if (error) throw error;
+            const data = await apiClient.bookings.updateStatus(bookingId, status);
 
             setBookings(prev =>
                 prev.map(booking =>

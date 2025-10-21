@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { apiClient } from "@/integrations/api/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ArrowLeft, GraduationCap, User, MapPin, BookOpen } from "lucide-react";
 import { useGraduations } from "@/hooks/useGraduations";
@@ -21,7 +21,7 @@ const BecomeMentor = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!user) {
       toast({
         title: "Erro",
@@ -42,28 +42,19 @@ const BecomeMentor = () => {
 
     try {
       // Update profile to mark as mentor
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ 
-          is_mentor: true,
-          bio: bio
-        })
-        .eq("user_id", user.id);
-
-      if (profileError) throw profileError;
+      await apiClient.profiles.update(user.id, {
+        is_mentor: true,
+        bio: bio
+      });
 
       // Create mentor profile
-      const { error: mentorError } = await supabase
-        .from("mentor_profiles")
-        .insert({
-          user_id: user.id,
-          graduation_id: graduationId,
-          location: location,
-          experience_years: experienceYears,
-          availability: availability
-        });
-
-      if (mentorError) throw mentorError;
+      await apiClient.mentors.create({
+        user_id: user.id,
+        graduation_id: graduationId,
+        location: location,
+        experience_years: experienceYears,
+        availability: availability
+      });
 
       toast({
         title: "Sucesso!",
@@ -86,15 +77,15 @@ const BecomeMentor = () => {
     <div className="min-h-screen bg-gradient-subtle p-4">
       <div className="container mx-auto max-w-2xl">
         <div className="mb-6">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => navigate("/")}
             className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar ao início
           </Button>
-          
+
           <div className="flex items-center gap-3 mb-2">
             <div className="p-3 bg-gradient-primary rounded-lg">
               <GraduationCap className="h-6 w-6 text-white" />
