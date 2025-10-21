@@ -70,7 +70,7 @@ router.get('/me', async (req: Request, res: Response) => {
         const auth = req.headers.authorization || '';
         const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
         if (!token) return res.status(401).json({ error: 'missing token' });
-    const secret = process.env.JWT_SECRET || 'dev-secret';
+        const secret = process.env.JWT_SECRET || 'dev-secret';
         const decoded: any = jwt.verify(token, secret);
         const { rows } = await pool.query('SELECT id, email, full_name FROM users WHERE id = $1', [decoded.sub]);
         if (rows.length === 0) return res.status(404).json({ error: 'user not found' });
