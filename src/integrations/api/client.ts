@@ -50,6 +50,17 @@ export const apiClient = {
             fetchAPI<{ token: string; user: any }>(`/api/auth/login`, { method: 'POST', body: JSON.stringify(payload) }),
         me: () => fetchAPI<{ user: any }>(`/api/auth/me`),
     },
+    // Users (self)
+    users: {
+        getMe: () => fetchAPI<any>(`/api/users/me`),
+        updateMe: (data: { email?: string; full_name?: string }) => fetchAPI<any>(`/api/users/me`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        }),
+        deleteMe: () => fetchAPI<any>(`/api/users/me`, {
+            method: 'DELETE',
+        }),
+    },
     // Subjects
     subjects: {
         getAll: (graduationId?: string) => {

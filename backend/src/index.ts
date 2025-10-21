@@ -8,6 +8,7 @@ import mentorsRouter from './routes/mentors';
 import studentsRouter from './routes/students';
 import bookingsRouter from './routes/bookings';
 import authRouter from './routes/auth';
+import usersRouter from './routes/users';
 import { ensureSchema } from './bootstrap';
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use('/api/mentors', mentorsRouter);
 app.use('/api/students', studentsRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/users', usersRouter);
 
 const port = process.env.PORT || 4000;
 ensureSchema()
