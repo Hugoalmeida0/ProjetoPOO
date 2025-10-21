@@ -4,6 +4,8 @@ import { ArrowLeft, Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } f
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Header from "@/components/Header";
+import { ChatDialog } from "@/components/ChatDialog";
+import { CancelBookingDialog } from "@/components/CancelBookingDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,13 +41,13 @@ const MyBookings = () => {
         );
     };
 
-    const handleCancelBooking = async (bookingId: string) => {
+    const handleCancelBooking = async (bookingId: string, cancelMessage: string) => {
         setActionLoading(bookingId);
         try {
-            await cancelBooking(bookingId);
+            await cancelBooking(bookingId, cancelMessage);
             toast({
                 title: "Agendamento cancelado",
-                description: "Seu agendamento foi cancelado com sucesso.",
+                description: "Seu agendamento foi cancelado e uma notificação foi enviada.",
             });
         } catch (error) {
             toast({
@@ -226,16 +228,16 @@ const MyBookings = () => {
                                                             </div>
 
                                                             <div className="flex flex-col gap-2">
+                                                                <ChatDialog 
+                                                                    bookingId={booking.id}
+                                                                    bookingTitle={`Chat - ${booking.student_name}`}
+                                                                />
+                                                                
                                                                 {canCancel(booking) && (
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={() => handleCancelBooking(booking.id)}
+                                                                    <CancelBookingDialog
+                                                                        onConfirm={(message) => handleCancelBooking(booking.id, message)}
                                                                         disabled={actionLoading === booking.id}
-                                                                        className="text-red-600 hover:text-red-700"
-                                                                    >
-                                                                        {actionLoading === booking.id ? "Cancelando..." : "Cancelar"}
-                                                                    </Button>
+                                                                    />
                                                                 )}
 
                                                                 {canComplete(booking) && (
@@ -316,16 +318,16 @@ const MyBookings = () => {
                                                             </div>
 
                                                             <div className="flex flex-col gap-2">
+                                                                <ChatDialog 
+                                                                    bookingId={booking.id}
+                                                                    bookingTitle={`Chat - ${booking.student_name}`}
+                                                                />
+                                                                
                                                                 {canCancel(booking) && (
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={() => handleCancelBooking(booking.id)}
+                                                                    <CancelBookingDialog
+                                                                        onConfirm={(message) => handleCancelBooking(booking.id, message)}
                                                                         disabled={actionLoading === booking.id}
-                                                                        className="text-red-600 hover:text-red-700"
-                                                                    >
-                                                                        {actionLoading === booking.id ? "Cancelando..." : "Cancelar"}
-                                                                    </Button>
+                                                                    />
                                                                 )}
 
                                                                 {canComplete(booking) && (

@@ -1,12 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Search, User, LogOut, Calendar, Settings, LayoutDashboard, Bell } from "lucide-react";
+import { GraduationCap, Search, User, LogOut, Calendar, Settings, LayoutDashboard, Bell, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 const Header = () => {
   const { user, signOut } = useAuth();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -59,15 +66,66 @@ const Header = () => {
                 <DialogTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-4 w-4" />
+                    {unreadCount > 0 && (
+                      <Badge 
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                        variant="destructive"
+                      >
+                        {unreadCount}
+                      </Badge>
+                    )}
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Notificações</DialogTitle>
-                    <DialogDescription>
-                      Nova mentoria agendada
-                    </DialogDescription>
+                    <div className="flex items-center justify-between">
+                      <DialogTitle>Notificações</DialogTitle>
+                      {unreadCount > 0 && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={markAllAsRead}
+                          className="text-xs"
+                        >
+                          Marcar todas como lidas
+                        </Button>
+                      )}
+                    </div>
                   </DialogHeader>
+                  
+                  <ScrollArea className="max-h-[400px] pr-4">
+                    {notifications.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                        <p>Nenhuma notificação</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className={cn(
+                              "p-3 rounded-lg border transition-colors cursor-pointer",
+                              notification.read 
+                                ? "bg-background hover:bg-muted/50" 
+                                : "bg-primary/5 border-primary/20 hover:bg-primary/10"
+                            )}
+                            onClick={() => !notification.read && markAsRead(notification.id)}
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-sm flex-1">{notification.message}</p>
+                              {!notification.read && (
+                                <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1" />
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {format(new Date(notification.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </ScrollArea>
                 </DialogContent>
               </Dialog>
             )}

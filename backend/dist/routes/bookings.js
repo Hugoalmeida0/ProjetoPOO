@@ -116,7 +116,7 @@ router.post('/', async (req, res) => {
 router.put('/:bookingId', async (req, res) => {
     try {
         const { bookingId } = req.params;
-        const { status } = req.body;
+        const { status, cancel_message, user_id } = req.body;
         if (!status) {
             return res.status(400).json({ error: 'status is required' });
         }
@@ -124,7 +124,21 @@ router.put('/:bookingId', async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Booking not found' });
         }
-        return res.json(result.rows[0]);
+        const booking = result.rows[0];
+        // Se for cancelamento com mensagem, criar notificação para a outra parte
+        if (status === 'cancelled' && cancel_message && user_id) {
+            // Determinar quem deve receber a notificação
+            const recipientId = booking.mentor_id === user_id ? booking.student_id : booking.mentor_id;
+            try {
+                await db_1.pool.query(`INSERT INTO notifications (user_id, message, booking_id, created_at)
+                     VALUES ($1, $2, $3, NOW())`, [recipientId, cancel_message, bookingId]);
+            }
+            catch (notifErr) {
+                console.error('Erro ao criar notificação de cancelamento:', notifErr);
+                // Não falhar a requisição se a notificação falhar
+            }
+        }
+        return res.json(booking);
     }
     catch (err) {
         console.error(err);

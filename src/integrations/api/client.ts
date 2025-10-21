@@ -154,9 +154,30 @@ export const apiClient = {
             method: 'POST',
             body: JSON.stringify(data),
         }),
-        updateStatus: (bookingId: string, status: string) => fetchAPI<any>(`/api/bookings/${bookingId}`, {
+        updateStatus: (bookingId: string, status: string, cancel_message?: string, user_id?: string) => fetchAPI<any>(`/api/bookings/${bookingId}`, {
             method: 'PUT',
-            body: JSON.stringify({ status }),
+            body: JSON.stringify({ status, cancel_message, user_id }),
+        }),
+    },
+
+    // Messages
+    messages: {
+        getByBookingId: (bookingId: string) => fetchAPI<any[]>(`/api/messages/${bookingId}`),
+        create: (data: { booking_id: string; content: string }) => fetchAPI<any>('/api/messages', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+    },
+
+    // Notifications
+    notifications: {
+        getAll: () => fetchAPI<any[]>('/api/notifications'),
+        getUnreadCount: () => fetchAPI<{ count: number }>('/api/notifications/unread-count'),
+        markAsRead: (notificationId: string) => fetchAPI<any>(`/api/notifications/${notificationId}/read`, {
+            method: 'PATCH',
+        }),
+        markAllAsRead: () => fetchAPI<any>('/api/notifications/mark-all-read', {
+            method: 'PATCH',
         }),
     },
 };

@@ -15,6 +15,8 @@ const students_1 = __importDefault(require("./routes/students"));
 const bookings_1 = __importDefault(require("./routes/bookings"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const users_1 = __importDefault(require("./routes/users"));
+const messages_1 = __importDefault(require("./routes/messages"));
+const notifications_1 = __importDefault(require("./routes/notifications"));
 const bootstrap_1 = require("./bootstrap");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -44,6 +46,8 @@ app.use('/api/students', students_1.default);
 app.use('/api/bookings', bookings_1.default);
 app.use('/api/auth', auth_1.default);
 app.use('/api/users', users_1.default);
+app.use('/api/messages', messages_1.default);
+app.use('/api/notifications', notifications_1.default);
 // Para desenvolvimento local
 if (process.env.NODE_ENV !== 'production') {
     const port = process.env.PORT || 4000;

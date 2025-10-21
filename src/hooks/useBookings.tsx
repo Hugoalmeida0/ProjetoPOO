@@ -119,9 +119,9 @@ export const useBookings = () => {
     };
 
     // Atualizar status do agendamento
-    const updateBookingStatus = async (bookingId: string, status: Booking['status']) => {
+    const updateBookingStatus = async (bookingId: string, status: Booking['status'], cancelMessage?: string) => {
         try {
-            const data = await apiClient.bookings.updateStatus(bookingId, status);
+            const data = await apiClient.bookings.updateStatus(bookingId, status, cancelMessage, user?.id);
 
             setBookings(prev =>
                 prev.map(booking =>
@@ -136,8 +136,8 @@ export const useBookings = () => {
     };
 
     // Cancelar agendamento
-    const cancelBooking = async (bookingId: string) => {
-        return updateBookingStatus(bookingId, 'cancelled');
+    const cancelBooking = async (bookingId: string, cancelMessage?: string) => {
+        return updateBookingStatus(bookingId, 'cancelled', cancelMessage);
     };
 
     // Finalizar agendamento

@@ -10,6 +10,8 @@ import studentsRouter from './routes/students';
 import bookingsRouter from './routes/bookings';
 import authRouter from './routes/auth';
 import usersRouter from './routes/users';
+import messagesRouter from './routes/messages';
+import notificationsRouter from './routes/notifications';
 import { ensureSchema } from './bootstrap';
 
 dotenv.config();
@@ -43,6 +45,8 @@ app.use('/api/students', studentsRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/messages', messagesRouter);
+app.use('/api/notifications', notificationsRouter);
 
 // Para desenvolvimento local
 if (process.env.NODE_ENV !== 'production') {
