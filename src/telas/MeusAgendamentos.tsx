@@ -289,7 +289,7 @@ const MyBookings = () => {
                                                                     disabled={actionLoading === booking.id}
                                                                 />
 
-                                                                {canComplete(booking) && (
+                                                                {canComplete(booking) && ( 
                                                                     <Button
                                                                         size="sm"
                                                                         onClick={() => handleCompleteBooking(booking.id)}
