@@ -12,22 +12,3 @@ dist
 dist-ssr
 *.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-.vercel
-
-
-# Backend build - NÃO ignorar para Vercel conseguir usar
-# backend/dist
-
-# API node_modules (Vercel instala automaticamente)
-api/node_modules
-api/package-lock.json

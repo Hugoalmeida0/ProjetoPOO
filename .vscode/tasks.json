@@ -1,0 +1,59 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start backend with env",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"cd 'c:\\Users\\hugo.almeida\\Desktop\\uvv-mentor-connect\\backend'; $env:DATABASE_URL='postgresql://neondb_owner:npg_zwY1rFxad5AV@ep-snowy-dew-acxzaior-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'; $env:PORT='4000'; npm run dev"
+			],
+			"isBackground": true,
+			"problemMatcher": [
+				"$eslint - stylish"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build frontend and backend",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-NonInteractive",
+				"-Command",
+				"if (Test-Path backend\\\\package.json) { cd backend; if (Test-Path node_modules) { echo 'Backend deps OK' } else { npm ci }; npm run build; cd .. }; if (Test-Path package.json) { if (Test-Path node_modules) { echo 'Frontend deps OK' } else { npm ci }; npm run build"
+			]
+		},
+		{
+			"label": "Rebuild backend after auth changes",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-NonInteractive",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"cd backend; if (Test-Path node_modules) { npm prune; npm install } else { npm ci }; npm run build"
+			]
+		},
+		{
+			"label": "Build full project",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-NonInteractive",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"npm run build"
+			]
+		}
+	]
+}
