@@ -1,4 +1,4 @@
-import Header from "@/componentes/Header";
+import Cabecalho from "@/componentes/Cabecalho";
 import { Button } from "@/componentes/ui/button";
 import { Input } from "@/componentes/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/componentes/ui/card";
@@ -62,7 +62,7 @@ const Account = () => {
 
     return (
         <div>
-            <Header />
+            <Cabecalho />
             <div className="container mx-auto px-4 py-8">
                 <Card className="max-w-xl mx-auto">
                     <CardHeader>

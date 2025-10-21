@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Star, MapPin, GraduationCap, Clock, User, MessageCircle, Calendar, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import Header from "@/componentes/Header";
+import Cabecalho from "@/componentes/Cabecalho";
 import { Button } from "@/componentes/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/componentes/ui/card";
 import { Badge } from "@/componentes/ui/badge";
@@ -47,7 +47,7 @@ const MentorDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Cabecalho />
         <div className="container mx-auto px-4 py-8 text-center">
           <p>Carregando...</p>
         </div>
@@ -74,7 +74,7 @@ const MentorDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Cabecalho />
 
       <section className="py-8">
         <div className="container mx-auto px-4">

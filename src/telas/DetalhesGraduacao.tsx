@@ -1,8 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import Header from "@/componentes/Header";
-import SubjectCard from "@/componentes/SubjectCard";
-import MentorCard from "@/componentes/MentorCard";
+import Cabecalho from "@/componentes/Cabecalho";
+import SubjectCard from "@/componentes/CardDisciplina";
+import MentorCard from "@/componentes/CardMentor";
 import { Button } from "@/componentes/ui/button";
 import { 
   Calculator, 
@@ -321,7 +321,7 @@ const GraduationDetails = () => {
   if (!graduation) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Cabecalho />
         <div className="container mx-auto px-4 py-20 text-center">
           <h1 className="text-4xl font-bold mb-4">Graduação não encontrada</h1>
           <Button onClick={() => navigate("/")} variant="outline">
@@ -335,7 +335,7 @@ const GraduationDetails = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Cabecalho />
       
       {/* Hero Section */}
       <section className="py-20 bg-gradient-hero text-white">

@@ -14,7 +14,7 @@ interface GraduationCardProps {
   slug: string;
 }
 
-const GraduationCard = ({ 
+const CardGraduacao = ({ 
   name, 
   description, 
   students, 
@@ -84,4 +84,4 @@ const GraduationCard = ({
   );
 };
 
-export default GraduationCard;
+export default CardGraduacao;

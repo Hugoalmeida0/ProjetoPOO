@@ -2,7 +2,7 @@ import { Button } from "@/componentes/ui/button";
 import { ArrowRight, Users, BookOpen, Calendar } from "lucide-react";
 import heroImage from "@/assets/hero-students.jpg";
 
-const Hero = () => {
+const Heroi = () => {
   return (
     <section className="relative min-h-[80vh] flex items-center overflow-hidden">
       {/* Background */}
@@ -68,4 +68,4 @@ const Hero = () => {
   );
 };
 
-export default Hero;
+export default Heroi;

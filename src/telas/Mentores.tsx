@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import useMentors from '@/hooks/useMentores';
-import MentorCard from '@/componentes/MentorCard';
+import MentorCard from '@/componentes/CardMentor';
 import { Alert, AlertDescription, AlertTitle } from '@/componentes/ui/alert';
 import { Button } from '@/componentes/ui/button';
 import { useToast } from '@/hooks/use-toast';

@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAutenticacao';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '@/integracoes/api/client';
 
-export default function RequireMentor({ children }: PropsWithChildren) {
+export default function RequerMentor({ children }: PropsWithChildren) {
     const { user, loading } = useAuth();
     const [allowed, setAllowed] = useState<boolean>(false);
     const navigate = useNavigate();

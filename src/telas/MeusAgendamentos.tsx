@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import Header from "@/componentes/Header";
-import { ChatDialog } from "@/componentes/ChatDialog";
-import { CancelBookingDialog } from "@/componentes/CancelBookingDialog";
+import Cabecalho from "@/componentes/Cabecalho";
+import { ChatDialog as DialogoChat } from "@/componentes/DialogoChat";
+import { CancelBookingDialog as DialogoCancelarAgendamento } from "@/componentes/DialogoCancelarAgendamento";
 import { Button } from "@/componentes/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/componentes/ui/card";
 import { Badge } from "@/componentes/ui/badge";
@@ -119,7 +119,7 @@ const MyBookings = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-background">
-                <Header />
+                <Cabecalho />
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
@@ -134,7 +134,7 @@ const MyBookings = () => {
 
     return (
         <div className="min-h-screen bg-background">
-            <Header />
+            <Cabecalho />
 
             <section className="py-8">
                 <div className="container mx-auto px-4 max-w-4xl">
@@ -228,13 +228,13 @@ const MyBookings = () => {
                                                             </div>
 
                                                             <div className="flex flex-col gap-2">
-                                                                <ChatDialog
+                                                                <DialogoChat
                                                                     bookingId={booking.id}
                                                                     bookingTitle={`Chat - ${booking.student_name}`}
                                                                 />
 
                                                                 {canCancel(booking) && (
-                                                                    <CancelBookingDialog
+                                                                    <DialogoCancelarAgendamento
                                                                         onConfirm={(message) => handleCancelBooking(booking.id, message)}
                                                                         disabled={actionLoading === booking.id}
                                                                     />
@@ -318,13 +318,13 @@ const MyBookings = () => {
                                                             </div>
 
                                                             <div className="flex flex-col gap-2">
-                                                                <ChatDialog
+                                                                <DialogoChat
                                                                     bookingId={booking.id}
                                                                     bookingTitle={`Chat - ${booking.student_name}`}
                                                                 />
 
                                                                 {canCancel(booking) && (
-                                                                    <CancelBookingDialog
+                                                                    <DialogoCancelarAgendamento
                                                                         onConfirm={(message) => handleCancelBooking(booking.id, message)}
                                                                         disabled={actionLoading === booking.id}
                                                                     />

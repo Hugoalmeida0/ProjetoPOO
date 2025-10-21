@@ -16,7 +16,7 @@ interface MentorCardProps {
   avatar?: string;
 }
 
-const MentorCard = ({
+  const CardMentor = ({
   mentorId,
   name,
   course,
@@ -94,4 +94,4 @@ const MentorCard = ({
   );
 };
 
-export default MentorCard;
+export default CardMentor;

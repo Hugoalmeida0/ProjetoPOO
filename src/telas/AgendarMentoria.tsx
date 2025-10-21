@@ -6,7 +6,7 @@ import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useEffect, useMemo, useState } from "react";
-import Header from "@/componentes/Header";
+import Cabecalho from "@/componentes/Cabecalho";
 import { Button } from "@/componentes/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/componentes/ui/card";
 import { Input } from "@/componentes/ui/input";
@@ -264,7 +264,7 @@ const BookingMentorship = () => {
   try {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Cabecalho />
 
         <section className="py-8">
           <div className="container mx-auto px-4 max-w-4xl">

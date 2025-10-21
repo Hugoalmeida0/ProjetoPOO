@@ -1,7 +1,7 @@
-import Header from "@/componentes/Header";
-import Hero from "@/componentes/Hero";
-import GraduationCard from "@/componentes/GraduationCard";
-import MentorCard from "@/componentes/MentorCard";
+import Cabecalho from "@/componentes/Cabecalho";
+import Hero from "@/componentes/Heroi";
+import GraduationCard from "@/componentes/CardGraduacao";
+import MentorCard from "@/componentes/CardMentor";
 import { Button } from "@/componentes/ui/button";
 import { useGraduations } from "@/hooks/useGraduacoes";
 import useMentors from "@/hooks/useMentores";
@@ -29,7 +29,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Cabecalho />
       <Hero />
 
       {/* Graduations Section */}

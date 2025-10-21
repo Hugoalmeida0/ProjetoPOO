@@ -1,5 +1,5 @@
-import Header from '@/componentes/Header';
-import RequireMentor from '@/componentes/RequireMentor';
+import Cabecalho from '@/componentes/Cabecalho';
+import RequireMentor from '@/componentes/RequerMentor';
 import { useAuth } from '@/hooks/useAutenticacao';
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/integracoes/api/client';
@@ -25,7 +25,7 @@ export default function MentorDashboard() {
 
     return (
         <RequireMentor>
-            <Header />
+            <Cabecalho />
             <div className="container mx-auto px-4 py-8">
                 <h1 className="text-2xl font-bold mb-4">Painel do Mentor</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

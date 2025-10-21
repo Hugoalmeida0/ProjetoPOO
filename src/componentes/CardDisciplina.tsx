@@ -12,7 +12,7 @@ interface SubjectCardProps {
   icon: React.ReactNode;
 }
 
-const SubjectCard = ({ name, description, mentors, duration, rating, color, icon }: SubjectCardProps) => {
+const CardDisciplina = ({ name, description, mentors, duration, rating, color, icon }: SubjectCardProps) => {
   return (
     <Card className="group hover:shadow-card transition-smooth hover:-translate-y-1 bg-gradient-card border-0 cursor-pointer">
       <CardHeader>
@@ -59,4 +59,4 @@ const SubjectCard = ({ name, description, mentors, duration, rating, color, icon
   );
 };
 
-export default SubjectCard;
+export default CardDisciplina;
