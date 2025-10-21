@@ -218,6 +218,23 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
             }
         }
 
+        // Se for finalização, criar notificação para o estudante
+        if (status === 'completed' && user_id) {
+            // Determinar quem deve receber a notificação (sempre o estudante)
+            const recipientId = booking.student_id;
+
+            try {
+                await pool.query(
+                    `INSERT INTO notifications (user_id, message, booking_id, created_at)
+                     VALUES ($1, $2, $3, NOW())`,
+                    [recipientId, `Sua mentoria foi finalizada! Clique aqui para avaliar sua experiência.`, bookingId]
+                );
+            } catch (notifErr) {
+                console.error('Erro ao criar notificação de finalização:', notifErr);
+                // Não falhar a requisição se a notificação falhar
+            }
+        }
+
         return res.json(booking);
     } catch (err) {
         console.error(err);

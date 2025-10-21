@@ -180,4 +180,14 @@ export const apiClient = {
             method: 'PATCH',
         }),
     },
+
+    // Ratings
+    ratings: {
+        create: (data: { booking_id: string; rating: number; comment?: string }) => fetchAPI<any>('/api/ratings', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+        getByMentorId: (mentorId: string) => fetchAPI<any[]>(`/api/ratings/mentor/${mentorId}`),
+        getByBookingId: (bookingId: string) => fetchAPI<any>(`/api/ratings/booking/${bookingId}`),
+    },
 };

@@ -128,4 +128,30 @@ export async function ensureSchema() {
   await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
     `);
+
+  // Ensure ratings table exists
+  await pool.query(`
+      CREATE TABLE IF NOT EXISTS ratings (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        booking_id UUID NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+        student_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        mentor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+        comment TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+  // Create indexes for ratings table
+  await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_ratings_booking_id ON ratings(booking_id);
+    `);
+
+  await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_ratings_student_id ON ratings(student_id);
+    `);
+
+  await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_ratings_mentor_id ON ratings(mentor_id);
+    `);
 }

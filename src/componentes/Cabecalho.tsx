@@ -9,12 +9,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/componentes/ui/dialog";
 import { Badge } from "@/componentes/ui/badge";
 import { ScrollArea } from "@/componentes/ui/scroll-area";
+import { ModalAvaliacao } from "@/componentes/ModalAvaliacao";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const Header = () => {
   const { user, signOut } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
+  const [isModalAvaliacaoOpen, setIsModalAvaliacaoOpen] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
   const handleSignOut = async () => {
     await signOut();
@@ -116,7 +120,11 @@ const Header = () => {
                                   await markAsRead(notification.id);
                                 }
                               } finally {
-                                if (notification.booking_id) {
+                                // Verificar se é uma notificação de finalização de mentoria
+                                if (notification.message.includes('finalizada') && notification.booking_id) {
+                                  setSelectedBookingId(notification.booking_id);
+                                  setIsModalAvaliacaoOpen(true);
+                                } else if (notification.booking_id) {
                                   navigate('/meus-agendamentos', { state: { highlightBookingId: notification.booking_id } });
                                 }
                               }
@@ -183,6 +191,16 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de Avaliação */}
+      <ModalAvaliacao
+        isOpen={isModalAvaliacaoOpen}
+        onClose={() => {
+          setIsModalAvaliacaoOpen(false);
+          setSelectedBookingId(null);
+        }}
+        bookingId={selectedBookingId || ''}
+      />
     </header>
   );
 };
