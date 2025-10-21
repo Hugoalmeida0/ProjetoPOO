@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -399,9 +399,13 @@ const BookingMentorship = () => {
                                   </FormControl>
                                   <SelectContent>
                                     {timeSlots.length === 0 ? (
-                                      <SelectLabel>Mentor sem disponibilidade definida</SelectLabel>
+                                      <SelectGroup>
+                                        <SelectLabel>Mentor sem disponibilidade definida</SelectLabel>
+                                      </SelectGroup>
                                     ) : isLoadingSlots ? (
-                                      <SelectLabel>Carregando horários...</SelectLabel>
+                                      <SelectGroup>
+                                        <SelectLabel>Carregando horários...</SelectLabel>
+                                      </SelectGroup>
                                     ) : (
                                       timeSlots.map((time) => {
                                         const isOccupied = occupiedSlots.has(time);
@@ -479,7 +483,9 @@ const BookingMentorship = () => {
                                         <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                                       ))
                                     ) : (
-                                      <SelectLabel>Nenhuma matéria disponível</SelectLabel>
+                                      <SelectGroup>
+                                        <SelectLabel>Nenhuma matéria disponível</SelectLabel>
+                                      </SelectGroup>
                                     )}
                                   </SelectContent>
                                 </Select>
