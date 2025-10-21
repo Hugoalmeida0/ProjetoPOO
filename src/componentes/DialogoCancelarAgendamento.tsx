@@ -10,10 +10,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+} from "@/componentes/ui/alert-dialog";
+import { Button } from "@/componentes/ui/button";
+import { Textarea } from "@/componentes/ui/textarea";
+import { Label } from "@/componentes/ui/label";
 
 interface CancelBookingDialogProps {
     onConfirm: (message: string) => Promise<void>;

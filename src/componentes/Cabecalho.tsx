@@ -1,14 +1,14 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/componentes/ui/button";
 import { GraduationCap, Search, User, LogOut, Calendar, Settings, LayoutDashboard, Bell, X } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useAuth } from "@/hooks/useAutenticacao";
+import { useNotifications } from "@/hooks/useNotificacoes";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/componentes/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/componentes/ui/dialog";
+import { Badge } from "@/componentes/ui/badge";
+import { ScrollArea } from "@/componentes/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 const Header = () => {

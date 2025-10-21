@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { apiClient, setToken } from "@/integrations/api/client";
+import { apiClient, setToken } from "@/integracoes/api/client";
 
 type AuthUser = { id: string; email: string; full_name?: string; is_mentor?: boolean } | null;
 

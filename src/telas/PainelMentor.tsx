@@ -1,9 +1,9 @@
-import Header from '@/components/Header';
-import RequireMentor from '@/components/RequireMentor';
-import { useAuth } from '@/hooks/useAuth';
+import Header from '@/componentes/Header';
+import RequireMentor from '@/componentes/RequireMentor';
+import { useAuth } from '@/hooks/useAutenticacao';
 import { useEffect, useState } from 'react';
-import { apiClient } from '@/integrations/api/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { apiClient } from '@/integracoes/api/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/componentes/ui/card';
 
 export default function MentorDashboard() {
     const { user } = useAuth();

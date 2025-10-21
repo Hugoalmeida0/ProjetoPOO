@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/componentes/ui/button";
+import { Input } from "@/componentes/ui/input";
+import { Label } from "@/componentes/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/componentes/ui/card";
+import { Textarea } from "@/componentes/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/componentes/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/integrations/api/client";
-import { useAuth } from "@/hooks/useAuth";
+import { apiClient } from "@/integracoes/api/client";
+import { useAuth } from "@/hooks/useAutenticacao";
 import { ArrowLeft, GraduationCap, User, MapPin, BookOpen } from "lucide-react";
-import { useGraduations } from "@/hooks/useGraduations";
+import { useGraduations } from "@/hooks/useGraduacoes";
 
 const BecomeMentor = () => {
   const [isLoading, setIsLoading] = useState(false);

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useStudents } from '@/hooks/useStudents';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { useStudents } from '@/hooks/useEstudantes';
+import { Card, CardContent, CardHeader } from '@/componentes/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/componentes/ui/avatar';
+import { Button } from '@/componentes/ui/button';
+import { Input } from '@/componentes/ui/input';
+import { Label } from '@/componentes/ui/label';
+import { Textarea } from '@/componentes/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 
 const Students = () => {

@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import Header from "@/components/Header";
-import SubjectCard from "@/components/SubjectCard";
-import MentorCard from "@/components/MentorCard";
-import { Button } from "@/components/ui/button";
+import Header from "@/componentes/Header";
+import SubjectCard from "@/componentes/SubjectCard";
+import MentorCard from "@/componentes/MentorCard";
+import { Button } from "@/componentes/ui/button";
 import { 
   Calculator, 
   Atom, 

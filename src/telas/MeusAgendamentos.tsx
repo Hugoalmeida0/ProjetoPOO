@@ -3,16 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import Header from "@/components/Header";
-import { ChatDialog } from "@/components/ChatDialog";
-import { CancelBookingDialog } from "@/components/CancelBookingDialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Header from "@/componentes/Header";
+import { ChatDialog } from "@/componentes/ChatDialog";
+import { CancelBookingDialog } from "@/componentes/CancelBookingDialog";
+import { Button } from "@/componentes/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/componentes/ui/card";
+import { Badge } from "@/componentes/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/componentes/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { useBookings, Booking } from "@/hooks/useBookings";
+import { useAuth } from "@/hooks/useAutenticacao";
+import { useBookings, Booking } from "@/hooks/useAgendamentos";
 import { cn } from "@/lib/utils";
 
 const MyBookings = () => {

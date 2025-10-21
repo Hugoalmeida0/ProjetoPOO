@@ -1,11 +1,11 @@
-import Header from "@/components/Header";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/hooks/useAuth";
-import { apiClient } from "@/integrations/api/client";
+import Header from "@/componentes/Header";
+import { Button } from "@/componentes/ui/button";
+import { Input } from "@/componentes/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/componentes/ui/card";
+import { useAuth } from "@/hooks/useAutenticacao";
+import { apiClient } from "@/integracoes/api/client";
 import { useEffect, useState } from "react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/componentes/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 
 const Account = () => {

@@ -1,10 +1,10 @@
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import GraduationCard from "@/components/GraduationCard";
-import MentorCard from "@/components/MentorCard";
-import { Button } from "@/components/ui/button";
-import { useGraduations } from "@/hooks/useGraduations";
-import useMentors from "@/hooks/useMentors";
+import Header from "@/componentes/Header";
+import Hero from "@/componentes/Hero";
+import GraduationCard from "@/componentes/GraduationCard";
+import MentorCard from "@/componentes/MentorCard";
+import { Button } from "@/componentes/ui/button";
+import { useGraduations } from "@/hooks/useGraduacoes";
+import useMentors from "@/hooks/useMentores";
 import { useNavigate } from "react-router-dom";
 import {
   Calculator,

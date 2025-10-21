@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/componentes/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/componentes/ui/card";
+import { Badge } from "@/componentes/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/componentes/ui/avatar";
 import { Star, MapPin, GraduationCap } from "lucide-react";
 
 interface MentorCardProps {

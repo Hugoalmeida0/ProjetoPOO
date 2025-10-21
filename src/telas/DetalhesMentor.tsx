@@ -1,13 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Star, MapPin, GraduationCap, Clock, User, MessageCircle, Calendar, CheckCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import Header from "@/components/Header";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { apiClient } from "@/integrations/api/client";
+import Header from "@/componentes/Header";
+import { Button } from "@/componentes/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/componentes/ui/card";
+import { Badge } from "@/componentes/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/componentes/ui/avatar";
+import { Separator } from "@/componentes/ui/separator";
+import { apiClient } from "@/integracoes/api/client";
 import { useToast } from "@/hooks/use-toast";
 
 const MentorDetails = () => {

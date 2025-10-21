@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { MessageCircle, Send, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useMessages } from "@/hooks/useMessages";
-import { useAuth } from "@/hooks/useAuth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/componentes/ui/dialog";
+import { Button } from "@/componentes/ui/button";
+import { Input } from "@/componentes/ui/input";
+import { ScrollArea } from "@/componentes/ui/scroll-area";
+import { Avatar, AvatarFallback } from "@/componentes/ui/avatar";
+import { useMessages } from "@/hooks/useMensagens";
+import { useAuth } from "@/hooks/useAutenticacao";
 import { cn } from "@/lib/utils";
 
 interface ChatDialogProps {

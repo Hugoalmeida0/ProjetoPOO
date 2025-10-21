@@ -1,17 +1,17 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import subjectsRouter from './routes/subjects';
-import profilesRouter from './routes/profiles';
-import graduationsRouter from './routes/graduations';
-import mentorsRouter from './routes/mentors';
-import mentorSubjectsRouter from './routes/mentor-subjects';
-import studentsRouter from './routes/students';
-import bookingsRouter from './routes/bookings';
-import authRouter from './routes/auth';
-import usersRouter from './routes/users';
-import messagesRouter from './routes/messages';
-import notificationsRouter from './routes/notifications';
+import subjectsRouter from './rotas/disciplinas';
+import profilesRouter from './rotas/perfis';
+import graduationsRouter from './rotas/graduacoes';
+import mentorsRouter from './rotas/mentores';
+import mentorSubjectsRouter from './rotas/mentor-disciplinas';
+import studentsRouter from './rotas/estudantes';
+import bookingsRouter from './rotas/agendamentos';
+import authRouter from './rotas/autenticacao';
+import usersRouter from './rotas/usuarios';
+import messagesRouter from './rotas/mensagens';
+import notificationsRouter from './rotas/notificacoes';
 import { ensureSchema } from './bootstrap';
 
 dotenv.config();

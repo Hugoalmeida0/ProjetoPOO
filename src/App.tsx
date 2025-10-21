@@ -1,9 +1,9 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/componentes/ui/toaster";
+import { Toaster as Sonner } from "@/componentes/ui/sonner";
+import { TooltipProvider } from "@/componentes/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider } from "@/hooks/useAutenticacao";
 import Index from "./telas/Inicio";
 import Auth from "./telas/Autenticacao";
 import GraduationDetails from "./telas/DetalhesGraduacao";

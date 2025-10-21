@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/componentes/ui/button";
 import { ArrowRight, Users, BookOpen, Calendar } from "lucide-react";
 import heroImage from "@/assets/hero-students.jpg";
 

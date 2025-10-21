@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import useMentors from '@/hooks/useMentors';
-import MentorCard from '@/components/MentorCard';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import useMentors from '@/hooks/useMentores';
+import MentorCard from '@/componentes/MentorCard';
+import { Alert, AlertDescription, AlertTitle } from '@/componentes/ui/alert';
+import { Button } from '@/componentes/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { apiClient } from '@/integrations/api/client';
+import { useAuth } from '@/hooks/useAutenticacao';
+import { apiClient } from '@/integracoes/api/client';
 import { useNavigate } from 'react-router-dom';
 
 const Mentors = () => {
