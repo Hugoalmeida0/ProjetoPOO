@@ -42,7 +42,7 @@ const BookingMentorship = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { isTimeSlotOccupied, createBooking, fetchMentorBookings } = useBookings();
   const [occupiedSlots, setOccupiedSlots] = useState<Set<string>>(new Set());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -92,6 +92,7 @@ const BookingMentorship = () => {
 
   // Redirect if not authenticated
   useEffect(() => {
+    if (authLoading) return; // aguarda finalizar carregamento do usuário
     if (!user) {
       toast({
         title: "Acesso negado",
@@ -100,7 +101,7 @@ const BookingMentorship = () => {
       });
       navigate("/auth");
     }
-  }, [user, navigate, toast]);
+  }, [authLoading, user, navigate, toast]);
 
   // Carregar horários ocupados quando a data for selecionada
   useEffect(() => {
