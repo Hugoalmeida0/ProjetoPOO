@@ -1,120 +1,82 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useMentors from '@/hooks/useMentors';
 import MentorCard from '@/components/MentorCard';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { apiClient } from '@/integrations/api/client';
+import { useNavigate } from 'react-router-dom';
 
 const Mentors = () => {
-    const { mentors, loading, error, createMentor, updateMentor, deleteMentor, fetchMentors } = useMentors();
+    const { mentors, loading, error } = useMentors();
     const { toast } = useToast();
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [editingUserId, setEditingUserId] = useState<string | null>(null);
-    const [form, setForm] = useState({ user_id: '', graduation_id: '', location: '', availability: '', experience_years: '', price_per_hour: '', bio: '' });
+    // Alerta para mentor logado com cadastro incompleto
+    const [missingFields, setMissingFields] = useState<string[]>([]);
+    const [checkedProfile, setCheckedProfile] = useState(false);
 
-    const openCreate = () => {
-        setForm({ user_id: '', graduation_id: '', location: '', availability: '', experience_years: '', price_per_hour: '', bio: '' });
-        setEditingUserId(null);
-        setIsFormOpen(true);
-    };
-
-    const openEdit = (m: any) => {
-        setForm({ user_id: m.user_id || '', graduation_id: m.graduation_id || '', location: m.location || '', availability: m.availability || '', experience_years: String(m.experience_years || ''), price_per_hour: String(m.price_per_hour || ''), bio: m.bio || '' });
-        setEditingUserId(m.user_id);
-        setIsFormOpen(true);
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            if (editingUserId) {
-                await updateMentor(editingUserId, { graduation_id: form.graduation_id || null, location: form.location, availability: form.availability, experience_years: Number(form.experience_years || 0), price_per_hour: Number(form.price_per_hour || 0) });
-                toast({ title: 'Sucesso', description: 'Mentor atualizado' });
-            } else {
-                if (!form.user_id) throw new Error('user_id é obrigatório');
-                await createMentor({ user_id: form.user_id, graduation_id: form.graduation_id || null, location: form.location, availability: form.availability, experience_years: Number(form.experience_years || 0), price_per_hour: Number(form.price_per_hour || 0) });
-                toast({ title: 'Sucesso', description: 'Mentor criado' });
+    useEffect(() => {
+        const checkMentorProfile = async () => {
+            if (!user?.is_mentor || !user?.id) { setCheckedProfile(true); return; }
+            try {
+                const [mentor, profile] = await Promise.all([
+                    apiClient.mentors.getByUserId(user.id).catch(() => null),
+                    apiClient.profiles.getByUserId(user.id).catch(() => null),
+                ]);
+                const missing: string[] = [];
+                if (!profile?.full_name) missing.push('Nome completo');
+                if (!profile?.email) missing.push('Email');
+                if (!mentor?.location) missing.push('Localização');
+                if (!mentor?.price_per_hour || mentor?.price_per_hour <= 0) missing.push('Preço por hora');
+                if (!mentor?.availability) missing.push('Disponibilidade');
+                if (!mentor?.experience_years || mentor?.experience_years <= 0) missing.push('Anos de experiência');
+                setMissingFields(missing);
+            } catch (err: any) {
+                console.error('Erro ao validar perfil do mentor', err);
+                toast({ title: 'Erro', description: 'Falha ao validar seu cadastro de mentor' });
+            } finally {
+                setCheckedProfile(true);
             }
-            setIsFormOpen(false);
-            fetchMentors();
-        } catch (err: any) {
-            toast({ title: 'Erro', description: err.message || 'Erro ao salvar mentor', variant: 'destructive' });
-        }
-    };
+        };
+        checkMentorProfile();
+    }, [user?.id, user?.is_mentor, toast]);
 
-    const handleDelete = async (userId: string) => {
-        if (!confirm('Deseja realmente remover este mentor?')) return;
-        try {
-            await deleteMentor(userId);
-            toast({ title: 'Removido', description: 'Mentor removido com sucesso' });
-            fetchMentors();
-        } catch (err: any) {
-            toast({ title: 'Erro', description: err.message || 'Erro ao remover mentor', variant: 'destructive' });
-        }
-    };
+    // Filtrar somente mentores com dados mínimos (nome e preço)
+    const visibleMentors = useMemo(() => {
+        return mentors.filter((m: any) => {
+            const hasName = !!(m.profiles?.full_name && String(m.profiles.full_name).trim());
+            const hasPrice = typeof m.price_per_hour === 'number' && m.price_per_hour > 0;
+            return hasName && hasPrice;
+        });
+    }, [mentors]);
 
     return (
         <div className="container mx-auto p-4">
             <div className="flex items-center justify-between mb-4">
                 <h1 className="text-2xl font-bold">Mentores</h1>
-                <Button onClick={openCreate}>Novo Mentor</Button>
             </div>
 
-            {isFormOpen && (
-                <Card className="mb-6">
-                    <CardHeader>
-                        <h2 className="text-lg font-semibold">{editingUserId ? 'Editar Mentor' : 'Criar Mentor'}</h2>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-3">
-                            {!editingUserId && (
-                                <div>
-                                    <Label htmlFor="user_id">User ID (UUID)</Label>
-                                    <Input id="user_id" value={form.user_id} onChange={(e) => setForm({ ...form, user_id: e.target.value })} required />
-                                </div>
-                            )}
-                            <div>
-                                <Label htmlFor="graduation_id">Graduação (ID)</Label>
-                                <Input id="graduation_id" value={form.graduation_id} onChange={(e) => setForm({ ...form, graduation_id: e.target.value })} />
-                            </div>
-                            <div>
-                                <Label htmlFor="location">Localização</Label>
-                                <Input id="location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-                            </div>
-                            <div>
-                                <Label htmlFor="availability">Disponibilidade</Label>
-                                <Input id="availability" value={form.availability} onChange={(e) => setForm({ ...form, availability: e.target.value })} />
-                            </div>
-                            <div>
-                                <Label htmlFor="experience_years">Anos de experiência</Label>
-                                <Input id="experience_years" type="number" value={form.experience_years} onChange={(e) => setForm({ ...form, experience_years: e.target.value })} />
-                            </div>
-                            <div>
-                                <Label htmlFor="price_per_hour">Preço por hora</Label>
-                                <Input id="price_per_hour" type="number" step="0.01" value={form.price_per_hour} onChange={(e) => setForm({ ...form, price_per_hour: e.target.value })} />
-                            </div>
-                            <div>
-                                <Label htmlFor="bio">Biografia</Label>
-                                <Textarea id="bio" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
-                            </div>
-                            <div className="flex gap-2">
-                                <Button type="submit">Salvar</Button>
-                                <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
+            {/* Alerta de cadastro incompleto para mentor logado */}
+            {checkedProfile && user?.is_mentor && missingFields.length > 0 && (
+                <Alert className="mb-4">
+                    <AlertTitle>Complete seu cadastro de mentor</AlertTitle>
+                    <AlertDescription>
+                        Para aparecer na lista e receber agendamentos, finalize os campos: {missingFields.join(', ')}.
+                        <Button variant="link" className="pl-2" onClick={() => navigate('/account')}>Ir para Minha Conta</Button>
+                    </AlertDescription>
+                </Alert>
             )}
+
+            {/* CRUD de mentor removido da UI pública */}
 
             {loading && <p>Carregando...</p>}
             {error && <p className="text-red-500">{error}</p>}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {mentors.map((m: any) => (
+                {visibleMentors.map((m: any) => (
                     <div key={m.id}>
                         <MentorCard
                             name={m.profiles?.full_name || 'Sem nome'}
@@ -126,10 +88,6 @@ const Mentors = () => {
                             location={m.location || '-'}
                             avatar={m.profiles?.avatar_url}
                         />
-                        <div className="flex gap-2 mt-2">
-                            <Button size="sm" variant="outline" onClick={() => openEdit(m)}>Editar</Button>
-                            <Button size="sm" variant="destructive" onClick={() => handleDelete(m.user_id)}>Remover</Button>
-                        </div>
                     </div>
                 ))}
             </div>
