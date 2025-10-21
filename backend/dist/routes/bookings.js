@@ -55,14 +55,19 @@ router.post('/', async (req, res) => {
                         finalSubjectId = matchRes.rows[0].id;
                     }
                 }
-                // 3) Se não encontrou correspondência, pegar a primeira matéria daquela graduação
+                // 3) Se não encontrou correspondência, criar uma matéria com esse nome na graduação do mentor (se existir)
+                if (!finalSubjectId) {
+                    const created = await db_1.pool.query(`INSERT INTO subjects (id, name, graduation_id) VALUES (gen_random_uuid(), $1, $2) RETURNING id`, [subject_name.trim(), mentorGraduationId]);
+                    finalSubjectId = created.rows[0]?.id || null;
+                }
+                // 4) Se por algum motivo a criação falhar, pegar a primeira matéria daquela graduação
                 if (!finalSubjectId && mentorGraduationId) {
                     const anyGradSubject = await db_1.pool.query(`SELECT id FROM subjects WHERE graduation_id = $1 ORDER BY name LIMIT 1`, [mentorGraduationId]);
                     if (anyGradSubject.rows.length > 0) {
                         finalSubjectId = anyGradSubject.rows[0].id;
                     }
                 }
-                // 4) Como último recurso, pegar qualquer matéria existente
+                // 5) Como último recurso, pegar qualquer matéria existente
                 if (!finalSubjectId) {
                     const anySubject = await db_1.pool.query(`SELECT id FROM subjects ORDER BY name LIMIT 1`);
                     if (anySubject.rows.length > 0) {

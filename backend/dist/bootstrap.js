@@ -28,6 +28,15 @@ async function ensureSchema() {
         END IF;
       END $$;
     `);
+    // Ensure subjects table exists (minimal schema)
+    await db_1.pool.query(`
+      CREATE TABLE IF NOT EXISTS subjects (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name TEXT NOT NULL,
+        graduation_id UUID,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
     // Add subjects column to mentor_profiles if it doesn't exist
     await db_1.pool.query(`
       DO $$
