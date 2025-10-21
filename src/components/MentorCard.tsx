@@ -51,8 +51,8 @@ const MentorCard = ({
 
         <div className="flex items-center justify-center gap-1 mt-2">
           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-          <span className="font-medium">{rating.toFixed(1)}</span>
-          <span className="text-muted-foreground text-sm">({reviews} avaliações)</span>
+          <span className="font-medium">{typeof rating === 'number' ? rating.toFixed(1) : '0.0'}</span>
+          <span className="text-muted-foreground text-sm">({reviews || 0} avaliações)</span>
         </div>
       </CardHeader>
 

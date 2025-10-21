@@ -296,7 +296,7 @@ const BookingMentorship = () => {
 
                       <div className="pt-3 border-t">
                         <div className="px-3 py-2 bg-gradient-primary text-white rounded-lg text-center">
-                          <span className="text-sm font-medium">R$ {mentor.price_per_hour?.toFixed(2) || '0.00'}/hora</span>
+                          <span className="text-sm font-medium">R$ {typeof mentor.price_per_hour === 'number' ? mentor.price_per_hour.toFixed(2) : '0.00'}/hora</span>
                         </div>
                       </div>
                     </div>

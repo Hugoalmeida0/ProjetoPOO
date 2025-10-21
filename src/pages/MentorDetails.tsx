@@ -114,11 +114,11 @@ const MentorDetails = () => {
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1">
                           <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                          <span className="font-bold text-lg">{(mentor.rating || 0).toFixed(1)}</span>
+                          <span className="font-bold text-lg">{typeof mentor.rating === 'number' ? mentor.rating.toFixed(1) : '0.0'}</span>
                           <span className="text-muted-foreground">({mentor.total_sessions || 0} sessões)</span>
                         </div>
                         <div className="px-4 py-2 bg-gradient-primary text-white rounded-lg text-center">
-                          <span className="font-bold">R$ {(mentor.price_per_hour || 0).toFixed(2)}/hora</span>
+                          <span className="font-bold">R$ {typeof mentor.price_per_hour === 'number' ? mentor.price_per_hour.toFixed(2) : '0.00'}/hora</span>
                         </div>
                       </div>
                     </div>
