@@ -11,6 +11,8 @@ import MentorDetails from "./pages/MentorDetails";
 import BookingMentorship from "./pages/BookingMentorship";
 import MyBookings from "./pages/MyBookings";
 import BecomeMentor from "./pages/BecomeMentor";
+import Students from "./pages/Students";
+import Mentors from "./pages/Mentors";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/graduacao/:slug" element={<GraduationDetails />} />
             <Route path="/mentor/:id" element={<MentorDetails />} />
             <Route path="/agendar/:id" element={<BookingMentorship />} />
+            <Route path="/mentors" element={<Mentors />} />
+            <Route path="/students" element={<Students />} />
             <Route path="/meus-agendamentos" element={<MyBookings />} />
             <Route path="/tornar-se-mentor" element={<BecomeMentor />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

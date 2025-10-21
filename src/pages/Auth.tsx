@@ -140,61 +140,66 @@ const Auth = () => {
     try {
       console.log("Tentando fazer login com:", { email });
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const result = await supabase.auth.signInWithPassword({ email, password });
+      console.log("Resposta do login (raw):", result);
 
-      console.log("Resposta do login:", { data, error });
+      // result can have data.session or data.user, or error
+      const { data, error } = result as any;
 
       if (error) {
         console.error("Erro no login:", error);
-        if (error.message.includes("Invalid login credentials")) {
-          toast({
-            title: "Erro",
-            description: "Email ou senha incorretos.",
-            variant: "destructive",
-          });
-        } else if (error.message.includes("Email not confirmed") || error.message.includes("email_not_confirmed")) {
+        // Mostrar erro completo para diagnóstico
+        toast({
+          title: "Erro no login",
+          description: error.message || JSON.stringify(error),
+          variant: "destructive",
+        });
+        // Offer resend if looks like confirmation issue
+        if ((error.message && error.message.includes('confirm')) || (error?.status === 400 && /confirm/i.test(error?.message || ''))) {
           toast({
             title: "Email não confirmado",
-            description: "Verifique sua caixa de entrada e clique no link de confirmação antes de fazer login.",
-            variant: "destructive",
+            description: "Verifique seu email. Deseja reenviar o link de confirmação?",
             action: (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleResendConfirmation(email)}
-                disabled={isResendingEmail}
-                className="text-red-600 hover:text-red-700"
-              >
-                {isResendingEmail ? "Reenviando..." : "Reenviar email"}
+              <Button variant="outline" size="sm" onClick={() => handleResendConfirmation(email)} disabled={isResendingEmail}>
+                {isResendingEmail ? 'Reenviando...' : 'Reenviar email'}
               </Button>
             ),
-          });
-        } else {
-          toast({
-            title: "Erro",
-            description: error.message,
-            variant: "destructive",
+            variant: 'destructive',
           });
         }
       } else {
-        console.log("Login bem-sucedido:", data);
-        toast({
-          title: "Sucesso!",
-          description: "Login realizado com sucesso!",
-        });
-        navigate("/");
+        console.log('Login response data:', data);
+        // If no session present, inform user that email confirmation may be required
+        if (!data?.session) {
+          toast({
+            title: 'Sem sessão ativa',
+            description: 'Login efetuado, mas nenhuma sessão foi retornada — verifique confirmação de email.',
+          });
+        } else {
+          toast({ title: 'Sucesso!', description: 'Login realizado com sucesso!' });
+          navigate('/');
+        }
       }
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro inesperado. Tente novamente.",
-        variant: "destructive",
-      });
+    } catch (err: any) {
+      console.error('Exceção ao fazer login:', err);
+      toast({ title: 'Erro inesperado', description: err?.message || JSON.stringify(err), variant: 'destructive' });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Debug helper: testar conexão com Supabase
+  const handleTestConnection = async () => {
+    try {
+      const s = await supabase.auth.getSession();
+      console.log('getSession():', s);
+      const { data, error } = await supabase.from('profiles').select('id, user_id').limit(1);
+      console.log('profiles select:', { data, error });
+      if (error) throw error;
+      toast({ title: 'Conexão OK', description: `profiles rows: ${data?.length || 0}` });
+    } catch (err: any) {
+      console.error('Erro de conexão:', err);
+      toast({ title: 'Erro de conexão', description: err?.message || JSON.stringify(err), variant: 'destructive' });
     }
   };
 
@@ -218,6 +223,9 @@ const Auth = () => {
             <h1 className="text-2xl font-bold text-foreground">UVV Mentor</h1>
             <p className="text-sm text-muted-foreground">Conecte</p>
           </div>
+        </div>
+        <div className="mb-4 flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleTestConnection}>Testar conexão</Button>
         </div>
 
         <Card>
