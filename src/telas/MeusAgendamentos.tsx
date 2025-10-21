@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, User, CheckCircle, XCircle, AlertCircle, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import Cabecalho from "@/componentes/Cabecalho";
@@ -22,6 +22,25 @@ const MyBookings = () => {
     const { user } = useAuth();
     const { bookings, loading, cancelBooking, completeBooking } = useBookings();
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [hiddenBookings, setHiddenBookings] = useState<string[]>(() => {
+        try {
+            const raw = localStorage.getItem('hidden_bookings');
+            return raw ? JSON.parse(raw) : [];
+        } catch {
+            return [];
+        }
+    });
+
+    const persistHidden = (ids: string[]) => {
+        setHiddenBookings(ids);
+        try { localStorage.setItem('hidden_bookings', JSON.stringify(ids)); } catch {}
+    };
+    const hideBooking = (id: string) => {
+        if (hiddenBookings.includes(id)) return;
+        const next = [...hiddenBookings, id];
+        persistHidden(next);
+        toast({ title: 'Removido da lista', description: 'Este agendamento foi ocultado nesta interface.' });
+    };
 
     const getStatusBadge = (status: Booking['status']) => {
         const statusConfig = {
@@ -97,8 +116,12 @@ const MyBookings = () => {
     // Regras de bloqueio removidas: nenhuma razão para desabilitar além de estado de loading
 
     // Dividir agendamentos em duas seções: como Mentor e como Mentorado (por id ou email)
-    const bookingsAsMentor = bookings.filter((b) => b.mentor_id === user?.id);
-    const bookingsAsStudent = bookings.filter((b) => b.student_id === (user?.id || '') || b.student_email === (user?.email || ''));
+    const bookingsAsMentor = bookings
+        .filter((b) => b.mentor_id === user?.id)
+        .filter((b) => !hiddenBookings.includes(b.id));
+    const bookingsAsStudent = bookings
+        .filter((b) => b.student_id === (user?.id || '') || b.student_email === (user?.email || ''))
+        .filter((b) => !hiddenBookings.includes(b.id));
 
     const getSubjectDisplay = (booking: Booking) => booking.subject_name || booking.subject_id || '—';
 
@@ -281,6 +304,17 @@ const MyBookings = () => {
                                                                         {actionLoading === booking.id ? "Finalizando..." : "Finalizar"}
                                                                     </Button>
                                                                 )}
+
+                                                                {(booking.status === 'cancelled' || booking.status === 'completed') && (
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => hideBooking(booking.id)}
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4 mr-2" />
+                                                                        Remover da lista
+                                                                    </Button>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     </CardContent>
@@ -375,6 +409,17 @@ const MyBookings = () => {
                                                                         disabled={actionLoading === booking.id}
                                                                     >
                                                                         {actionLoading === booking.id ? "Finalizando..." : "Finalizar"}
+                                                                    </Button>
+                                                                )}
+
+                                                                {(booking.status === 'cancelled' || booking.status === 'completed') && (
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => hideBooking(booking.id)}
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4 mr-2" />
+                                                                        Remover da lista
                                                                     </Button>
                                                                 )}
                                                             </div>

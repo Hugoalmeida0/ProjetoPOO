@@ -4,6 +4,8 @@ import { useAuth } from '@/hooks/useAutenticacao';
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/integracoes/api/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/componentes/ui/card';
+import { Button } from '@/componentes/ui/button';
+import { CheckCircle, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CancelBookingDialog as DialogoCancelarAgendamento } from '@/componentes/DialogoCancelarAgendamento';
 
@@ -12,6 +14,9 @@ export default function MentorDashboard() {
     const [bookings, setBookings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [hiddenBookings, setHiddenBookings] = useState<string[]>(() => {
+        try { const raw = localStorage.getItem('hidden_bookings'); return raw ? JSON.parse(raw) : []; } catch { return []; }
+    });
     const { toast } = useToast();
 
     useEffect(() => {
@@ -51,6 +56,46 @@ export default function MentorDashboard() {
         }
     };
 
+    const handleConfirm = async (bookingId: string) => {
+        if (!user?.id) return;
+        setActionLoading(bookingId);
+        try {
+            await apiClient.bookings.updateStatus(bookingId, 'confirmed', undefined, user.id);
+            toast({ title: 'Agendamento confirmado' });
+            await refresh();
+        } catch (err) {
+            console.error('Erro ao confirmar:', err);
+            toast({ title: 'Erro', description: 'Não foi possível confirmar.', variant: 'destructive' });
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleComplete = async (bookingId: string) => {
+        if (!user?.id) return;
+        setActionLoading(bookingId);
+        try {
+            await apiClient.bookings.updateStatus(bookingId, 'completed', undefined, user.id);
+            toast({ title: 'Mentoria finalizada' });
+            await refresh();
+        } catch (err) {
+            console.error('Erro ao finalizar:', err);
+            toast({ title: 'Erro', description: 'Não foi possível finalizar.', variant: 'destructive' });
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const persistHidden = (ids: string[]) => {
+        setHiddenBookings(ids);
+        try { localStorage.setItem('hidden_bookings', JSON.stringify(ids)); } catch {}
+    };
+    const hideBooking = (id: string) => {
+        if (hiddenBookings.includes(id)) return;
+        persistHidden([...hiddenBookings, id]);
+        toast({ title: 'Removido da lista', description: 'Este agendamento foi ocultado nesta interface.' });
+    };
+
     return (
         <RequireMentor>
             <Cabecalho />
@@ -68,7 +113,7 @@ export default function MentorDashboard() {
                                 <p>Nenhuma aula agendada.</p>
                             ) : (
                                 <ul className="space-y-3">
-                                    {bookings.map((b) => (
+                                    {bookings.filter((b) => !hiddenBookings.includes(b.id)).map((b) => (
                                         <li key={b.id} className="border rounded p-3">
                                             <div className="font-medium">{b.date} {b.time} · {b.duration}min</div>
                                             <div className="text-sm text-muted-foreground">Aluno: {b.student_name} | Status: {b.status}</div>
@@ -80,10 +125,23 @@ export default function MentorDashboard() {
                                             )}
                                             {/* Ação de cancelar direto do painel */}
                                             <div className="mt-3">
+                                                {b.status === 'pending' && (
+                                                    <Button size="sm" variant="secondary" onClick={() => handleConfirm(b.id)} disabled={actionLoading === b.id}>
+                                                        Confirmar
+                                                    </Button>
+                                                )}
+                                                <Button size="sm" className="ml-2" onClick={() => handleComplete(b.id)} disabled={actionLoading === b.id}>
+                                                    <CheckCircle className="h-4 w-4 mr-1" /> Finalizar
+                                                </Button>
                                                 <DialogoCancelarAgendamento
                                                     onConfirm={(msg) => handleCancel(b.id, msg)}
                                                     disabled={actionLoading === b.id}
                                                 />
+                                                {(b.status === 'cancelled' || b.status === 'completed') && (
+                                                    <Button variant="ghost" size="sm" className="ml-2" onClick={() => hideBooking(b.id)}>
+                                                        <Trash2 className="h-4 w-4 mr-1" /> Remover da lista
+                                                    </Button>
+                                                )}
                                             </div>
                                         </li>
                                     ))}
