@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/integracoes/api/client';
-import { useAuth } from './useAuth';
+import { useAuth } from './useAutenticacao';
 
 export interface Booking {
     id: string;
