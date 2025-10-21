@@ -33,7 +33,7 @@ const MyBookings = () => {
 
     const persistHidden = (ids: string[]) => {
         setHiddenBookings(ids);
-        try { localStorage.setItem('hidden_bookings', JSON.stringify(ids)); } catch {}
+        try { localStorage.setItem('hidden_bookings', JSON.stringify(ids)); } catch { }
     };
     const hideBooking = (id: string) => {
         if (hiddenBookings.includes(id)) return;
@@ -266,12 +266,6 @@ const MyBookings = () => {
                                                                             <div className="mt-3">
                                                                                 <p className="font-medium text-foreground mb-1">Objetivo:</p>
                                                                                 <p className="text-sm">{booking.objective}</p>
-                                                                            </div>
-                                                                        )}
-                                                                        {booking.status === 'cancelled' && booking.cancel_reason && (
-                                                                            <div className="mt-3">
-                                                                                <p className="font-medium text-foreground mb-1 text-red-600">Motivo do cancelamento:</p>
-                                                                                <p className="text-sm text-muted-foreground">{booking.cancel_reason}</p>
                                                                             </div>
                                                                         )}
                                                                         {booking.status === 'cancelled' && booking.cancel_reason && (

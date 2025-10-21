@@ -88,7 +88,7 @@ export default function MentorDashboard() {
 
     const persistHidden = (ids: string[]) => {
         setHiddenBookings(ids);
-        try { localStorage.setItem('hidden_bookings', JSON.stringify(ids)); } catch {}
+        try { localStorage.setItem('hidden_bookings', JSON.stringify(ids)); } catch { }
     };
     const hideBooking = (id: string) => {
         if (hiddenBookings.includes(id)) return;
