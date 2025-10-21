@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -399,13 +399,9 @@ const BookingMentorship = () => {
                                   </FormControl>
                                   <SelectContent>
                                     {timeSlots.length === 0 ? (
-                                      <SelectItem value="" disabled>
-                                        Mentor sem disponibilidade definida
-                                      </SelectItem>
+                                      <SelectLabel>Mentor sem disponibilidade definida</SelectLabel>
                                     ) : isLoadingSlots ? (
-                                      <SelectItem value="" disabled>
-                                        Carregando horários...
-                                      </SelectItem>
+                                      <SelectLabel>Carregando horários...</SelectLabel>
                                     ) : (
                                       timeSlots.map((time) => {
                                         const isOccupied = occupiedSlots.has(time);
@@ -483,7 +479,7 @@ const BookingMentorship = () => {
                                         <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                                       ))
                                     ) : (
-                                      <SelectItem value="" disabled>Nenhuma matéria disponível</SelectItem>
+                                      <SelectLabel>Nenhuma matéria disponível</SelectLabel>
                                     )}
                                   </SelectContent>
                                 </Select>
