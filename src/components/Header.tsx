@@ -3,12 +3,10 @@ import { GraduationCap, Search, User, LogOut, Calendar, Settings, LayoutDashboar
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useNotifications } from "@/hooks/useNotifications";
-import { Badge } from "./ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 
 const Header = () => {
   const { user, signOut } = useAuth();
-  const { pendingCount } = useNotifications();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -57,14 +55,21 @@ const Header = () => {
             </Button>
 
             {user?.is_mentor && (
-              <Button variant="ghost" size="icon" className="relative" onClick={() => navigate("/mentor/dashboard")}>
-                <Bell className="h-4 w-4" />
-                {pendingCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                    {pendingCount}
-                  </Badge>
-                )}
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Notificações</DialogTitle>
+                    <DialogDescription>
+                      Nova mentoria agendada
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             )}
 
             {user ? (

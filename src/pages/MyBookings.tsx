@@ -78,7 +78,8 @@ const MyBookings = () => {
     };
 
     const canCancel = (booking: Booking) => {
-        const bookingDate = new Date(booking.date + 'T' + booking.time);
+        const bookingDate = getBookingDate(booking);
+        if (!bookingDate) return false;
         const now = new Date();
         const hoursUntilBooking = (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
 
@@ -86,11 +87,31 @@ const MyBookings = () => {
     };
 
     const canComplete = (booking: Booking) => {
-        const bookingDate = new Date(booking.date + 'T' + booking.time);
+        const bookingDate = getBookingDate(booking);
+        if (!bookingDate) return false;
         const now = new Date();
         const hoursAfterBooking = (now.getTime() - bookingDate.getTime()) / (1000 * 60 * 60);
 
         return booking.status === 'confirmed' && hoursAfterBooking >= 0;
+    };
+
+    // Dividir agendamentos em duas seções: como Mentor e como Mentorado (por id ou email)
+    const bookingsAsMentor = bookings.filter((b) => b.mentor_id === user?.id);
+    const bookingsAsStudent = bookings.filter((b) => b.student_id === (user?.id || '') || b.student_email === (user?.email || ''));
+
+    const getSubjectDisplay = (booking: Booking) => booking.subject_name || booking.subject_id || '—';
+
+    const getBookingDate = (booking: Booking): Date | null => {
+        const base = booking.date?.trim();
+        const t = booking.time?.trim();
+        if (!base) return null;
+        let iso = base;
+        if (t) {
+            const time = t.length === 5 ? `${t}:00` : t; // garante segundos
+            iso = `${base}T${time}`;
+        }
+        const d = new Date(iso);
+        return isNaN(d.getTime()) ? null : d;
     };
 
     if (loading) {
@@ -145,87 +166,186 @@ const MyBookings = () => {
                             </CardContent>
                         </Card>
                     ) : (
-                        <div className="space-y-4">
-                            {bookings.map((booking) => {
-                                const initials = booking.student_name.split(' ').map((n: string) => n[0]).join('').toUpperCase();
-                                const bookingDate = new Date(booking.date + 'T' + booking.time);
-                                const isPast = bookingDate < new Date();
+                        <div className="space-y-10">
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4">Como Mentor</h2>
+                                {bookingsAsMentor.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">Você não possui agendamentos como mentor.</p>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {bookingsAsMentor.map((booking) => {
+                                            const initials = (booking.student_name || '?').split(' ').map((n: string) => n[0]).join('').toUpperCase();
+                                            const bookingDate = getBookingDate(booking);
+                                            const isPast = bookingDate ? bookingDate < new Date() : false;
 
-                                return (
-                                    <Card key={booking.id} className="bg-gradient-card border-0 shadow-card">
-                                        <CardContent className="p-6">
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex items-start gap-4">
-                                                    <Avatar className="h-12 w-12 ring-2 ring-primary/20">
-                                                        <AvatarFallback className="text-sm font-bold bg-gradient-primary text-white">
-                                                            {initials}
-                                                        </AvatarFallback>
-                                                    </Avatar>
+                                            return (
+                                                <Card key={booking.id} className="bg-gradient-card border-0 shadow-card">
+                                                    <CardContent className="p-6">
+                                                        <div className="flex items-start justify-between">
+                                                            <div className="flex items-start gap-4">
+                                                                <Avatar className="h-12 w-12 ring-2 ring-primary/20">
+                                                                    <AvatarFallback className="text-sm font-bold bg-gradient-primary text-white">
+                                                                        {initials}
+                                                                    </AvatarFallback>
+                                                                </Avatar>
 
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <h3 className="font-semibold text-lg">{booking.student_name}</h3>
-                                                            {getStatusBadge(booking.status)}
-                                                        </div>
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-center gap-2 mb-2">
+                                                                        <h3 className="font-semibold text-lg">{booking.student_name}</h3>
+                                                                        {getStatusBadge(booking.status)}
+                                                                    </div>
 
-                                                        <div className="space-y-2 text-sm text-muted-foreground">
-                                                            <div className="flex items-center gap-2">
-                                                                <Calendar className="h-4 w-4" />
-                                                                <span>
-                                                                    {format(bookingDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                                                                </span>
-                                                            </div>
+                                                                    <div className="space-y-2 text-sm text-muted-foreground">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <Calendar className="h-4 w-4" />
+                                                                            <span>
+                                                                                {bookingDate ? format(bookingDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : 'Data inválida'}
+                                                                            </span>
+                                                                        </div>
 
-                                                            <div className="flex items-center gap-2">
-                                                                <Clock className="h-4 w-4" />
-                                                                <span>
-                                                                    {booking.time} - {booking.duration} minutos
-                                                                </span>
-                                                            </div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <Clock className="h-4 w-4" />
+                                                                            <span>
+                                                                                {booking.time} - {booking.duration} minutos
+                                                                            </span>
+                                                                        </div>
 
-                                                            <div className="flex items-center gap-2">
-                                                                <User className="h-4 w-4" />
-                                                                <span>Matéria: {booking.subject_id}</span>
-                                                            </div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <User className="h-4 w-4" />
+                                                                            <span>Matéria: {getSubjectDisplay(booking)}</span>
+                                                                        </div>
 
-                                                            {booking.objective && (
-                                                                <div className="mt-3">
-                                                                    <p className="font-medium text-foreground mb-1">Objetivo:</p>
-                                                                    <p className="text-sm">{booking.objective}</p>
+                                                                        {booking.objective && (
+                                                                            <div className="mt-3">
+                                                                                <p className="font-medium text-foreground mb-1">Objetivo:</p>
+                                                                                <p className="text-sm">{booking.objective}</p>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
-                                                            )}
+                                                            </div>
+
+                                                            <div className="flex flex-col gap-2">
+                                                                {canCancel(booking) && (
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => handleCancelBooking(booking.id)}
+                                                                        disabled={actionLoading === booking.id}
+                                                                        className="text-red-600 hover:text-red-700"
+                                                                    >
+                                                                        {actionLoading === booking.id ? "Cancelando..." : "Cancelar"}
+                                                                    </Button>
+                                                                )}
+
+                                                                {canComplete(booking) && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        onClick={() => handleCompleteBooking(booking.id)}
+                                                                        disabled={actionLoading === booking.id}
+                                                                    >
+                                                                        {actionLoading === booking.id ? "Finalizando..." : "Finalizar"}
+                                                                    </Button>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </div>
+                                                    </CardContent>
+                                                </Card>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
 
-                                                <div className="flex flex-col gap-2">
-                                                    {canCancel(booking) && (
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => handleCancelBooking(booking.id)}
-                                                            disabled={actionLoading === booking.id}
-                                                            className="text-red-600 hover:text-red-700"
-                                                        >
-                                                            {actionLoading === booking.id ? "Cancelando..." : "Cancelar"}
-                                                        </Button>
-                                                    )}
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4">Como Mentorado</h2>
+                                {bookingsAsStudent.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground">Você não possui agendamentos como mentorado.</p>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {bookingsAsStudent.map((booking) => {
+                                            const initials = (booking.student_name || '?').split(' ').map((n: string) => n[0]).join('').toUpperCase();
+                                            const bookingDate = getBookingDate(booking);
+                                            const isPast = bookingDate ? bookingDate < new Date() : false;
 
-                                                    {canComplete(booking) && (
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={() => handleCompleteBooking(booking.id)}
-                                                            disabled={actionLoading === booking.id}
-                                                        >
-                                                            {actionLoading === booking.id ? "Finalizando..." : "Finalizar"}
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                );
-                            })}
+                                            return (
+                                                <Card key={booking.id} className="bg-gradient-card border-0 shadow-card">
+                                                    <CardContent className="p-6">
+                                                        <div className="flex items-start justify-between">
+                                                            <div className="flex items-start gap-4">
+                                                                <Avatar className="h-12 w-12 ring-2 ring-primary/20">
+                                                                    <AvatarFallback className="text-sm font-bold bg-gradient-primary text-white">
+                                                                        {initials}
+                                                                    </AvatarFallback>
+                                                                </Avatar>
+
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-center gap-2 mb-2">
+                                                                        <h3 className="font-semibold text-lg">{booking.student_name}</h3>
+                                                                        {getStatusBadge(booking.status)}
+                                                                    </div>
+
+                                                                    <div className="space-y-2 text-sm text-muted-foreground">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <Calendar className="h-4 w-4" />
+                                                                            <span>
+                                                                                {bookingDate ? format(bookingDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : 'Data inválida'}
+                                                                            </span>
+                                                                        </div>
+
+                                                                        <div className="flex items-center gap-2">
+                                                                            <Clock className="h-4 w-4" />
+                                                                            <span>
+                                                                                {booking.time} - {booking.duration} minutos
+                                                                            </span>
+                                                                        </div>
+
+                                                                        <div className="flex items-center gap-2">
+                                                                            <User className="h-4 w-4" />
+                                                                            <span>Matéria: {getSubjectDisplay(booking)}</span>
+                                                                        </div>
+
+                                                                        {booking.objective && (
+                                                                            <div className="mt-3">
+                                                                                <p className="font-medium text-foreground mb-1">Objetivo:</p>
+                                                                                <p className="text-sm">{booking.objective}</p>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex flex-col gap-2">
+                                                                {canCancel(booking) && (
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        onClick={() => handleCancelBooking(booking.id)}
+                                                                        disabled={actionLoading === booking.id}
+                                                                        className="text-red-600 hover:text-red-700"
+                                                                    >
+                                                                        {actionLoading === booking.id ? "Cancelando..." : "Cancelar"}
+                                                                    </Button>
+                                                                )}
+
+                                                                {canComplete(booking) && (
+                                                                    <Button
+                                                                        size="sm"
+                                                                        onClick={() => handleCompleteBooking(booking.id)}
+                                                                        disabled={actionLoading === booking.id}
+                                                                    >
+                                                                        {actionLoading === booking.id ? "Finalizando..." : "Finalizar"}
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

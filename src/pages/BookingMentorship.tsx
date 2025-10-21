@@ -68,7 +68,7 @@ const BookingMentorship = () => {
         }
         const merged = { ...mentorData, profiles: profileData };
         setMentor(merged);
-        
+
         // Processar matérias do campo subjects (texto livre separado por vírgula)
         try {
           if (mentorData.subjects && typeof mentorData.subjects === 'string') {
