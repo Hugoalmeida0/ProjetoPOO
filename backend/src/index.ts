@@ -57,5 +57,6 @@ if (process.env.NODE_ENV !== 'production') {
         });
 }
 
-// Para Vercel serverless
+// Para Vercel serverless (CommonJS export)
+module.exports = app;
 export default app;

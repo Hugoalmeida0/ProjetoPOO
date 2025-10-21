@@ -1,4 +1,6 @@
 // Serverless function wrapper para Vercel
-const app = require('../backend/dist/index').default || require('../backend/dist/index');
+require('dotenv').config({ path: '../backend/.env' });
 
-module.exports = app;
+const express = require('../backend/dist/index').default || require('../backend/dist/index');
+
+module.exports = express;
