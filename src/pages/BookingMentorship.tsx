@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,6 +48,37 @@ const BookingMentorship = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mentor, setMentor] = useState<any>(null);
+  const [loadingMentor, setLoadingMentor] = useState(true);
+
+
+  // Carregar dados reais do mentor
+  useEffect(() => {
+    const loadMentor = async () => {
+      if (!id) return;
+      try {
+        setLoadingMentor(true);
+        const [mentorData, profileData] = await Promise.all([
+          apiClient.mentors.getByUserId(id).catch(() => null),
+          apiClient.profiles.getByUserId(id).catch(() => null),
+        ]);
+        if (!mentorData || !profileData) {
+          throw new Error('Mentor não encontrado');
+        }
+        setMentor({ ...mentorData, profiles: profileData });
+      } catch (err: any) {
+        toast({
+          title: 'Erro',
+          description: err.message || 'Erro ao carregar dados do mentor',
+          variant: 'destructive',
+        });
+        navigate(-1);
+      } finally {
+        setLoadingMentor(false);
+      }
+    };
+    loadMentor();
+  }, [id, toast, navigate]);
 
 
   // Redirect if not authenticated
@@ -72,15 +103,8 @@ const BookingMentorship = () => {
           console.log("Carregando horários para data:", dateString);
           console.log("ID do mentor:", id, "Tipo:", typeof id);
 
-          // Para teste, vamos usar o ID do usuário atual como mentor
-          // Isso funciona porque o usuário logado existe na tabela auth.users
-          const mentorId = id === "1" ? user.id : id;
-          console.log("Usando mentorId:", mentorId);
-
-          const mentorBookings = await fetchMentorBookings(mentorId);
-          console.log("Agendamentos do mentor:", mentorBookings);
-
-          const occupied = new Set(
+          const mentorBookings = await fetchMentorBookings(id);
+          console.log("Agendamentos do mentor:", mentorBookings); const occupied = new Set(
             mentorBookings
               .filter(booking => booking.date === dateString)
               .map(booking => booking.time)
@@ -104,26 +128,16 @@ const BookingMentorship = () => {
     return () => clearTimeout(timeoutId);
   }, [selectedDate, id]);
 
-  // Mock mentor data - in a real app, this would come from an API based on the ID
-  const mentor = {
-    name: "Ana Silva",
-    course: "Engenharia Civil",
-    period: "8º período",
-    subjects: [
-      "Algoritmos e Estruturas de Dados",
-      "Desenvolvimento Web",
-      "Estruturas de Concreto",
-      "Gestão Financeira"
-    ],
-    rating: 4.9,
-    avatar: undefined,
-  };
+  // Mapear disponibilidade do mentor para horários
+  const timeSlots = useMemo(() => {
+    if (!mentor?.availability) return [];
+    const avail = mentor.availability.toLowerCase();
+    if (avail.includes('manhã') || avail.includes('flexível')) return ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
+    if (avail.includes('tarde')) return ["14:00", "15:00", "16:00", "17:00"];
+    if (avail.includes('noite')) return ["18:00", "19:00", "20:00"];
+    return ["08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
+  }, [mentor]);
 
-  const initials = mentor.name.split(' ').map(n => n[0]).join('').toUpperCase();
-
-  const timeSlots = [
-    "08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
-  ];
 
   const durations = [
     { value: "60", label: "1 hora" },
@@ -142,12 +156,11 @@ const BookingMentorship = () => {
   });
 
   const onSubmit = async (data: BookingFormData) => {
-    if (!user || !id) return;
+    if (!user || !id || !mentor) return;
 
     setIsSubmitting(true); // Inicia o loading
 
     try {
-      const mentorId = id === "1" ? user.id : id; // Lógica de teste
       const dateString = data.date.toISOString().split('T')[0];
 
       // Passo 1: Buscar o ID da matéria - usar API
@@ -162,7 +175,7 @@ const BookingMentorship = () => {
       // Passo 2: Montar o objeto final do agendamento
       const bookingData = {
         student_id: user.id,
-        mentor_id: mentorId,
+        mentor_id: id,
         subject_id: subject.id,
         date: dateString,
         time: data.time,
@@ -181,7 +194,7 @@ const BookingMentorship = () => {
       // Se tudo deu certo até aqui:
       toast({
         title: "Mentoria agendada com sucesso!",
-        description: `Sua mentoria com ${mentor.name} foi agendada para ${format(data.date, "dd/MM/yyyy", { locale: ptBR })} às ${data.time}.`,
+        description: `Sua mentoria com ${mentor.profiles?.full_name || 'o mentor'} foi agendada para ${format(data.date, "dd/MM/yyyy", { locale: ptBR })} às ${data.time}.`,
       });
 
       navigate(-1); // Navega para a página anterior
@@ -217,6 +230,18 @@ const BookingMentorship = () => {
     );
   }
 
+  if (loadingMentor || !mentor) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground">Carregando dados do mentor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const initials = (mentor.profiles?.full_name || 'M').split(' ').map((n: string) => n[0]).join('').toUpperCase();
+
   try {
     return (
       <div className="min-h-screen bg-background">
@@ -246,33 +271,32 @@ const BookingMentorship = () => {
                   <CardContent>
                     <div className="flex items-center gap-4 mb-4">
                       <Avatar className="h-16 w-16 ring-2 ring-primary/20">
-                        <AvatarImage src={mentor.avatar} alt={mentor.name} />
+                        <AvatarImage src={mentor.profiles?.avatar_url} alt={mentor.profiles?.full_name} />
                         <AvatarFallback className="text-lg font-bold bg-gradient-primary text-white">
                           {initials}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="font-bold text-lg">{mentor.name}</h3>
-                        <p className="text-sm text-muted-foreground">{mentor.course}</p>
-                        <p className="text-sm text-muted-foreground">{mentor.period}</p>
+                        <h3 className="font-bold text-lg">{mentor.profiles?.full_name || 'Mentor'}</h3>
+                        <p className="text-sm text-muted-foreground">{mentor.profiles?.graduation || 'Graduação'}</p>
+                        <p className="text-sm text-muted-foreground">{mentor.experience_years ? `${mentor.experience_years} anos exp.` : '--'}</p>
                       </div>
                     </div>
 
                     <div className="space-y-3">
                       <div>
-                        <p className="text-sm font-medium mb-2">Especialidades:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {mentor.subjects.map((subject, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {subject}
-                            </Badge>
-                          ))}
-                        </div>
+                        <p className="text-sm font-medium mb-2">Disponibilidade:</p>
+                        <Badge variant="secondary">{mentor.availability || 'Flexível'}</Badge>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium mb-2">Localização:</p>
+                        <p className="text-sm text-muted-foreground">{mentor.location || '--'}</p>
                       </div>
 
                       <div className="pt-3 border-t">
                         <div className="px-3 py-2 bg-gradient-primary text-white rounded-lg text-center">
-                          <span className="text-sm font-medium">Mentoria Voluntária</span>
+                          <span className="text-sm font-medium">R$ {mentor.price_per_hour?.toFixed(2) || '0.00'}/hora</span>
                         </div>
                       </div>
                     </div>
@@ -427,11 +451,11 @@ const BookingMentorship = () => {
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    {mentor.subjects.map((subject) => (
-                                      <SelectItem key={subject} value={subject}>
-                                        {subject}
-                                      </SelectItem>
-                                    ))}
+                                    {/* Idealmente buscar matérias do backend vinculadas ao mentor */}
+                                    <SelectItem value="Algoritmos e Estruturas de Dados">Algoritmos e Estruturas de Dados</SelectItem>
+                                    <SelectItem value="Desenvolvimento Web">Desenvolvimento Web</SelectItem>
+                                    <SelectItem value="Estruturas de Concreto">Estruturas de Concreto</SelectItem>
+                                    <SelectItem value="Gestão Financeira">Gestão Financeira</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />

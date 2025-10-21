@@ -19,6 +19,12 @@ const BecomeMentor = () => {
   const { user } = useAuth();
   const { data: graduations = [] } = useGraduations();
 
+  // Regra 1: Precisa estar logado para se cadastrar como mentor
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 

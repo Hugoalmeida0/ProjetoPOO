@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, MapPin, GraduationCap } from "lucide-react";
 
 interface MentorCardProps {
+  mentorId: string;
   name: string;
   course: string;
   period: string;
@@ -15,14 +16,15 @@ interface MentorCardProps {
   avatar?: string;
 }
 
-const MentorCard = ({ 
-  name, 
-  course, 
-  period, 
-  subjects, 
-  rating, 
-  reviews, 
-  location, 
+const MentorCard = ({
+  mentorId,
+  name,
+  course,
+  period,
+  subjects,
+  rating,
+  reviews,
+  location,
   avatar
 }: MentorCardProps) => {
   const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -36,7 +38,7 @@ const MentorCard = ({
             {initials}
           </AvatarFallback>
         </Avatar>
-        
+
         <div>
           <h3 className="font-semibold text-lg group-hover:text-primary transition-smooth">
             {name}
@@ -53,7 +55,7 @@ const MentorCard = ({
           <span className="text-muted-foreground text-sm">({reviews} avaliações)</span>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <MapPin className="h-4 w-4" />
@@ -75,16 +77,16 @@ const MentorCard = ({
           <span className="text-sm font-medium text-primary">Mentoria Voluntária</span>
         </div>
       </CardContent>
-      
+
       <CardFooter className="flex gap-2">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           className="flex-1"
-          onClick={() => window.location.href = `/mentor/1`}
+          onClick={() => (window.location.href = `/mentor/${mentorId}`)}
         >
           Ver Perfil
         </Button>
-        <Button variant="hero" className="flex-1">
+        <Button variant="hero" className="flex-1" onClick={() => (window.location.href = `/agendar/${mentorId}`)}>
           Agendar
         </Button>
       </CardFooter>

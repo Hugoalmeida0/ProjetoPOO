@@ -79,9 +79,10 @@ const Mentors = () => {
                 {visibleMentors.map((m: any) => (
                     <div key={m.id}>
                         <MentorCard
+                            mentorId={m.user_id}
                             name={m.profiles?.full_name || 'Sem nome'}
                             course={m.profiles?.graduation || 'N/A'}
-                            period={'--'}
+                            period={m.experience_years ? `${m.experience_years} anos exp.` : '--'}
                             subjects={[]}
                             rating={m.rating || 0}
                             reviews={m.total_sessions || 0}
