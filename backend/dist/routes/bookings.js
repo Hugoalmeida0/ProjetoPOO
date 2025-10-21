@@ -40,26 +40,43 @@ router.post('/', async (req, res) => {
         if (!student_id || !mentor_id || (!subject_id && !subject_name) || !date || !time || !duration || !student_name || !student_email) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
-        // Se não tiver subject_id mas tiver subject_name, criar/buscar um subject genérico
+        // Resolver subject_id quando vier apenas subject_name
         let finalSubjectId = subject_id;
         const finalSubjectName = subject_name || null;
         if (!finalSubjectId && subject_name) {
-            // Tentar buscar ou criar um subject "Outros" para usar como fallback
             try {
-                const genericSubject = await db_1.pool.query(`SELECT id FROM subjects WHERE name = 'Outros' LIMIT 1`);
-                if (genericSubject.rows.length > 0) {
-                    finalSubjectId = genericSubject.rows[0].id;
+                // 1) Descobrir a graduacao do mentor
+                const mentorGradRes = await db_1.pool.query(`SELECT graduation_id FROM mentor_profiles WHERE user_id = $1 LIMIT 1`, [mentor_id]);
+                const mentorGraduationId = mentorGradRes.rows?.[0]?.graduation_id || null;
+                // 2) Tentar encontrar uma matéria com mesmo nome dentro da graduação do mentor
+                if (mentorGraduationId) {
+                    const matchRes = await db_1.pool.query(`SELECT id FROM subjects WHERE graduation_id = $1 AND LOWER(name) = LOWER($2) LIMIT 1`, [mentorGraduationId, subject_name.trim()]);
+                    if (matchRes.rows.length > 0) {
+                        finalSubjectId = matchRes.rows[0].id;
+                    }
                 }
-                else {
-                    // Criar subject genérico se não existir
-                    const newSubject = await db_1.pool.query(`INSERT INTO subjects (name) VALUES ('Outros') RETURNING id`);
-                    finalSubjectId = newSubject.rows[0].id;
+                // 3) Se não encontrou correspondência, pegar a primeira matéria daquela graduação
+                if (!finalSubjectId && mentorGraduationId) {
+                    const anyGradSubject = await db_1.pool.query(`SELECT id FROM subjects WHERE graduation_id = $1 ORDER BY name LIMIT 1`, [mentorGraduationId]);
+                    if (anyGradSubject.rows.length > 0) {
+                        finalSubjectId = anyGradSubject.rows[0].id;
+                    }
+                }
+                // 4) Como último recurso, pegar qualquer matéria existente
+                if (!finalSubjectId) {
+                    const anySubject = await db_1.pool.query(`SELECT id FROM subjects ORDER BY name LIMIT 1`);
+                    if (anySubject.rows.length > 0) {
+                        finalSubjectId = anySubject.rows[0].id;
+                    }
+                }
+                // Se mesmo assim não houver matérias, melhor retornar 400 orientando a cadastrar matérias
+                if (!finalSubjectId) {
+                    return res.status(400).json({ error: 'Nenhuma matéria cadastrada no sistema. Cadastre matérias em subjects ou informe um subject_id válido.' });
                 }
             }
             catch (err) {
-                console.error('Erro ao buscar/criar subject genérico:', err);
-                // Se falhar, deixar null mesmo
-                finalSubjectId = null;
+                console.error('Erro ao resolver subject_id a partir de subject_name:', err);
+                return res.status(500).json({ error: 'Falha ao resolver a matéria informada. Tente novamente.' });
             }
         }
         // Tentar inserir com subject_name primeiro, se falhar, tentar sem
