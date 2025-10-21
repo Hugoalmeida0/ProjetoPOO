@@ -32,3 +32,7 @@ backend/.env.production
 
 # Backend build
 backend/dist
+
+# API node_modules (Vercel instala automaticamente)
+api/node_modules
+api/package-lock.json
