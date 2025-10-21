@@ -50,6 +50,7 @@ const BookingMentorship = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mentor, setMentor] = useState<any>(null);
   const [loadingMentor, setLoadingMentor] = useState(true);
+  const [subjectsList, setSubjectsList] = useState<any[]>([]);
 
 
   // Carregar dados reais do mentor
@@ -65,7 +66,15 @@ const BookingMentorship = () => {
         if (!mentorData || !profileData) {
           throw new Error('Mentor não encontrado');
         }
-        setMentor({ ...mentorData, profiles: profileData });
+        const merged = { ...mentorData, profiles: profileData };
+        setMentor(merged);
+        // Carregar matérias vinculadas à graduação do mentor, se disponível
+        try {
+          const subjects = await apiClient.subjects.getAll(merged.graduation_id);
+          setSubjectsList(Array.isArray(subjects) ? subjects : []);
+        } catch {
+          setSubjectsList([]);
+        }
       } catch (err: any) {
         toast({
           title: 'Erro',
@@ -163,9 +172,18 @@ const BookingMentorship = () => {
     try {
       const dateString = data.date.toISOString().split('T')[0];
 
+      // Garantir que o horário escolhido não está ocupado
+      if (occupiedSlots.has(data.time)) {
+        throw new Error('Este horário já está ocupado. Por favor, escolha outro.');
+      }
+
       // Passo 1: Buscar o ID da matéria - usar API
-      const subjects = await apiClient.subjects.getAll();
-      const subject = subjects.find(s => s.name === data.subject);
+      let subject = subjectsList.find((s: any) => s.name === data.subject);
+      if (!subject) {
+        // Fallback: buscar todas as matérias
+        const subjects = await apiClient.subjects.getAll();
+        subject = subjects.find((s: any) => s.name === data.subject);
+      }
 
       // Se a matéria não for encontrada, lançamos um erro que será capturado pelo catch
       if (!subject) {
@@ -371,11 +389,19 @@ const BookingMentorship = () => {
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                   <FormControl>
                                     <SelectTrigger>
-                                      <SelectValue placeholder={isLoadingSlots ? "Carregando horários..." : "Selecionar horário"} />
+                                      <SelectValue placeholder={
+                                        timeSlots.length === 0
+                                          ? 'Mentor sem disponibilidade definida'
+                                          : (isLoadingSlots ? 'Carregando horários...' : 'Selecionar horário')
+                                      } />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    {isLoadingSlots ? (
+                                    {timeSlots.length === 0 ? (
+                                      <SelectItem value="" disabled>
+                                        Mentor sem disponibilidade definida
+                                      </SelectItem>
+                                    ) : isLoadingSlots ? (
                                       <SelectItem value="" disabled>
                                         Carregando horários...
                                       </SelectItem>
@@ -447,15 +473,17 @@ const BookingMentorship = () => {
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                   <FormControl>
                                     <SelectTrigger>
-                                      <SelectValue placeholder="Selecionar matéria" />
+                                      <SelectValue placeholder={subjectsList.length ? 'Selecionar matéria' : 'Carregando matérias...'} />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    {/* Idealmente buscar matérias do backend vinculadas ao mentor */}
-                                    <SelectItem value="Algoritmos e Estruturas de Dados">Algoritmos e Estruturas de Dados</SelectItem>
-                                    <SelectItem value="Desenvolvimento Web">Desenvolvimento Web</SelectItem>
-                                    <SelectItem value="Estruturas de Concreto">Estruturas de Concreto</SelectItem>
-                                    <SelectItem value="Gestão Financeira">Gestão Financeira</SelectItem>
+                                    {subjectsList.length ? (
+                                      subjectsList.map((s: any) => (
+                                        <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                                      ))
+                                    ) : (
+                                      <SelectItem value="" disabled>Nenhuma matéria disponível</SelectItem>
+                                    )}
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -537,7 +565,7 @@ const BookingMentorship = () => {
 
                         {/* Submit Button */}
                         <div className="pt-6">
-                          <Button type="submit" className="w-full" size="lg">
+                          <Button type="submit" className="w-full" size="lg" disabled={!timeSlots.length || isSubmitting || isLoadingSlots}>
                             <Calendar className="mr-2 h-4 w-4" />
                             Confirmar Agendamento
                           </Button>
