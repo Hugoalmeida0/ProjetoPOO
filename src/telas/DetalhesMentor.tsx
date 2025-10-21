@@ -32,7 +32,7 @@ const MentorDetails = () => {
           throw new Error('Mentor não encontrado');
         }
         setMentor({ ...mentorData, profiles: profileData });
-        
+
         // Contar sessões exceto as canceladas
         const completedCount = (bookingsData || []).filter((b: any) => b.status !== 'cancelled').length;
         setCompletedSessions(completedCount);
