@@ -189,5 +189,6 @@ export const apiClient = {
         }),
         getByMentorId: (mentorId: string) => fetchAPI<any[]>(`/api/ratings/mentor/${mentorId}`),
         getByBookingId: (bookingId: string) => fetchAPI<any>(`/api/ratings/booking/${bookingId}`),
+        getMentorStats: (mentorId: string) => fetchAPI<any>(`/api/ratings/mentor/${mentorId}/stats`),
     },
 };

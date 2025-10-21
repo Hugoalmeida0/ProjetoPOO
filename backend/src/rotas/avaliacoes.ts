@@ -129,4 +129,48 @@ router.get('/booking/:bookingId', auth, async (req: Request & { userId?: string 
     }
 });
 
+// GET /api/ratings/mentor/:mentorId/stats - Buscar estatísticas de avaliações de um mentor
+router.get('/mentor/:mentorId/stats', async (req: Request, res: Response) => {
+    try {
+        const { mentorId } = req.params;
+
+        const result = await pool.query(`
+            SELECT 
+                ROUND(AVG(rating), 1) as avg_rating,
+                COUNT(*) as total_ratings,
+                COUNT(CASE WHEN rating = 5 THEN 1 END) as five_star,
+                COUNT(CASE WHEN rating = 4 THEN 1 END) as four_star,
+                COUNT(CASE WHEN rating = 3 THEN 1 END) as three_star,
+                COUNT(CASE WHEN rating = 2 THEN 1 END) as two_star,
+                COUNT(CASE WHEN rating = 1 THEN 1 END) as one_star
+            FROM ratings 
+            WHERE mentor_id = $1
+        `, [mentorId]);
+
+        if (result.rows.length > 0) {
+            const stats = result.rows[0];
+            res.json({
+                avg_rating: parseFloat(stats.avg_rating) || 0,
+                total_ratings: parseInt(stats.total_ratings) || 0,
+                distribution: {
+                    5: parseInt(stats.five_star) || 0,
+                    4: parseInt(stats.four_star) || 0,
+                    3: parseInt(stats.three_star) || 0,
+                    2: parseInt(stats.two_star) || 0,
+                    1: parseInt(stats.one_star) || 0
+                }
+            });
+        } else {
+            res.json({
+                avg_rating: 0,
+                total_ratings: 0,
+                distribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao buscar estatísticas de avaliações:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
 export default router;

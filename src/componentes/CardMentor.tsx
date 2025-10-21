@@ -50,8 +50,29 @@ const CardMentor = ({
         </div>
 
         <div className="flex items-center justify-center gap-1 mt-2">
-          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-          <span className="font-medium">{typeof rating === 'number' ? rating.toFixed(1) : '0.0'}</span>
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((star) => {
+              const currentRating = typeof rating === 'number' ? rating : 0;
+              const isFilled = star <= currentRating;
+              const isHalfFilled = star - 0.5 <= currentRating && star > currentRating;
+
+              return (
+                <div key={star} className="relative">
+                  <Star className="h-4 w-4 text-gray-300" />
+                  {(isFilled || isHalfFilled) && (
+                    <Star
+                      className={`h-4 w-4 absolute top-0 left-0 fill-yellow-400 text-yellow-400 ${isHalfFilled ? 'clip-path-half' : ''
+                        }`}
+                      style={isHalfFilled ? {
+                        clipPath: 'polygon(0 0, 50% 0, 50% 100%, 0 100%)'
+                      } : undefined}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <span className="font-medium ml-1">{typeof rating === 'number' ? rating.toFixed(1) : '0.0'}</span>
           <span className="text-muted-foreground text-sm">({reviews || 0} avaliações)</span>
         </div>
       </CardHeader>
