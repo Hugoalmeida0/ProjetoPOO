@@ -16,20 +16,26 @@ const MentorDetails = () => {
   const { toast } = useToast();
   const [mentor, setMentor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [completedSessions, setCompletedSessions] = useState(0);
 
   useEffect(() => {
     const loadMentor = async () => {
       if (!id) return;
       try {
         setLoading(true);
-        const [mentorData, profileData] = await Promise.all([
+        const [mentorData, profileData, bookingsData] = await Promise.all([
           apiClient.mentors.getByUserId(id).catch(() => null),
           apiClient.profiles.getByUserId(id).catch(() => null),
+          apiClient.bookings.getByMentorId(id).catch(() => []),
         ]);
         if (!mentorData || !profileData) {
           throw new Error('Mentor não encontrado');
         }
         setMentor({ ...mentorData, profiles: profileData });
+        
+        // Contar sessões exceto as canceladas
+        const completedCount = (bookingsData || []).filter((b: any) => b.status !== 'cancelled').length;
+        setCompletedSessions(completedCount);
       } catch (err: any) {
         toast({
           title: 'Erro',
@@ -157,7 +163,7 @@ const MentorDetails = () => {
                         <User className="h-4 w-4 text-primary" />
                         <span className="text-sm">Sessões realizadas</span>
                       </div>
-                      <span className="font-bold">{mentor.total_sessions || 0}</span>
+                      <span className="font-bold">{completedSessions}</span>
                     </div>
                     <Separator />
                     <div className="flex items-center justify-between">
