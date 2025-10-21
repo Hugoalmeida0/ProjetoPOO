@@ -28,8 +28,8 @@ export async function ensureSchema() {
       END $$;
     `);
 
-    // Ensure subjects table exists (minimal schema)
-    await pool.query(`
+  // Ensure subjects table exists (minimal schema)
+  await pool.query(`
       CREATE TABLE IF NOT EXISTS subjects (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name TEXT NOT NULL,
