@@ -81,12 +81,8 @@ const MyBookings = () => {
     };
 
     const canCancel = (booking: Booking) => {
-        const bookingDate = getBookingDate(booking);
-        if (!bookingDate) return false;
-        const now = new Date();
-        // Mostrar o botão de cancelamento enquanto a mentoria ainda não começou
-        // para status 'pending' ou 'confirmed'.
-        return ['pending', 'confirmed'].includes(booking.status) && bookingDate.getTime() > now.getTime();
+        // Regras removidas: agora é possível cancelar qualquer mentoria independentemente de data/status
+        return true;
     };
 
     const canComplete = (booking: Booking) => {
@@ -98,16 +94,7 @@ const MyBookings = () => {
         return booking.status === 'confirmed' && hoursAfterBooking >= 0;
     };
 
-    const getCancelDisabledReason = (booking: Booking): string | null => {
-        const bookingDate = getBookingDate(booking);
-        const now = new Date();
-        if (booking.status === 'cancelled') return 'Este agendamento já foi cancelado.';
-        if (booking.status === 'completed') return 'Mentoria finalizada não pode ser cancelada.';
-        if (!bookingDate) return 'Data/Hora inválida do agendamento.';
-        if (bookingDate.getTime() <= now.getTime()) return 'A mentoria já começou ou já passou.';
-        if (!['pending', 'confirmed'].includes(booking.status)) return 'Somente agendamentos pendentes ou confirmados podem ser cancelados.';
-        return null;
-    };
+    // Regras de bloqueio removidas: nenhuma razão para desabilitar além de estado de loading
 
     // Dividir agendamentos em duas seções: como Mentor e como Mentorado (por id ou email)
     const bookingsAsMentor = bookings.filter((b) => b.mentor_id === user?.id);
@@ -282,8 +269,7 @@ const MyBookings = () => {
 
                                                                 <DialogoCancelarAgendamento
                                                                     onConfirm={(message) => handleCancelBooking(booking.id, message)}
-                                                                    disabled={actionLoading === booking.id || !canCancel(booking)}
-                                                                    disabledTooltip={getCancelDisabledReason(booking) || undefined}
+                                                                    disabled={actionLoading === booking.id}
                                                                 />
 
                                                                 {canComplete(booking) && (
@@ -379,8 +365,7 @@ const MyBookings = () => {
 
                                                                 <DialogoCancelarAgendamento
                                                                     onConfirm={(message) => handleCancelBooking(booking.id, message)}
-                                                                    disabled={actionLoading === booking.id || !canCancel(booking)}
-                                                                    disabledTooltip={getCancelDisabledReason(booking) || undefined}
+                                                                    disabled={actionLoading === booking.id}
                                                                 />
 
                                                                 {canComplete(booking) && (

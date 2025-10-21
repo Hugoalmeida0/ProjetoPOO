@@ -4,11 +4,15 @@ import { useAuth } from '@/hooks/useAutenticacao';
 import { useEffect, useState } from 'react';
 import { apiClient } from '@/integracoes/api/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/componentes/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { CancelBookingDialog as DialogoCancelarAgendamento } from '@/componentes/DialogoCancelarAgendamento';
 
 export default function MentorDashboard() {
     const { user } = useAuth();
     const [bookings, setBookings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
         const load = async () => {
@@ -22,6 +26,30 @@ export default function MentorDashboard() {
         };
         load();
     }, [user?.id]);
+
+    const refresh = async () => {
+        if (!user?.id) return;
+        const res = await apiClient.bookings.getByMentorId(user.id);
+        setBookings(res);
+    };
+
+    const handleCancel = async (bookingId: string, message: string) => {
+        if (!user?.id) return;
+        setActionLoading(bookingId);
+        try {
+            await apiClient.bookings.updateStatus(bookingId, 'cancelled', message, user.id);
+            toast({
+                title: 'Agendamento cancelado',
+                description: 'Uma notificação foi enviada ao outro participante.',
+            });
+            await refresh();
+        } catch (err) {
+            console.error('Erro ao cancelar:', err);
+            toast({ title: 'Erro', description: 'Não foi possível cancelar.', variant: 'destructive' });
+        } finally {
+            setActionLoading(null);
+        }
+    };
 
     return (
         <RequireMentor>
@@ -50,6 +78,13 @@ export default function MentorDashboard() {
                                                     <span className="text-muted-foreground">{b.cancel_reason}</span>
                                                 </div>
                                             )}
+                                            {/* Ação de cancelar direto do painel */}
+                                            <div className="mt-3">
+                                                <DialogoCancelarAgendamento
+                                                    onConfirm={(msg) => handleCancel(b.id, msg)}
+                                                    disabled={actionLoading === b.id}
+                                                />
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
