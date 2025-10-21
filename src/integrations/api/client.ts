@@ -130,6 +130,22 @@ export const apiClient = {
         }),
     },
 
+    // Mentor Subjects (many-to-many relation)
+    mentorSubjects: {
+        getByMentorId: (mentorId: string) => fetchAPI<any[]>(`/api/mentor-subjects/${mentorId}`),
+        setSubjects: (mentorId: string, subjectIds: string[]) => fetchAPI<any[]>(`/api/mentor-subjects/${mentorId}`, {
+            method: 'POST',
+            body: JSON.stringify({ subject_ids: subjectIds }),
+        }),
+        addSubject: (mentorId: string, subjectId: string) => fetchAPI<any>(`/api/mentor-subjects/${mentorId}/add`, {
+            method: 'POST',
+            body: JSON.stringify({ subject_id: subjectId }),
+        }),
+        removeSubject: (mentorId: string, subjectId: string) => fetchAPI<any>(`/api/mentor-subjects/${mentorId}/${subjectId}`, {
+            method: 'DELETE',
+        }),
+    },
+
     // Bookings
     bookings: {
         getByUserId: (userId: string) => fetchAPI<any[]>(`/api/bookings/user/${userId}`),

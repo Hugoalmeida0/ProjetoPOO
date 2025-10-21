@@ -27,4 +27,23 @@ export async function ensureSchema() {
         END IF;
       END $$;
     `);
+
+    // Ensure mentor_subjects junction table exists
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS mentor_subjects (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        mentor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        subject_id UUID NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE(mentor_id, subject_id)
+      );
+    `);
+
+    // Create index for faster lookups
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_mentor_subjects_mentor_id ON mentor_subjects(mentor_id);
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_mentor_subjects_subject_id ON mentor_subjects(subject_id);
+    `);
 }

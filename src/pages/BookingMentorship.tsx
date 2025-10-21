@@ -68,11 +68,13 @@ const BookingMentorship = () => {
         }
         const merged = { ...mentorData, profiles: profileData };
         setMentor(merged);
-        // Carregar matérias vinculadas à graduação do mentor, se disponível
+        
+        // Carregar matérias específicas do mentor via mentor_subjects
         try {
-          const subjects = await apiClient.subjects.getAll(merged.graduation_id);
-          setSubjectsList(Array.isArray(subjects) ? subjects : []);
-        } catch {
+          const mentorSubjects = await apiClient.mentorSubjects.getByMentorId(id);
+          setSubjectsList(Array.isArray(mentorSubjects) ? mentorSubjects : []);
+        } catch (err) {
+          console.error('Erro ao carregar matérias do mentor:', err);
           setSubjectsList([]);
         }
       } catch (err: any) {
