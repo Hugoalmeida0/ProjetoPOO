@@ -1,8 +1,8 @@
 import { pool } from './db';
 
 export async function ensureSchema() {
-    // Ensure users table exists (plaintext password for testing only)
-    await pool.query(`
+  // Ensure users table exists (plaintext password for testing only)
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
       id UUID PRIMARY KEY,
       email TEXT NOT NULL UNIQUE,
@@ -12,8 +12,8 @@ export async function ensureSchema() {
     );
   `);
 
-    // Rename legacy column password_hash -> password if needed
-    await pool.query(`
+  // Rename legacy column password_hash -> password if needed
+  await pool.query(`
       DO $$
       BEGIN
         IF EXISTS (
@@ -28,8 +28,8 @@ export async function ensureSchema() {
       END $$;
     `);
 
-    // Add subjects column to mentor_profiles if it doesn't exist
-    await pool.query(`
+  // Add subjects column to mentor_profiles if it doesn't exist
+  await pool.query(`
       DO $$
       BEGIN
         IF NOT EXISTS (
@@ -41,8 +41,8 @@ export async function ensureSchema() {
       END $$;
     `);
 
-    // Add subject_name column to bookings if it doesn't exist
-    await pool.query(`
+  // Add subject_name column to bookings if it doesn't exist
+  await pool.query(`
       DO $$
       BEGIN
         IF NOT EXISTS (
@@ -54,8 +54,8 @@ export async function ensureSchema() {
       END $$;
     `);
 
-    // Ensure mentor_subjects junction table exists
-    await pool.query(`
+  // Ensure mentor_subjects junction table exists
+  await pool.query(`
       CREATE TABLE IF NOT EXISTS mentor_subjects (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         mentor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -65,11 +65,11 @@ export async function ensureSchema() {
       );
     `);
 
-    // Create index for faster lookups
-    await pool.query(`
+  // Create index for faster lookups
+  await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_mentor_subjects_mentor_id ON mentor_subjects(mentor_id);
     `);
-    await pool.query(`
+  await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_mentor_subjects_subject_id ON mentor_subjects(subject_id);
     `);
 }

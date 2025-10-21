@@ -45,7 +45,7 @@ router.post('/:mentorId', async (req, res) => {
 
         // Insert new subjects
         if (subject_ids.length > 0) {
-            const values = subject_ids.map((subjectId, idx) => 
+            const values = subject_ids.map((subjectId, idx) =>
                 `($1, $${idx + 2})`
             ).join(', ');
 
