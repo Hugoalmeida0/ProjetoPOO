@@ -44,6 +44,12 @@ export default function MentorDashboard() {
                                         <li key={b.id} className="border rounded p-3">
                                             <div className="font-medium">{b.date} {b.time} · {b.duration}min</div>
                                             <div className="text-sm text-muted-foreground">Aluno: {b.student_name} | Status: {b.status}</div>
+                                            {b.status === 'cancelled' && b.cancel_reason && (
+                                                <div className="mt-2 text-sm">
+                                                    <span className="font-medium text-red-600">Motivo do cancelamento: </span>
+                                                    <span className="text-muted-foreground">{b.cancel_reason}</span>
+                                                </div>
+                                            )}
                                         </li>
                                     ))}
                                 </ul>

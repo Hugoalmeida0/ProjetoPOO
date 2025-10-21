@@ -18,6 +18,7 @@ export interface Booking {
     status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
     created_at: string;
     updated_at: string;
+    cancel_reason?: string;
 }
 
 export const useBookings = () => {

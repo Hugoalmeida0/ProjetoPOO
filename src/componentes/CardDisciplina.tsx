@@ -32,7 +32,7 @@ const CardDisciplina = ({ name, description, mentors, duration, rating, color, i
         </div>
         <p className="text-muted-foreground text-sm">{description}</p>
       </CardHeader>
-      
+
       <CardContent>
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
@@ -45,10 +45,10 @@ const CardDisciplina = ({ name, description, mentors, duration, rating, color, i
           </div>
         </div>
       </CardContent>
-      
+
       <CardFooter>
-        <Button 
-          variant="default" 
+        <Button
+          variant="default"
           className="w-full"
           onClick={() => window.location.href = `/mentor/1`}
         >

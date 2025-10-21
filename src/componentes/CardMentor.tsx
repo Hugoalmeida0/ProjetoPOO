@@ -16,7 +16,7 @@ interface MentorCardProps {
   avatar?: string;
 }
 
-  const CardMentor = ({
+const CardMentor = ({
   mentorId,
   name,
   course,

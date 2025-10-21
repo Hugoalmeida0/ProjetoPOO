@@ -61,6 +61,18 @@ async function ensureSchema() {
         END IF;
       END $$;
     `);
+    // Add cancel_reason column to bookings if it doesn't exist
+    await db_1.pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='bookings' AND column_name='cancel_reason'
+        ) THEN
+          ALTER TABLE bookings ADD COLUMN cancel_reason TEXT;
+        END IF;
+      END $$;
+    `);
     // Ensure mentor_subjects junction table exists
     await db_1.pool.query(`
       CREATE TABLE IF NOT EXISTS mentor_subjects (

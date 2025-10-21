@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 const MyBookings = () => {
     const navigate = useNavigate();
+    const location = useLocation() as any;
     const { toast } = useToast();
     const { user } = useAuth();
     const { bookings, loading, cancelBooking, completeBooking } = useBookings();
@@ -83,9 +84,9 @@ const MyBookings = () => {
         const bookingDate = getBookingDate(booking);
         if (!bookingDate) return false;
         const now = new Date();
-        const hoursUntilBooking = (bookingDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-
-        return ['pending', 'confirmed'].includes(booking.status) && hoursUntilBooking > 2;
+        // Mostrar o botão de cancelamento enquanto a mentoria ainda não começou
+        // para status 'pending' ou 'confirmed'.
+        return ['pending', 'confirmed'].includes(booking.status) && bookingDate.getTime() > now.getTime();
     };
 
     const canComplete = (booking: Booking) => {
@@ -95,6 +96,17 @@ const MyBookings = () => {
         const hoursAfterBooking = (now.getTime() - bookingDate.getTime()) / (1000 * 60 * 60);
 
         return booking.status === 'confirmed' && hoursAfterBooking >= 0;
+    };
+
+    const getCancelDisabledReason = (booking: Booking): string | null => {
+        const bookingDate = getBookingDate(booking);
+        const now = new Date();
+        if (booking.status === 'cancelled') return 'Este agendamento já foi cancelado.';
+        if (booking.status === 'completed') return 'Mentoria finalizada não pode ser cancelada.';
+        if (!bookingDate) return 'Data/Hora inválida do agendamento.';
+        if (bookingDate.getTime() <= now.getTime()) return 'A mentoria já começou ou já passou.';
+        if (!['pending', 'confirmed'].includes(booking.status)) return 'Somente agendamentos pendentes ou confirmados podem ser cancelados.';
+        return null;
     };
 
     // Dividir agendamentos em duas seções: como Mentor e como Mentorado (por id ou email)
@@ -115,6 +127,9 @@ const MyBookings = () => {
         const d = new Date(iso);
         return isNaN(d.getTime()) ? null : d;
     };
+
+    // Suporte a foco/destaque de um agendamento vindo das notificações
+    const highlightBookingId: string | undefined = location?.state?.highlightBookingId;
 
     if (loading) {
         return (
@@ -138,6 +153,18 @@ const MyBookings = () => {
 
             <section className="py-8">
                 <div className="container mx-auto px-4 max-w-4xl">
+                    {/* Auto scroll para o agendamento destacado */}
+                    {highlightBookingId && (
+                        <span
+                            className="sr-only"
+                            ref={() => {
+                                const el = document.getElementById(`booking-${highlightBookingId}`);
+                                if (el) {
+                                    setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+                                }
+                            }}
+                        />
+                    )}
                     <Button
                         variant="ghost"
                         onClick={() => navigate(-1)}
@@ -179,9 +206,17 @@ const MyBookings = () => {
                                             const initials = (booking.student_name || '?').split(' ').map((n: string) => n[0]).join('').toUpperCase();
                                             const bookingDate = getBookingDate(booking);
                                             const isPast = bookingDate ? bookingDate < new Date() : false;
+                                            const isHighlighted = highlightBookingId && booking.id === highlightBookingId;
 
                                             return (
-                                                <Card key={booking.id} className="bg-gradient-card border-0 shadow-card">
+                                                <Card
+                                                    key={booking.id}
+                                                    id={`booking-${booking.id}`}
+                                                    className={cn(
+                                                        "bg-gradient-card border-0 shadow-card",
+                                                        isHighlighted && "ring-2 ring-primary/50 bg-primary/5"
+                                                    )}
+                                                >
                                                     <CardContent className="p-6">
                                                         <div className="flex items-start justify-between">
                                                             <div className="flex items-start gap-4">
@@ -223,6 +258,18 @@ const MyBookings = () => {
                                                                                 <p className="text-sm">{booking.objective}</p>
                                                                             </div>
                                                                         )}
+                                                                        {booking.status === 'cancelled' && booking.cancel_reason && (
+                                                                            <div className="mt-3">
+                                                                                <p className="font-medium text-foreground mb-1 text-red-600">Motivo do cancelamento:</p>
+                                                                                <p className="text-sm text-muted-foreground">{booking.cancel_reason}</p>
+                                                                            </div>
+                                                                        )}
+                                                                        {booking.status === 'cancelled' && booking.cancel_reason && (
+                                                                            <div className="mt-3">
+                                                                                <p className="font-medium text-foreground mb-1 text-red-600">Motivo do cancelamento:</p>
+                                                                                <p className="text-sm text-muted-foreground">{booking.cancel_reason}</p>
+                                                                            </div>
+                                                                        )}
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -233,12 +280,11 @@ const MyBookings = () => {
                                                                     bookingTitle={`Chat - ${booking.student_name}`}
                                                                 />
 
-                                                                {canCancel(booking) && (
-                                                                    <DialogoCancelarAgendamento
-                                                                        onConfirm={(message) => handleCancelBooking(booking.id, message)}
-                                                                        disabled={actionLoading === booking.id}
-                                                                    />
-                                                                )}
+                                                                <DialogoCancelarAgendamento
+                                                                    onConfirm={(message) => handleCancelBooking(booking.id, message)}
+                                                                    disabled={actionLoading === booking.id || !canCancel(booking)}
+                                                                    disabledTooltip={getCancelDisabledReason(booking) || undefined}
+                                                                />
 
                                                                 {canComplete(booking) && (
                                                                     <Button
@@ -269,9 +315,17 @@ const MyBookings = () => {
                                             const initials = (booking.student_name || '?').split(' ').map((n: string) => n[0]).join('').toUpperCase();
                                             const bookingDate = getBookingDate(booking);
                                             const isPast = bookingDate ? bookingDate < new Date() : false;
+                                            const isHighlighted = highlightBookingId && booking.id === highlightBookingId;
 
                                             return (
-                                                <Card key={booking.id} className="bg-gradient-card border-0 shadow-card">
+                                                <Card
+                                                    key={booking.id}
+                                                    id={`booking-${booking.id}`}
+                                                    className={cn(
+                                                        "bg-gradient-card border-0 shadow-card",
+                                                        isHighlighted && "ring-2 ring-primary/50 bg-primary/5"
+                                                    )}
+                                                >
                                                     <CardContent className="p-6">
                                                         <div className="flex items-start justify-between">
                                                             <div className="flex items-start gap-4">
@@ -323,12 +377,11 @@ const MyBookings = () => {
                                                                     bookingTitle={`Chat - ${booking.student_name}`}
                                                                 />
 
-                                                                {canCancel(booking) && (
-                                                                    <DialogoCancelarAgendamento
-                                                                        onConfirm={(message) => handleCancelBooking(booking.id, message)}
-                                                                        disabled={actionLoading === booking.id}
-                                                                    />
-                                                                )}
+                                                                <DialogoCancelarAgendamento
+                                                                    onConfirm={(message) => handleCancelBooking(booking.id, message)}
+                                                                    disabled={actionLoading === booking.id || !canCancel(booking)}
+                                                                    disabledTooltip={getCancelDisabledReason(booking) || undefined}
+                                                                />
 
                                                                 {canComplete(booking) && (
                                                                     <Button

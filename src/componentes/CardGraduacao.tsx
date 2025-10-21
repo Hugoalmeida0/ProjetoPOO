@@ -14,15 +14,15 @@ interface GraduationCardProps {
   slug: string;
 }
 
-const CardGraduacao = ({ 
-  name, 
-  description, 
-  students, 
-  subjects, 
-  mentors, 
-  color, 
-  icon, 
-  slug 
+const CardGraduacao = ({
+  name,
+  description,
+  students,
+  subjects,
+  mentors,
+  color,
+  icon,
+  slug
 }: GraduationCardProps) => {
   const navigate = useNavigate();
 
@@ -35,7 +35,7 @@ const CardGraduacao = ({
       {/* Gradient border effect */}
       <div className="absolute inset-0 bg-gradient-accent opacity-0 group-hover:opacity-100 transition-glow -z-10 blur-xl"></div>
       <div className="absolute inset-[1px] bg-card rounded-lg"></div>
-      
+
       <CardHeader className="relative z-10">
         <div className="flex items-center gap-4 mb-4">
           <div className={`w-16 h-16 rounded-xl ${color} flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-bounce shadow-soft`}>
@@ -49,7 +49,7 @@ const CardGraduacao = ({
         </div>
         <p className="text-muted-foreground leading-relaxed">{description}</p>
       </CardHeader>
-      
+
       <CardContent className="relative z-10">
         <div className="grid grid-cols-3 gap-6">
           <div className="text-center p-3 rounded-lg bg-muted/30 group-hover:bg-primary/5 transition-smooth">
@@ -74,7 +74,7 @@ const CardGraduacao = ({
             </div>
           </div>
         </div>
-        
+
         <div className="mt-6 flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Explorar curso</span>
           <ArrowUpRight className="h-5 w-5 text-primary group-hover:translate-x-1 group-hover:-translate-y-1 transition-smooth" />

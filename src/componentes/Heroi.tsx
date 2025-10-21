@@ -7,11 +7,11 @@ const Heroi = () => {
     <section className="relative min-h-[80vh] flex items-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-hero opacity-90"></div>
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center mix-blend-overlay"
         style={{ backgroundImage: `url(${heroImage})` }}
       ></div>
-      
+
       {/* Content */}
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center text-white">
@@ -22,7 +22,7 @@ const Heroi = () => {
             </span>
             da UVV
           </h1>
-          
+
           <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto">
             Encontre mentores qualificados, agende monitorias e melhore seu desempenho acadêmico
             de forma personalizada e eficiente.

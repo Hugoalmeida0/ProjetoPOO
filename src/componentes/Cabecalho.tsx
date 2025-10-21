@@ -102,18 +102,30 @@ const Header = () => {
                     ) : (
                       <div className="space-y-2">
                         {notifications.map((notification) => (
-                          <div
+                          <button
                             key={notification.id}
                             className={cn(
-                              "p-3 rounded-lg border transition-colors cursor-pointer",
+                              "w-full text-left p-3 rounded-lg border transition-colors",
                               notification.read
                                 ? "bg-background hover:bg-muted/50"
                                 : "bg-primary/5 border-primary/20 hover:bg-primary/10"
                             )}
-                            onClick={() => !notification.read && markAsRead(notification.id)}
+                            onClick={async () => {
+                              try {
+                                if (!notification.read) {
+                                  await markAsRead(notification.id);
+                                }
+                              } finally {
+                                if (notification.booking_id) {
+                                  navigate('/meus-agendamentos', { state: { highlightBookingId: notification.booking_id } });
+                                }
+                              }
+                            }}
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <p className="text-sm flex-1">{notification.message}</p>
+                              <p className="text-sm flex-1 underline underline-offset-2">
+                                {notification.message}
+                              </p>
                               {!notification.read && (
                                 <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1" />
                               )}
@@ -121,7 +133,7 @@ const Header = () => {
                             <p className="text-xs text-muted-foreground mt-1">
                               {format(new Date(notification.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                             </p>
-                          </div>
+                          </button>
                         ))}
                       </div>
                     )}

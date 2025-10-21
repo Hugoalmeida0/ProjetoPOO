@@ -14,13 +14,16 @@ import {
 import { Button } from "@/componentes/ui/button";
 import { Textarea } from "@/componentes/ui/textarea";
 import { Label } from "@/componentes/ui/label";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/componentes/ui/tooltip";
+import { Alert, AlertDescription } from "@/componentes/ui/alert";
 
 interface CancelBookingDialogProps {
     onConfirm: (message: string) => Promise<void>;
     disabled?: boolean;
+    disabledTooltip?: string;
 }
 
-export const CancelBookingDialog = ({ onConfirm, disabled }: CancelBookingDialogProps) => {
+export const CancelBookingDialog = ({ onConfirm, disabled, disabledTooltip }: CancelBookingDialogProps) => {
     const [open, setOpen] = useState(false);
     const [cancelMessage, setCancelMessage] = useState("");
     const [loading, setLoading] = useState(false);
@@ -42,17 +45,40 @@ export const CancelBookingDialog = ({ onConfirm, disabled }: CancelBookingDialog
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
-            <AlertDialogTrigger asChild>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={disabled}
-                    className="text-red-600 hover:text-red-700"
-                >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Cancelar
-                </Button>
-            </AlertDialogTrigger>
+            <TooltipProvider>
+                {disabled && disabledTooltip ? (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div>
+                                <AlertDialogTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        disabled={disabled}
+                                        className="text-red-600 hover:text-red-700"
+                                    >
+                                        <XCircle className="h-4 w-4 mr-2" />
+                                        Cancelar
+                                    </Button>
+                                </AlertDialogTrigger>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>{disabledTooltip}</TooltipContent>
+                    </Tooltip>
+                ) : (
+                    <AlertDialogTrigger asChild>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={disabled}
+                            className="text-red-600 hover:text-red-700"
+                        >
+                            <XCircle className="h-4 w-4 mr-2" />
+                            Cancelar
+                        </Button>
+                    </AlertDialogTrigger>
+                )}
+            </TooltipProvider>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Cancelar Agendamento</AlertDialogTitle>
@@ -61,6 +87,12 @@ export const CancelBookingDialog = ({ onConfirm, disabled }: CancelBookingDialog
                         Uma notificação será enviada para a outra parte.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
+
+                <Alert variant="destructive" className="mb-3">
+                    <AlertDescription>
+                        Atenção: esta é uma ação irreversível. Confirme somente se tiver certeza.
+                    </AlertDescription>
+                </Alert>
 
                 <div className="space-y-2 py-4">
                     <Label htmlFor="cancel-message">Motivo do cancelamento *</Label>

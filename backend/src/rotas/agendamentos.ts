@@ -168,10 +168,32 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'status is required' });
         }
 
-        const result = await pool.query(
-            `UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
-            [status, bookingId]
-        );
+        let result;
+
+        // If cancelling, also persist the cancel_reason
+        if (status === 'cancelled') {
+            try {
+                result = await pool.query(
+                    `UPDATE bookings SET status = $1, cancel_reason = $3, updated_at = NOW() WHERE id = $2 RETURNING *`,
+                    [status, bookingId, cancel_message || null]
+                );
+            } catch (err: any) {
+                // If cancel_reason column doesn't exist for some reason, fallback to status-only update
+                if (err?.code === '42703' || (err?.message && err.message.includes('cancel_reason'))) {
+                    result = await pool.query(
+                        `UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+                        [status, bookingId]
+                    );
+                } else {
+                    throw err;
+                }
+            }
+        } else {
+            result = await pool.query(
+                `UPDATE bookings SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+                [status, bookingId]
+            );
+        }
 
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Booking not found' });
@@ -188,7 +210,7 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
                 await pool.query(
                     `INSERT INTO notifications (user_id, message, booking_id, created_at)
                      VALUES ($1, $2, $3, NOW())`,
-                    [recipientId, cancel_message, bookingId]
+                    [recipientId, `Agendamento cancelado: ${cancel_message}`, bookingId]
                 );
             } catch (notifErr) {
                 console.error('Erro ao criar notificação de cancelamento:', notifErr);
