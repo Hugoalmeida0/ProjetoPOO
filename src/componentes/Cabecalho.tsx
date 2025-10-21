@@ -175,4 +175,4 @@ const Header = () => {
   );
 };
 
-export default Cabecalho;
+export default Header;
