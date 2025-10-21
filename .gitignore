@@ -23,3 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Environment files (keep .env.example)
+.env
+.env.production
+backend/.env
+backend/.env.production
+
+# Backend build
+backend/dist

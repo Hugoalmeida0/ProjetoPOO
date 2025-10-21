@@ -17,6 +17,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Middleware para garantir schema no cold start (Vercel)
+let schemaInitialized = false;
+app.use(async (req, res, next) => {
+    if (!schemaInitialized && process.env.NODE_ENV === 'production') {
+        try {
+            await ensureSchema();
+            schemaInitialized = true;
+        } catch (err) {
+            console.error('Schema initialization failed:', err);
+        }
+    }
+    next();
+});
+
 app.get('/api/health', (_req: Request, res: Response) => res.json({ status: 'ok' }));
 
 app.use('/api/subjects', subjectsRouter);
@@ -28,14 +42,20 @@ app.use('/api/bookings', bookingsRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 
-const port = process.env.PORT || 4000;
-ensureSchema()
-    .then(() => {
-        app.listen(port, () => {
-            console.log(`Server started on port ${port}`);
+// Para desenvolvimento local
+if (process.env.NODE_ENV !== 'production') {
+    const port = process.env.PORT || 4000;
+    ensureSchema()
+        .then(() => {
+            app.listen(port, () => {
+                console.log(`Server started on port ${port}`);
+            });
+        })
+        .catch((err) => {
+            console.error('Failed to bootstrap schema', err);
+            process.exit(1);
         });
-    })
-    .catch((err) => {
-        console.error('Failed to bootstrap schema', err);
-        process.exit(1);
-    });
+}
+
+// Para Vercel serverless
+export default app;

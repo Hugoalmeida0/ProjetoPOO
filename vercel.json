@@ -7,9 +7,17 @@
             "config": {
                 "distDir": "dist"
             }
+        },
+        {
+            "src": "backend/package.json",
+            "use": "@vercel/node"
         }
     ],
     "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/api/index.js"
+        },
         {
             "handle": "filesystem"
         },
@@ -17,5 +25,8 @@
             "src": "/(.*)",
             "dest": "/index.html"
         }
-    ]
+    ],
+    "env": {
+        "NODE_ENV": "production"
+    }
 }
