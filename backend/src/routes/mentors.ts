@@ -48,17 +48,17 @@ router.get('/:userId', async (req: Request, res: Response) => {
 // POST create mentor
 router.post('/', async (req: Request, res: Response) => {
     try {
-        const { user_id, graduation_id, location, experience_years, availability, price_per_hour } = req.body;
+        const { user_id, graduation_id, location, experience_years, availability, price_per_hour, subjects } = req.body;
 
         if (!user_id) {
             return res.status(400).json({ error: 'user_id is required' });
         }
 
         const result = await pool.query(
-            `INSERT INTO mentor_profiles (user_id, graduation_id, location, experience_years, availability, price_per_hour)
-       VALUES ($1, $2, $3, $4, $5, $6)
+            `INSERT INTO mentor_profiles (user_id, graduation_id, location, experience_years, availability, price_per_hour, subjects)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-            [user_id, graduation_id, location, experience_years, availability, price_per_hour]
+            [user_id, graduation_id, location, experience_years, availability, price_per_hour, subjects]
         );
 
         return res.status(201).json(result.rows[0]);

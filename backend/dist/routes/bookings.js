@@ -35,15 +35,18 @@ router.get('/mentor/:mentorId', async (req, res) => {
 // POST create booking
 router.post('/', async (req, res) => {
     try {
-        const { student_id, mentor_id, subject_id, date, time, duration, objective, student_name, student_email, student_phone, status = 'pending' } = req.body;
-        // Validate required fields
-        if (!student_id || !mentor_id || !subject_id || !date || !time || !duration || !student_name || !student_email) {
+        const { student_id, mentor_id, subject_id, subject_name, date, time, duration, objective, student_name, student_email, student_phone, status = 'pending' } = req.body;
+        // Validate required fields - aceitar subject_id OU subject_name
+        if (!student_id || !mentor_id || (!subject_id && !subject_name) || !date || !time || !duration || !student_name || !student_email) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
+        // Se tiver subject_name mas não subject_id, usar subject_name diretamente
+        const finalSubjectId = subject_id || null;
+        const finalSubjectName = subject_name || null;
         const result = await db_1.pool.query(`INSERT INTO bookings 
-       (student_id, mentor_id, subject_id, date, time, duration, objective, student_name, student_email, student_phone, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-       RETURNING *`, [student_id, mentor_id, subject_id, date, time, duration, objective, student_name, student_email, student_phone, status]);
+       (student_id, mentor_id, subject_id, subject_name, date, time, duration, objective, student_name, student_email, student_phone, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       RETURNING *`, [student_id, mentor_id, finalSubjectId, finalSubjectName, date, time, duration, objective, student_name, student_email, student_phone, status]);
         return res.status(201).json(result.rows[0]);
     }
     catch (err) {

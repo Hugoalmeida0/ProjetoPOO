@@ -69,12 +69,20 @@ const BookingMentorship = () => {
         const merged = { ...mentorData, profiles: profileData };
         setMentor(merged);
         
-        // Carregar matérias específicas do mentor via mentor_subjects
+        // Processar matérias do campo subjects (texto livre separado por vírgula)
         try {
-          const mentorSubjects = await apiClient.mentorSubjects.getByMentorId(id);
-          setSubjectsList(Array.isArray(mentorSubjects) ? mentorSubjects : []);
+          if (mentorData.subjects && typeof mentorData.subjects === 'string') {
+            const subjectsArray = mentorData.subjects
+              .split(',')
+              .map((s: string) => s.trim())
+              .filter((s: string) => s.length > 0)
+              .map((name: string, idx: number) => ({ id: `subject-${idx}`, name }));
+            setSubjectsList(subjectsArray);
+          } else {
+            setSubjectsList([]);
+          }
         } catch (err) {
-          console.error('Erro ao carregar matérias do mentor:', err);
+          console.error('Erro ao processar matérias do mentor:', err);
           setSubjectsList([]);
         }
       } catch (err: any) {
@@ -180,24 +188,15 @@ const BookingMentorship = () => {
         throw new Error('Este horário já está ocupado. Por favor, escolha outro.');
       }
 
-      // Passo 1: Buscar o ID da matéria - usar API
-      let subject = subjectsList.find((s: any) => s.name === data.subject);
-      if (!subject) {
-        // Fallback: buscar todas as matérias
-        const subjects = await apiClient.subjects.getAll();
-        subject = subjects.find((s: any) => s.name === data.subject);
-      }
-
-      // Se a matéria não for encontrada, lançamos um erro que será capturado pelo catch
-      if (!subject) {
-        throw new Error(`Matéria "${data.subject}" não encontrada no banco de dados.`);
-      }
+      // Passo 1: Para matérias em texto livre, usar diretamente o nome como subject_name
+      // Não precisa buscar no banco, pois o campo subjects no mentor é texto livre
+      const subjectName = data.subject;
 
       // Passo 2: Montar o objeto final do agendamento
       const bookingData = {
         student_id: user.id,
         mentor_id: id,
-        subject_id: subject.id,
+        subject_name: subjectName, // Usar subject_name ao invés de subject_id
         date: dateString,
         time: data.time,
         duration: parseInt(data.duration),
@@ -209,7 +208,6 @@ const BookingMentorship = () => {
       };
 
       // Passo 3: Chamar a função do seu hook para criar o agendamento
-      // (A sua função createBooking já faz o insert no banco, então o teste direto que você tinha é redundante)
       await createBooking(bookingData);
 
       // Se tudo deu certo até aqui:

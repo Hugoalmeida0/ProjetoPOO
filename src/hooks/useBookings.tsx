@@ -6,7 +6,8 @@ export interface Booking {
     id: string;
     student_id: string;
     mentor_id: string;
-    subject_id: string;
+    subject_id?: string; // Agora opcional
+    subject_name?: string; // Novo campo para matérias em texto livre
     date: string;
     time: string;
     duration: number;
@@ -77,20 +78,30 @@ export const useBookings = () => {
             console.log("Tentando criar agendamento:", bookingData);
 
             // Verificar se todos os campos obrigatórios estão presentes
-            const requiredFields = ['student_id', 'mentor_id', 'subject_id', 'date', 'time', 'duration', 'student_name', 'student_email', 'status'];
+            // subject_id OU subject_name deve estar presente
+            const requiredFields = ['student_id', 'mentor_id', 'date', 'time', 'duration', 'student_name', 'student_email', 'status'];
             const missingFields = requiredFields.filter(field => !bookingData[field as keyof typeof bookingData]);
 
             if (missingFields.length > 0) {
                 throw new Error(`Campos obrigatórios ausentes: ${missingFields.join(', ')}`);
             }
 
-            // Verificar se os UUIDs são válidos
-            const uuidFields = ['student_id', 'mentor_id', 'subject_id'];
+            // Verificar se pelo menos um dos campos de matéria está presente
+            if (!bookingData.subject_id && !bookingData.subject_name) {
+                throw new Error('É necessário informar subject_id ou subject_name');
+            }
+
+            // Verificar se os UUIDs são válidos (apenas se fornecidos)
+            const uuidFields = ['student_id', 'mentor_id'];
+            if (bookingData.subject_id) {
+                uuidFields.push('subject_id');
+            }
+            
             const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
             for (const field of uuidFields) {
                 const value = bookingData[field as keyof typeof bookingData] as string;
-                if (!uuidRegex.test(value)) {
+                if (value && !uuidRegex.test(value)) {
                     throw new Error(`Campo ${field} não é um UUID válido: ${value}`);
                 }
             }

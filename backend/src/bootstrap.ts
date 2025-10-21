@@ -28,6 +28,32 @@ export async function ensureSchema() {
       END $$;
     `);
 
+    // Add subjects column to mentor_profiles if it doesn't exist
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='mentor_profiles' AND column_name='subjects'
+        ) THEN
+          ALTER TABLE mentor_profiles ADD COLUMN subjects TEXT;
+        END IF;
+      END $$;
+    `);
+
+    // Add subject_name column to bookings if it doesn't exist
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='bookings' AND column_name='subject_name'
+        ) THEN
+          ALTER TABLE bookings ADD COLUMN subject_name TEXT;
+        END IF;
+      END $$;
+    `);
+
     // Ensure mentor_subjects junction table exists
     await pool.query(`
       CREATE TABLE IF NOT EXISTS mentor_subjects (
