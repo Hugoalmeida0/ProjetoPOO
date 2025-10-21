@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { apiClient, setToken } from "@/integrations/api/client";
 
-type AuthUser = { id: string; email: string; full_name?: string } | null;
+type AuthUser = { id: string; email: string; full_name?: string; is_mentor?: boolean } | null;
 
 interface AuthContextType {
   user: AuthUser;

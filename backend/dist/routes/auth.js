@@ -67,7 +67,10 @@ router.get('/me', async (req, res) => {
             return res.status(401).json({ error: 'missing token' });
         const secret = process.env.JWT_SECRET || 'dev-secret';
         const decoded = jsonwebtoken_1.default.verify(token, secret);
-        const { rows } = await db_1.pool.query('SELECT id, email, full_name FROM users WHERE id = $1', [decoded.sub]);
+        const { rows } = await db_1.pool.query(`SELECT u.id, u.email, u.full_name, COALESCE(p.is_mentor, false) as is_mentor
+             FROM users u
+             LEFT JOIN profiles p ON p.user_id = u.id
+             WHERE u.id = $1`, [decoded.sub]);
         if (rows.length === 0)
             return res.status(404).json({ error: 'user not found' });
         return res.json({ user: rows[0] });

@@ -24,11 +24,6 @@ dist-ssr
 *.sw?
 .vercel
 
-# Environment files (keep .env.example)
-.env
-.env.production
-backend/.env
-backend/.env.production
 
 # Backend build - NÃO ignorar para Vercel conseguir usar
 # backend/dist

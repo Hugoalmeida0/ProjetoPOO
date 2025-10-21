@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Search, User, LogOut, Calendar, Settings } from "lucide-react";
+import { GraduationCap, Search, User, LogOut, Calendar, Settings, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -59,6 +59,12 @@ const Header = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {user?.is_mentor && (
+                    <DropdownMenuItem onClick={() => navigate("/mentor/dashboard")}>
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      Painel do Mentor
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => navigate("/account")}>
                     <Settings className="mr-2 h-4 w-4" />
                     Minha Conta

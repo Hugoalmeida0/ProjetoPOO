@@ -22,8 +22,8 @@ class APIError extends Error {
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
     // Remove /api do endpoint se API_BASE_URL já for /api (para evitar /api/api)
-    const cleanEndpoint = API_BASE_URL === '/api' && endpoint.startsWith('/api') 
-        ? endpoint.replace('/api', '') 
+    const cleanEndpoint = API_BASE_URL === '/api' && endpoint.startsWith('/api')
+        ? endpoint.replace('/api', '')
         : endpoint;
     const url = `${API_BASE_URL}${cleanEndpoint}`;
 
