@@ -108,7 +108,7 @@ const Auth = () => {
           className="mb-4"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar ao início
+          Voltar ao iníciooo
         </Button>
 
         <div className="flex items-center justify-center mb-8">
