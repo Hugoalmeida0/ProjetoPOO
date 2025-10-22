@@ -56,55 +56,90 @@ router.post('/:mentorId', async (req, res) => {
         const mp = await client.query('SELECT id FROM mentor_profiles WHERE user_id = $1 LIMIT 1', [mentorId]);
         const mentorProfileId = mp.rows?.[0]?.id as string | undefined;
 
-        // Descobrir de forma determinística qual tabela a FK referencia
-        let referencedTable = 'users';
-        try {
-            const fk = await client.query(
-                `SELECT confrelid::regclass AS referenced_table
-                 FROM pg_constraint
-                 WHERE conname = 'mentor_subjects_mentor_id_fkey' AND contype = 'f'
-                 LIMIT 1`
-            );
-            referencedTable = fk.rows?.[0]?.referenced_table || 'users';
-        } catch {
-            // fallback silencioso
+        // Descobrir de forma determinística qual tabela a FK referencia (robusto a nomes de constraints)
+        const detectReferenced = async (): Promise<string | null> => {
+            try {
+                const q = await client.query(
+                    `SELECT ccu.table_name AS referenced_table
+                     FROM information_schema.table_constraints tc
+                     JOIN information_schema.key_column_usage kcu
+                       ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
+                     JOIN information_schema.constraint_column_usage ccu
+                       ON ccu.constraint_name = tc.constraint_name AND ccu.table_schema = tc.table_schema
+                     WHERE tc.table_name = 'mentor_subjects'
+                       AND tc.constraint_type = 'FOREIGN KEY'
+                       AND kcu.column_name = 'mentor_id'
+                     LIMIT 1`
+                );
+                return q.rows?.[0]?.referenced_table || null;
+            } catch {
+                return null;
+            }
+        };
+
+        const referencedTable = await detectReferenced();
+
+        // Monta candidatos de chave, tentando primeiro a tabela detectada
+        const candidates: (string | undefined)[] = [];
+        const upsert = (v?: string) => { if (v && !candidates.includes(v)) candidates.push(v); };
+        if (referencedTable === 'mentor_profiles') {
+            upsert(mentorProfileId);
+            upsert(mentorId);
+        } else if (referencedTable === 'users') {
+            upsert(mentorId);
+            upsert(mentorProfileId);
+        } else {
+            // indeterminado: tenta as duas
+            upsert(mentorId);
+            upsert(mentorProfileId);
         }
 
-        const pickKey = (): string => {
-            if (referencedTable === 'mentor_profiles') {
-                if (!mentorProfileId) {
-                    throw new Error('Mentor profile not found for this user');
-                }
-                return mentorProfileId;
-            }
-            return mentorId; // users
-        };
-
-        // Função para aplicar setSubjects com uma chave específica
+        // Função para aplicar setSubjects com uma chave específica (com rollback em erro)
         const applyWithKey = async (key: string) => {
-            await client.query('BEGIN');
-            await client.query('DELETE FROM mentor_subjects WHERE mentor_id = $1', [key]);
-            if (subject_ids.length > 0) {
-                const values = subject_ids.map((_, idx) => `($1, $${idx + 2})`).join(', ');
-                await client.query(
-                    `INSERT INTO mentor_subjects (mentor_id, subject_id) VALUES ${values}`,
-                    [key, ...subject_ids]
+            try {
+                await client.query('BEGIN');
+                await client.query('DELETE FROM mentor_subjects WHERE mentor_id = $1', [key]);
+                if (subject_ids.length > 0) {
+                    const values = subject_ids.map((_, idx) => `($1, $${idx + 2})`).join(', ');
+                    await client.query(
+                        `INSERT INTO mentor_subjects (mentor_id, subject_id) VALUES ${values}`,
+                        [key, ...subject_ids]
+                    );
+                }
+                await client.query('COMMIT');
+                const resSel = await client.query(
+                    `SELECT s.* 
+                     FROM subjects s
+                     JOIN mentor_subjects ms ON s.id = ms.subject_id
+                     WHERE ms.mentor_id = $1
+                     ORDER BY s.name`,
+                    [key]
                 );
+                return resSel.rows;
+            } catch (e) {
+                await client.query('ROLLBACK').catch(() => {});
+                throw e;
             }
-            await client.query('COMMIT');
-            const resSel = await client.query(
-                `SELECT s.* 
-                 FROM subjects s
-                 JOIN mentor_subjects ms ON s.id = ms.subject_id
-                 WHERE ms.mentor_id = $1
-                 ORDER BY s.name`,
-                [key]
-            );
-            return resSel.rows;
         };
 
-        const keyToUse = pickKey();
-        const rows = await applyWithKey(keyToUse);
+        // Tenta em ordem os candidatos de chave; se todas falharem, devolve erro consolidado
+        let rows: any[] | null = null;
+        let lastErr: any = null;
+        for (const key of candidates) {
+            if (!key) continue;
+            try {
+                rows = await applyWithKey(key);
+                lastErr = null;
+                break;
+            } catch (e) {
+                lastErr = e;
+                // tenta próximo candidato
+            }
+        }
+        if (!rows) {
+            const msg = (lastErr && (lastErr as any).message) || 'Failed to set mentor subjects';
+            throw new Error(`mentor_subjects set failed: ${msg}`);
+        }
 
         res.json(rows || []);
     } catch (error: any) {
