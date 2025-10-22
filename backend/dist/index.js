@@ -17,6 +17,7 @@ const autenticacao_1 = __importDefault(require("./rotas/autenticacao"));
 const usuarios_1 = __importDefault(require("./rotas/usuarios"));
 const mensagens_1 = __importDefault(require("./rotas/mensagens"));
 const notificacoes_1 = __importDefault(require("./rotas/notificacoes"));
+const avaliacoes_1 = __importDefault(require("./rotas/avaliacoes"));
 const bootstrap_1 = require("./bootstrap");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
@@ -48,6 +49,7 @@ app.use('/api/auth', autenticacao_1.default);
 app.use('/api/users', usuarios_1.default);
 app.use('/api/messages', mensagens_1.default);
 app.use('/api/notifications', notificacoes_1.default);
+app.use('/api/ratings', avaliacoes_1.default);
 // Para desenvolvimento local
 if (process.env.NODE_ENV !== 'production') {
     const port = process.env.PORT || 4000;

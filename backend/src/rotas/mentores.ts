@@ -42,7 +42,8 @@ router.get('/debug', async (_req: Request, res: Response) => {
         });
     } catch (err) {
         console.error('Erro no debug:', err);
-        res.status(500).json({ error: 'Internal server error', details: err.message });
+        const details = err instanceof Error ? err.message : undefined;
+        res.status(500).json({ error: 'Internal server error', ...(details ? { details } : {}) });
     }
 });
 
