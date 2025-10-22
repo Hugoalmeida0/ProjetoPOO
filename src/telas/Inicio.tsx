@@ -101,8 +101,8 @@ const Index = () => {
                   course={m.profiles?.graduation || 'N/A'}
                   period={m.experience_years ? `${m.experience_years} anos exp.` : '--'}
                   subjects={[]}
-                  rating={Number(m.avg_rating) || 0}
-                  reviews={Number(m.total_ratings) || 0}
+                  rating={m.avg_rating ?? 0}
+                  reviews={m.total_ratings ?? 0}
                   location={m.location || '-'}
                   avatar={m.profiles?.avatar_url}
                 />
