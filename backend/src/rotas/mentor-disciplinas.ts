@@ -56,28 +56,29 @@ router.post('/:mentorId', async (req, res) => {
         const mp = await client.query('SELECT id FROM mentor_profiles WHERE user_id = $1 LIMIT 1', [mentorId]);
         const mentorProfileId = mp.rows?.[0]?.id as string | undefined;
 
-        // Descobrir de forma determinística qual tabela a FK referencia (robusto a nomes de constraints)
+        // Descobrir qual tabela a FK mentor_id referencia via pg_constraint
         const detectReferenced = async (): Promise<string | null> => {
             try {
                 const q = await client.query(
-                    `SELECT ccu.table_name AS referenced_table
-                     FROM information_schema.table_constraints tc
-                     JOIN information_schema.key_column_usage kcu
-                       ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
-                     JOIN information_schema.constraint_column_usage ccu
-                       ON ccu.constraint_name = tc.constraint_name AND ccu.table_schema = tc.table_schema
-                     WHERE tc.table_name = 'mentor_subjects'
-                       AND tc.constraint_type = 'FOREIGN KEY'
-                       AND kcu.column_name = 'mentor_id'
+                    `SELECT 
+                       (SELECT relname FROM pg_class WHERE oid = confrelid) AS referenced_table
+                     FROM pg_constraint
+                     WHERE conrelid = 'mentor_subjects'::regclass
+                       AND contype = 'f'
+                       AND conkey = (SELECT array_agg(attnum) FROM pg_attribute 
+                                     WHERE attrelid = 'mentor_subjects'::regclass 
+                                       AND attname = 'mentor_id')
                      LIMIT 1`
                 );
                 return q.rows?.[0]?.referenced_table || null;
-            } catch {
+            } catch (err) {
+                console.error('FK detection error:', err);
                 return null;
             }
         };
 
         const referencedTable = await detectReferenced();
+        console.log('[DEBUG] FK detection result:', referencedTable);
 
         // Monta candidatos de chave, tentando primeiro a tabela detectada
         const candidates: (string | undefined)[] = [];
@@ -93,6 +94,7 @@ router.post('/:mentorId', async (req, res) => {
             upsert(mentorId);
             upsert(mentorProfileId);
         }
+        console.log('[DEBUG] Candidates:', candidates.filter(Boolean));
 
         // Função para aplicar setSubjects com uma chave específica (com rollback em erro)
         const applyWithKey = async (key: string) => {
@@ -127,17 +129,21 @@ router.post('/:mentorId', async (req, res) => {
         let lastErr: any = null;
         for (const key of candidates) {
             if (!key) continue;
+            console.log('[DEBUG] Trying key:', key);
             try {
                 rows = await applyWithKey(key);
+                console.log('[DEBUG] Success with key:', key);
                 lastErr = null;
                 break;
-            } catch (e) {
+            } catch (e: any) {
+                console.error('[DEBUG] Failed with key:', key, 'Error:', e.message);
                 lastErr = e;
                 // tenta próximo candidato
             }
         }
         if (!rows) {
             const msg = (lastErr && (lastErr as any).message) || 'Failed to set mentor subjects';
+            console.error('[DEBUG] All candidates failed. Last error:', msg);
             throw new Error(`mentor_subjects set failed: ${msg}`);
         }
 
