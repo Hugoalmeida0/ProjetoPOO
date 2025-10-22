@@ -44,78 +44,26 @@ router.post('/:mentorId', async (req, res) => {
         // Buscar mentor_profiles.id (se existir)
         const mp = await client.query('SELECT id FROM mentor_profiles WHERE user_id = $1 LIMIT 1', [mentorId]);
         const mentorProfileId = mp.rows?.[0]?.id;
+        // Buscar profiles.id (tabela que a FK realmente referencia!)
+        const profileResult = await client.query('SELECT id FROM profiles WHERE id = $1 LIMIT 1', [mentorId]);
+        const profileId = profileResult.rows?.[0]?.id;
         console.log('[DEBUG] mentorId (from params):', mentorId);
         console.log('[DEBUG] mentorProfileId (from DB):', mentorProfileId);
-        // DIAGNÓSTICO: descobrir qual tabela a FK referencia usando múltiplas abordagens
-        try {
-            // Abordagem 1: information_schema
-            const fkInfo = await client.query(`
-                SELECT
-                    tc.constraint_name,
-                    tc.table_name AS source_table,
-                    kcu.column_name AS source_column,
-                    ccu.table_name AS referenced_table,
-                    ccu.column_name AS referenced_column
-                FROM information_schema.table_constraints AS tc
-                JOIN information_schema.key_column_usage AS kcu
-                    ON tc.constraint_name = kcu.constraint_name
-                    AND tc.table_schema = kcu.table_schema
-                JOIN information_schema.constraint_column_usage AS ccu
-                    ON ccu.constraint_name = tc.constraint_name
-                    AND ccu.table_schema = tc.table_schema
-                WHERE tc.constraint_type = 'FOREIGN KEY'
-                    AND tc.table_name = 'mentor_subjects'
-                    AND kcu.column_name = 'mentor_id'
-            `);
-            console.log('[DEBUG] FK SCHEMA INFO (information_schema):', JSON.stringify(fkInfo.rows, null, 2));
-            // Abordagem 2: pg_catalog (mais confiável)
-            const fkInfoCatalog = await client.query(`
-                SELECT
-                    conname AS constraint_name,
-                    conrelid::regclass AS source_table,
-                    confrelid::regclass AS referenced_table,
-                    a.attname AS source_column,
-                    af.attname AS referenced_column
-                FROM pg_constraint c
-                JOIN pg_attribute a ON a.attnum = ANY(c.conkey) AND a.attrelid = c.conrelid
-                JOIN pg_attribute af ON af.attnum = ANY(c.confkey) AND af.attrelid = c.confrelid
-                WHERE c.contype = 'f'
-                    AND conrelid = 'mentor_subjects'::regclass
-                    AND a.attname = 'mentor_id'
-            `);
-            console.log('[DEBUG] FK SCHEMA INFO (pg_catalog):', JSON.stringify(fkInfoCatalog.rows, null, 2));
-            // Verificar se os IDs existem nas tabelas candidatas
-            const checkUsers = await client.query('SELECT id FROM users WHERE id = $1', [mentorId]);
-            const checkMentorProfiles = mentorProfileId
-                ? await client.query('SELECT id FROM mentor_profiles WHERE id = $1', [mentorProfileId])
-                : { rows: [] };
-            console.log('[DEBUG] ID exists in users?', checkUsers.rows.length > 0, '- ID:', mentorId);
-            console.log('[DEBUG] ID exists in mentor_profiles?', checkMentorProfiles.rows.length > 0, '- ID:', mentorProfileId);
-            // Listar TODAS as tabelas que têm um campo 'id' que poderia ser a FK
-            const potentialTables = await client.query(`
-                SELECT table_name 
-                FROM information_schema.columns 
-                WHERE table_schema = 'public' 
-                    AND column_name = 'id'
-                    AND table_name LIKE '%mentor%'
-                ORDER BY table_name
-            `);
-            console.log('[DEBUG] Tables with mentor in name and id column:', potentialTables.rows.map(r => r.table_name));
-        }
-        catch (err) {
-            console.error('[DEBUG] Failed to query FK info:', err.message);
-        }
-        // Estratégia: tentar SEMPRE ambas as chaves em ordem de probabilidade
-        // 1. mentor_profiles.id (mais comum em schemas novos)
-        // 2. users.id (fallback para schemas antigos)
+        console.log('[DEBUG] profileId (from DB):', profileId);
+        // Estratégia: A FK aponta para profiles.id! Tentar nesta ordem:
+        // 1. profiles.id (descoberto via diagnóstico - é o correto!)
+        // 2. mentor_profiles.id (fallback)
+        // 3. users.id (último recurso)
         const candidates = [];
+        if (profileId)
+            candidates.push(profileId);
         if (mentorProfileId)
             candidates.push(mentorProfileId);
         if (mentorId)
             candidates.push(mentorId);
         console.log('[DEBUG] Will try keys in order:', candidates);
         if (candidates.length === 0) {
-            throw new Error('No valid mentor ID found (neither user_id nor mentor_profile.id)');
+            throw new Error('No valid mentor ID found (profiles.id, mentor_profile.id, or user_id)');
         }
         // Função para aplicar setSubjects com uma chave específica (com rollback em erro)
         const applyWithKey = async (key) => {
