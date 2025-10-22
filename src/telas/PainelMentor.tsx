@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { apiClient } from '@/integracoes/api/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/componentes/ui/card';
 import { Button } from '@/componentes/ui/button';
-import { CheckCircle, Trash2 } from 'lucide-react';
+import { CheckCircle, Trash2, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CancelBookingDialog as DialogoCancelarAgendamento } from '@/componentes/DialogoCancelarAgendamento';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/componentes/ui/tabs';
@@ -13,6 +13,8 @@ import { Label } from '@/componentes/ui/label';
 import { Input } from '@/componentes/ui/input';
 import { Textarea } from '@/componentes/ui/textarea';
 import { Checkbox } from '@/componentes/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/componentes/ui/select';
+import { useGraduations } from '@/hooks/useGraduacoes';
 
 export default function MentorDashboard() {
     const { user } = useAuth();
@@ -31,6 +33,10 @@ export default function MentorDashboard() {
     const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
     const [formLoading, setFormLoading] = useState(false);
     const [formSaving, setFormSaving] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Graduações
+    const { data: graduations, isLoading: graduationsLoading } = useGraduations();
 
     // Campos do formulário (pré-preenchidos quando carregar dados)
     const [fullName, setFullName] = useState('');
@@ -38,7 +44,7 @@ export default function MentorDashboard() {
     const [location, setLocation] = useState('');
     const [availability, setAvailability] = useState('');
     const [experienceYears, setExperienceYears] = useState<number | ''>('');
-    const [pricePerHour, setPricePerHour] = useState<number | ''>('');
+    const [graduationId, setGraduationId] = useState<string>('');
 
     useEffect(() => {
         const load = async () => {
@@ -76,7 +82,7 @@ export default function MentorDashboard() {
                 setLocation(mentorData?.location || '');
                 setAvailability(mentorData?.availability || '');
                 setExperienceYears(typeof mentorData?.experience_years === 'number' ? mentorData?.experience_years : '');
-                setPricePerHour(typeof mentorData?.price_per_hour === 'number' ? mentorData?.price_per_hour : '');
+                setGraduationId(mentorData?.graduation_id || '');
             } finally {
                 setFormLoading(false);
             }
@@ -166,9 +172,9 @@ export default function MentorDashboard() {
                 location,
                 availability,
                 experience_years: typeof experienceYears === 'number' ? experienceYears : Number(experienceYears) || 0,
-                price_per_hour: typeof pricePerHour === 'number' ? pricePerHour : Number(pricePerHour) || 0,
+                graduation_id: graduationId || null,
             });
-            // Atualizar especialidades
+            // Atualizar especialidades (usando user_id ao invés de mentor.id)
             await apiClient.mentorSubjects.setSubjects(user.id, selectedSubjectIds);
 
             toast({ title: 'Cadastro atualizado', description: 'Suas informações foram salvas.' });
@@ -181,6 +187,15 @@ export default function MentorDashboard() {
     };
 
     const subjectsByName = useMemo(() => (subjects || []).sort((a, b) => a.name.localeCompare(b.name)), [subjects]);
+
+    const filteredSubjects = useMemo(() => {
+        if (!searchTerm.trim()) return subjectsByName;
+        const lower = searchTerm.toLowerCase();
+        return subjectsByName.filter((s: any) => 
+            s.name.toLowerCase().includes(lower) || 
+            (s.description && s.description.toLowerCase().includes(lower))
+        );
+    }, [subjectsByName, searchTerm]);
 
     return (
         <RequireMentor>
@@ -280,18 +295,25 @@ export default function MentorDashboard() {
                                     ) : (
                                         <div className="space-y-4">
                                             <div className="grid grid-cols-1 gap-2">
+                                                <Label htmlFor="graduation">Graduação</Label>
+                                                <Select value={graduationId} onValueChange={setGraduationId} disabled={graduationsLoading}>
+                                                    <SelectTrigger id="graduation">
+                                                        <SelectValue placeholder="Selecione uma graduação" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {(graduations || []).map((g: any) => (
+                                                            <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="grid grid-cols-1 gap-2">
                                                 <Label htmlFor="location">Localidade</Label>
                                                 <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Cidade/Estado" />
                                             </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="grid grid-cols-1 gap-2">
-                                                    <Label htmlFor="experience_years">Experiência (anos)</Label>
-                                                    <Input id="experience_years" type="number" min={0} value={experienceYears} onChange={(e) => setExperienceYears(e.target.value === '' ? '' : Number(e.target.value))} />
-                                                </div>
-                                                <div className="grid grid-cols-1 gap-2">
-                                                    <Label htmlFor="price_per_hour">Preço por hora (R$)</Label>
-                                                    <Input id="price_per_hour" type="number" step="0.01" min={0} value={pricePerHour} onChange={(e) => setPricePerHour(e.target.value === '' ? '' : Number(e.target.value))} />
-                                                </div>
+                                            <div className="grid grid-cols-1 gap-2">
+                                                <Label htmlFor="experience_years">Experiência (anos)</Label>
+                                                <Input id="experience_years" type="number" min={0} value={experienceYears} onChange={(e) => setExperienceYears(e.target.value === '' ? '' : Number(e.target.value))} />
                                             </div>
                                             <div className="grid grid-cols-1 gap-2">
                                                 <Label htmlFor="availability">Disponibilidade</Label>
@@ -304,25 +326,45 @@ export default function MentorDashboard() {
 
                             <Card className="lg:col-span-2">
                                 <CardHeader>
-                                    <CardTitle>Especialidades</CardTitle>
+                                    <CardTitle className="flex items-center justify-between">
+                                        <span>Especialidades</span>
+                                        <span className="text-sm font-normal text-muted-foreground">
+                                            {selectedSubjectIds.length} selecionada{selectedSubjectIds.length !== 1 ? 's' : ''}
+                                        </span>
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     {formLoading ? (
                                         <p>Carregando...</p>
                                     ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                            {subjectsByName.map((s: any) => (
-                                                <label key={s.id} className="flex items-center gap-3 border rounded p-3 hover:bg-muted/50 cursor-pointer">
-                                                    <Checkbox checked={selectedSubjectIds.includes(s.id)} onCheckedChange={() => toggleSubject(s.id)} />
-                                                    <div>
-                                                        <div className="font-medium">{s.name}</div>
-                                                        {s.description ? (
-                                                            <div className="text-xs text-muted-foreground line-clamp-2">{s.description}</div>
-                                                        ) : null}
-                                                    </div>
-                                                </label>
-                                            ))}
-                                        </div>
+                                        <>
+                                            <div className="mb-4 relative">
+                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                <Input
+                                                    placeholder="Buscar especialidades..."
+                                                    value={searchTerm}
+                                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                                    className="pl-9"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+                                                {filteredSubjects.length === 0 ? (
+                                                    <p className="col-span-full text-sm text-muted-foreground">Nenhuma especialidade encontrada.</p>
+                                                ) : (
+                                                    filteredSubjects.map((s: any) => (
+                                                        <label key={s.id} className="flex items-center gap-3 border rounded p-3 hover:bg-muted/50 cursor-pointer">
+                                                            <Checkbox checked={selectedSubjectIds.includes(s.id)} onCheckedChange={() => toggleSubject(s.id)} />
+                                                            <div>
+                                                                <div className="font-medium">{s.name}</div>
+                                                                {s.description ? (
+                                                                    <div className="text-xs text-muted-foreground line-clamp-2">{s.description}</div>
+                                                                ) : null}
+                                                            </div>
+                                                        </label>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </>
                                     )}
                                     <div className="flex justify-end mt-6">
                                         <Button onClick={handleSaveCadastro} disabled={formSaving || formLoading}>
