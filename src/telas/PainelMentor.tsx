@@ -15,6 +15,7 @@ import { Textarea } from '@/componentes/ui/textarea';
 import { Checkbox } from '@/componentes/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/componentes/ui/select';
 import { useGraduations } from '@/hooks/useGraduacoes';
+import { Alert, AlertDescription, AlertTitle } from '@/componentes/ui/alert';
 
 export default function MentorDashboard() {
     const { user } = useAuth();
@@ -34,6 +35,7 @@ export default function MentorDashboard() {
     const [formLoading, setFormLoading] = useState(false);
     const [formSaving, setFormSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [incompleteNotified, setIncompleteNotified] = useState(false);
 
     // Graduações
     const { data: graduations, isLoading: graduationsLoading } = useGraduations();
@@ -75,6 +77,15 @@ export default function MentorDashboard() {
                 setSubjects(allSubjects || []);
                 const preSelected = (mentorSubjects || []).map((s: any) => s.id);
                 setSelectedSubjectIds(preSelected);
+
+                // Notificar uma única vez que o cadastro ainda não foi concluído
+                if (!mentorData && !incompleteNotified) {
+                    setIncompleteNotified(true);
+                    toast({
+                        title: 'Cadastro de mentor incompleto',
+                        description: 'Preencha seus dados, selecione uma graduação e ao menos uma especialidade para concluir.',
+                    });
+                }
 
                 // Preencher form com existentes
                 setFullName(profileData?.full_name || '');
@@ -211,6 +222,8 @@ export default function MentorDashboard() {
         );
     }, [subjectsByName, searchTerm]);
 
+    const isSaveDisabled = formSaving || formLoading || !graduationId || selectedSubjectIds.length === 0;
+
     return (
         <RequireMentor>
             <Cabecalho />
@@ -276,6 +289,14 @@ export default function MentorDashboard() {
                     </TabsContent>
 
                     <TabsContent value="cadastro">
+                        {!formLoading && !mentorInfo && (
+                            <Alert className="mb-4">
+                                <AlertTitle>Atenção</AlertTitle>
+                                <AlertDescription>
+                                    Você ainda não concluiu seu cadastro de mentor. Informe seus dados, selecione uma graduação e ao menos uma especialidade para habilitar o salvamento.
+                                </AlertDescription>
+                            </Alert>
+                        )}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             <Card>
                                 <CardHeader>
@@ -380,8 +401,11 @@ export default function MentorDashboard() {
                                             </div>
                                         </>
                                     )}
-                                    <div className="flex justify-end mt-6">
-                                        <Button onClick={handleSaveCadastro} disabled={formSaving || formLoading}>
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-6 gap-3">
+                                        <p className="text-sm text-muted-foreground">
+                                            {(!graduationId || selectedSubjectIds.length === 0) ? 'Selecione uma graduação e ao menos uma especialidade para salvar.' : 'Pronto para salvar.'}
+                                        </p>
+                                        <Button onClick={handleSaveCadastro} disabled={isSaveDisabled}>
                                             {formSaving ? 'Salvando...' : 'Salvar cadastro'}
                                         </Button>
                                     </div>
