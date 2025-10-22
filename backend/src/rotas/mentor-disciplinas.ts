@@ -56,6 +56,30 @@ router.post('/:mentorId', async (req, res) => {
         const mp = await client.query('SELECT id FROM mentor_profiles WHERE user_id = $1 LIMIT 1', [mentorId]);
         const mentorProfileId = mp.rows?.[0]?.id as string | undefined;
 
+        // Descobrir de forma determinística qual tabela a FK referencia
+        let referencedTable = 'users';
+        try {
+            const fk = await client.query(
+                `SELECT confrelid::regclass AS referenced_table
+                 FROM pg_constraint
+                 WHERE conname = 'mentor_subjects_mentor_id_fkey' AND contype = 'f'
+                 LIMIT 1`
+            );
+            referencedTable = fk.rows?.[0]?.referenced_table || 'users';
+        } catch {
+            // fallback silencioso
+        }
+
+        const pickKey = (): string => {
+            if (referencedTable === 'mentor_profiles') {
+                if (!mentorProfileId) {
+                    throw new Error('Mentor profile not found for this user');
+                }
+                return mentorProfileId;
+            }
+            return mentorId; // users
+        };
+
         // Função para aplicar setSubjects com uma chave específica
         const applyWithKey = async (key: string) => {
             await client.query('BEGIN');
@@ -79,20 +103,8 @@ router.post('/:mentorId', async (req, res) => {
             return resSel.rows;
         };
 
-        let rows: any[] | null = null;
-        try {
-            // Primeiro tenta com user_id (FK para users)
-            rows = await applyWithKey(mentorId);
-        } catch (e: any) {
-            await client.query('ROLLBACK').catch(() => { });
-            // Se violação de FK e temos mentorProfileId, tenta com mentor_profiles.id
-            const isFK = e?.code === '23503' || /foreign key/i.test(String(e?.message || ''));
-            if (isFK && mentorProfileId) {
-                rows = await applyWithKey(mentorProfileId);
-            } else {
-                throw e;
-            }
-        }
+        const keyToUse = pickKey();
+        const rows = await applyWithKey(keyToUse);
 
         res.json(rows || []);
     } catch (error: any) {
