@@ -56,45 +56,21 @@ router.post('/:mentorId', async (req, res) => {
         const mp = await client.query('SELECT id FROM mentor_profiles WHERE user_id = $1 LIMIT 1', [mentorId]);
         const mentorProfileId = mp.rows?.[0]?.id as string | undefined;
 
-        // Descobrir qual tabela a FK mentor_id referencia via pg_constraint
-        const detectReferenced = async (): Promise<string | null> => {
-            try {
-                const q = await client.query(
-                    `SELECT 
-                       (SELECT relname FROM pg_class WHERE oid = confrelid) AS referenced_table
-                     FROM pg_constraint
-                     WHERE conrelid = 'mentor_subjects'::regclass
-                       AND contype = 'f'
-                       AND conkey = (SELECT array_agg(attnum) FROM pg_attribute 
-                                     WHERE attrelid = 'mentor_subjects'::regclass 
-                                       AND attname = 'mentor_id')
-                     LIMIT 1`
-                );
-                return q.rows?.[0]?.referenced_table || null;
-            } catch (err) {
-                console.error('FK detection error:', err);
-                return null;
-            }
-        };
+        console.log('[DEBUG] mentorId (from params):', mentorId);
+        console.log('[DEBUG] mentorProfileId (from DB):', mentorProfileId);
 
-        const referencedTable = await detectReferenced();
-        console.log('[DEBUG] FK detection result:', referencedTable);
+        // Estratégia: tentar SEMPRE ambas as chaves em ordem de probabilidade
+        // 1. mentor_profiles.id (mais comum em schemas novos)
+        // 2. users.id (fallback para schemas antigos)
+        const candidates: string[] = [];
+        if (mentorProfileId) candidates.push(mentorProfileId);
+        if (mentorId) candidates.push(mentorId);
+        
+        console.log('[DEBUG] Will try keys in order:', candidates);
 
-        // Monta candidatos de chave, tentando primeiro a tabela detectada
-        const candidates: (string | undefined)[] = [];
-        const upsert = (v?: string) => { if (v && !candidates.includes(v)) candidates.push(v); };
-        if (referencedTable === 'mentor_profiles') {
-            upsert(mentorProfileId);
-            upsert(mentorId);
-        } else if (referencedTable === 'users') {
-            upsert(mentorId);
-            upsert(mentorProfileId);
-        } else {
-            // indeterminado: tenta as duas
-            upsert(mentorId);
-            upsert(mentorProfileId);
+        if (candidates.length === 0) {
+            throw new Error('No valid mentor ID found (neither user_id nor mentor_profile.id)');
         }
-        console.log('[DEBUG] Candidates:', candidates.filter(Boolean));
 
         // Função para aplicar setSubjects com uma chave específica (com rollback em erro)
         const applyWithKey = async (key: string) => {
@@ -127,25 +103,33 @@ router.post('/:mentorId', async (req, res) => {
         // Tenta em ordem os candidatos de chave; se todas falharem, devolve erro consolidado
         let rows: any[] | null = null;
         let lastErr: any = null;
+        let successKey: string | null = null;
+        
         for (const key of candidates) {
-            if (!key) continue;
-            console.log('[DEBUG] Trying key:', key);
+            console.log('[DEBUG] Attempting with key:', key);
             try {
                 rows = await applyWithKey(key);
-                console.log('[DEBUG] Success with key:', key);
-                lastErr = null;
+                successKey = key;
+                console.log('[DEBUG] ✅ SUCCESS with key:', key);
                 break;
             } catch (e: any) {
-                console.error('[DEBUG] Failed with key:', key, 'Error:', e.message);
+                console.error('[DEBUG] ❌ FAILED with key:', key);
+                console.error('[DEBUG] Error detail:', e.message);
+                console.error('[DEBUG] Error code:', e.code);
                 lastErr = e;
                 // tenta próximo candidato
             }
         }
+        
         if (!rows) {
-            const msg = (lastErr && (lastErr as any).message) || 'Failed to set mentor subjects';
-            console.error('[DEBUG] All candidates failed. Last error:', msg);
+            const msg = (lastErr && lastErr.message) || 'Failed to set mentor subjects';
+            console.error('[DEBUG] 🚨 ALL ATTEMPTS FAILED');
+            console.error('[DEBUG] Last error:', msg);
+            console.error('[DEBUG] Tried keys:', candidates);
             throw new Error(`mentor_subjects set failed: ${msg}`);
         }
+        
+        console.log('[DEBUG] Final success - used key:', successKey);
 
         res.json(rows || []);
     } catch (error: any) {
