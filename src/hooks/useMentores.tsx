@@ -6,6 +6,10 @@ export interface MentorProfile {
     user_id: string;
     graduation_id?: string;
     price_per_hour?: number;
+    // Avaliações agregadas vindas da API
+    avg_rating?: number;
+    total_ratings?: number;
+    // Compatibilidade legado
     rating?: number;
     total_sessions?: number;
     location?: string;
@@ -13,6 +17,7 @@ export interface MentorProfile {
     experience_years?: number;
     created_at?: string;
     updated_at?: string;
+    profiles?: any;
 }
 
 export const useMentors = () => {
@@ -24,11 +29,13 @@ export const useMentors = () => {
         try {
             setLoading(true);
             const data = await apiClient.mentors.getAll();
-            // Debug: verificar se os dados de avaliação estão chegando
-            if (data && data.length > 0) {
-                console.log('Primeiro mentor - avg_rating:', data[0].avg_rating, 'total_ratings:', data[0].total_ratings);
-            }
-            setMentors((data || []) as any);
+            // Normalizar avaliações para números
+            const normalized = (data || []).map((m: any) => ({
+                ...m,
+                avg_rating: Number(m?.avg_rating) || 0,
+                total_ratings: Number(m?.total_ratings) || 0,
+            }));
+            setMentors(normalized as any);
         } catch (err: any) {
             console.error('Erro ao buscar mentores:', err);
             setError(err?.message || 'Erro ao buscar mentores');
@@ -39,7 +46,12 @@ export const useMentors = () => {
 
     const getMentor = async (userId: string) => {
         const data = await apiClient.mentors.getByUserId(userId);
-        return data as MentorProfile;
+        const normalized = {
+            ...data,
+            avg_rating: Number((data as any)?.avg_rating) || 0,
+            total_ratings: Number((data as any)?.total_ratings) || 0,
+        } as MentorProfile;
+        return normalized;
     };
 
     // user_id é obrigatório ao criar um mentor

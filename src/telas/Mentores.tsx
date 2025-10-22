@@ -84,8 +84,8 @@ const Mentors = () => {
                             course={m.profiles?.graduation || 'N/A'}
                             period={m.experience_years ? `${m.experience_years} anos exp.` : '--'}
                             subjects={[]}
-                            rating={typeof m.avg_rating === 'number' ? m.avg_rating : 0}
-                            reviews={typeof m.total_ratings === 'number' ? m.total_ratings : 0}
+                            rating={Number(m.avg_rating) || 0}
+                            reviews={Number(m.total_ratings) || 0}
                             location={m.location || '-'}
                             avatar={m.profiles?.avatar_url}
                         />
