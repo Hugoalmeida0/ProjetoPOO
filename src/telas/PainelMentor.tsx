@@ -167,7 +167,7 @@ export default function MentorDashboard() {
                 full_name: fullName,
                 bio,
             });
-            
+
             // Se mentor não existe, criar primeiro
             if (!mentorInfo) {
                 const newMentor = await apiClient.mentors.create({
@@ -187,7 +187,7 @@ export default function MentorDashboard() {
                     graduation_id: graduationId || null,
                 });
             }
-            
+
             // Atualizar especialidades (usando user_id ao invés de mentor.id)
             await apiClient.mentorSubjects.setSubjects(user.id, selectedSubjectIds);
 

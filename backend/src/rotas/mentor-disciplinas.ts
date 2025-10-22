@@ -40,7 +40,7 @@ router.post('/:mentorId', async (req, res) => {
             'SELECT id FROM users WHERE id = $1',
             [mentorId]
         );
-        
+
         if (userCheck.rows.length === 0) {
             return res.status(404).json({ error: 'Mentor not found' });
         }
