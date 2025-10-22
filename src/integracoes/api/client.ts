@@ -71,6 +71,10 @@ export const apiClient = {
             const params = graduationId ? `?graduation_id=${graduationId}` : '';
             return fetchAPI<any[]>(`/api/subjects${params}`);
         },
+        getByGraduation: (graduationId: string, page = 1, pageSize = 12) => {
+            const params = `?graduation_id=${graduationId}&page=${page}&page_size=${pageSize}`;
+            return fetchAPI<{ items: any[]; total: number; page: number; page_size: number }>(`/api/subjects/by-graduation${params}`);
+        },
         getById: (id: string) => fetchAPI<any>(`/api/subjects/${id}`),
     },
 
