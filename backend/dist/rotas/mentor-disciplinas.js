@@ -46,8 +46,9 @@ router.post('/:mentorId', async (req, res) => {
         const mentorProfileId = mp.rows?.[0]?.id;
         console.log('[DEBUG] mentorId (from params):', mentorId);
         console.log('[DEBUG] mentorProfileId (from DB):', mentorProfileId);
-        // DIAGNÓSTICO: vamos descobrir exatamente qual tabela a FK referencia
+        // DIAGNÓSTICO: descobrir qual tabela a FK referencia usando múltiplas abordagens
         try {
+            // Abordagem 1: information_schema
             const fkInfo = await client.query(`
                 SELECT
                     tc.constraint_name,
@@ -66,7 +67,23 @@ router.post('/:mentorId', async (req, res) => {
                     AND tc.table_name = 'mentor_subjects'
                     AND kcu.column_name = 'mentor_id'
             `);
-            console.log('[DEBUG] FK SCHEMA INFO:', JSON.stringify(fkInfo.rows, null, 2));
+            console.log('[DEBUG] FK SCHEMA INFO (information_schema):', JSON.stringify(fkInfo.rows, null, 2));
+            // Abordagem 2: pg_catalog (mais confiável)
+            const fkInfoCatalog = await client.query(`
+                SELECT
+                    conname AS constraint_name,
+                    conrelid::regclass AS source_table,
+                    confrelid::regclass AS referenced_table,
+                    a.attname AS source_column,
+                    af.attname AS referenced_column
+                FROM pg_constraint c
+                JOIN pg_attribute a ON a.attnum = ANY(c.conkey) AND a.attrelid = c.conrelid
+                JOIN pg_attribute af ON af.attnum = ANY(c.confkey) AND af.attrelid = c.confrelid
+                WHERE c.contype = 'f'
+                    AND conrelid = 'mentor_subjects'::regclass
+                    AND a.attname = 'mentor_id'
+            `);
+            console.log('[DEBUG] FK SCHEMA INFO (pg_catalog):', JSON.stringify(fkInfoCatalog.rows, null, 2));
             // Verificar se os IDs existem nas tabelas candidatas
             const checkUsers = await client.query('SELECT id FROM users WHERE id = $1', [mentorId]);
             const checkMentorProfiles = mentorProfileId
@@ -74,9 +91,19 @@ router.post('/:mentorId', async (req, res) => {
                 : { rows: [] };
             console.log('[DEBUG] ID exists in users?', checkUsers.rows.length > 0, '- ID:', mentorId);
             console.log('[DEBUG] ID exists in mentor_profiles?', checkMentorProfiles.rows.length > 0, '- ID:', mentorProfileId);
+            // Listar TODAS as tabelas que têm um campo 'id' que poderia ser a FK
+            const potentialTables = await client.query(`
+                SELECT table_name 
+                FROM information_schema.columns 
+                WHERE table_schema = 'public' 
+                    AND column_name = 'id'
+                    AND table_name LIKE '%mentor%'
+                ORDER BY table_name
+            `);
+            console.log('[DEBUG] Tables with mentor in name and id column:', potentialTables.rows.map(r => r.table_name));
         }
         catch (err) {
-            console.error('[DEBUG] Failed to query FK info:', err);
+            console.error('[DEBUG] Failed to query FK info:', err.message);
         }
         // Estratégia: tentar SEMPRE ambas as chaves em ordem de probabilidade
         // 1. mentor_profiles.id (mais comum em schemas novos)
