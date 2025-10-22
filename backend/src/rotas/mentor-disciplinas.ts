@@ -59,6 +59,40 @@ router.post('/:mentorId', async (req, res) => {
         console.log('[DEBUG] mentorId (from params):', mentorId);
         console.log('[DEBUG] mentorProfileId (from DB):', mentorProfileId);
 
+        // DIAGNÓSTICO: vamos descobrir exatamente qual tabela a FK referencia
+        try {
+            const fkInfo = await client.query(`
+                SELECT
+                    tc.constraint_name,
+                    tc.table_name AS source_table,
+                    kcu.column_name AS source_column,
+                    ccu.table_name AS referenced_table,
+                    ccu.column_name AS referenced_column
+                FROM information_schema.table_constraints AS tc
+                JOIN information_schema.key_column_usage AS kcu
+                    ON tc.constraint_name = kcu.constraint_name
+                    AND tc.table_schema = kcu.table_schema
+                JOIN information_schema.constraint_column_usage AS ccu
+                    ON ccu.constraint_name = tc.constraint_name
+                    AND ccu.table_schema = tc.table_schema
+                WHERE tc.constraint_type = 'FOREIGN KEY'
+                    AND tc.table_name = 'mentor_subjects'
+                    AND kcu.column_name = 'mentor_id'
+            `);
+            console.log('[DEBUG] FK SCHEMA INFO:', JSON.stringify(fkInfo.rows, null, 2));
+
+            // Verificar se os IDs existem nas tabelas candidatas
+            const checkUsers = await client.query('SELECT id FROM users WHERE id = $1', [mentorId]);
+            const checkMentorProfiles = mentorProfileId 
+                ? await client.query('SELECT id FROM mentor_profiles WHERE id = $1', [mentorProfileId])
+                : { rows: [] };
+            
+            console.log('[DEBUG] ID exists in users?', checkUsers.rows.length > 0, '- ID:', mentorId);
+            console.log('[DEBUG] ID exists in mentor_profiles?', checkMentorProfiles.rows.length > 0, '- ID:', mentorProfileId);
+        } catch (err) {
+            console.error('[DEBUG] Failed to query FK info:', err);
+        }
+
         // Estratégia: tentar SEMPRE ambas as chaves em ordem de probabilidade
         // 1. mentor_profiles.id (mais comum em schemas novos)
         // 2. users.id (fallback para schemas antigos)
