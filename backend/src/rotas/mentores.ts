@@ -3,34 +3,92 @@ import { pool } from '../db';
 
 const router = Router();
 
+// GET /api/mentors/debug - Endpoint para debug das avaliações
+router.get('/debug', async (_req: Request, res: Response) => {
+    try {
+        // Verificar se a tabela ratings existe
+        const tableCheck = await pool.query(`
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'ratings'
+            );
+        `);
+
+        // Contar avaliações
+        const ratingsCount = await pool.query('SELECT COUNT(*) as count FROM ratings');
+
+        // Buscar algumas avaliações
+        const sampleRatings = await pool.query('SELECT * FROM ratings LIMIT 5');
+
+        // Buscar mentores com avaliações
+        const mentorsWithRatings = await pool.query(`
+            SELECT 
+                mp.user_id,
+                p.full_name,
+                COUNT(r.id) as total_ratings,
+                ROUND(AVG(r.rating), 1) as avg_rating
+            FROM mentor_profiles mp
+            LEFT JOIN profiles p ON mp.user_id = p.user_id
+            LEFT JOIN ratings r ON mp.user_id = r.mentor_id
+            GROUP BY mp.user_id, p.full_name
+            HAVING COUNT(r.id) > 0
+        `);
+
+        res.json({
+            tableExists: tableCheck.rows[0].exists,
+            totalRatings: ratingsCount.rows[0].count,
+            sampleRatings: sampleRatings.rows,
+            mentorsWithRatings: mentorsWithRatings.rows
+        });
+    } catch (err) {
+        console.error('Erro no debug:', err);
+        res.status(500).json({ error: 'Internal server error', details: err.message });
+    }
+});
+
 // GET all mentors with profile info
 router.get('/', async (_req: Request, res: Response) => {
     try {
+        // Consulta simplificada que funciona mesmo sem a tabela ratings
         const result = await pool.query(`
-      SELECT 
-        mp.*,
-        json_build_object(
-          'user_id', p.user_id,
-          'full_name', p.full_name,
-          'email', p.email
-        ) as profiles,
-        COALESCE(rating_stats.avg_rating, 0) as avg_rating,
-        COALESCE(rating_stats.total_ratings, 0) as total_ratings
-      FROM mentor_profiles mp
-      LEFT JOIN profiles p ON mp.user_id = p.user_id
-      LEFT JOIN (
-        SELECT 
-          mentor_id,
-          ROUND(AVG(rating), 1) as avg_rating,
-          COUNT(*) as total_ratings
-        FROM ratings 
-        GROUP BY mentor_id
-      ) rating_stats ON mp.user_id = rating_stats.mentor_id
-      ORDER BY COALESCE(rating_stats.avg_rating, 0) DESC, rating_stats.total_ratings DESC
-    `);
+            SELECT 
+                mp.*,
+                json_build_object(
+                    'user_id', p.user_id,
+                    'full_name', p.full_name,
+                    'email', p.email
+                ) as profiles,
+                COALESCE((
+                    SELECT ROUND(AVG(rating), 1) 
+                    FROM ratings 
+                    WHERE mentor_id = mp.user_id
+                ), 0) as avg_rating,
+                COALESCE((
+                    SELECT COUNT(*) 
+                    FROM ratings 
+                    WHERE mentor_id = mp.user_id
+                ), 0) as total_ratings
+            FROM mentor_profiles mp
+            LEFT JOIN profiles p ON mp.user_id = p.user_id
+            ORDER BY COALESCE((
+                SELECT ROUND(AVG(rating), 1) 
+                FROM ratings 
+                WHERE mentor_id = mp.user_id
+            ), 0) DESC, COALESCE((
+                SELECT COUNT(*) 
+                FROM ratings 
+                WHERE mentor_id = mp.user_id
+            ), 0) DESC
+        `);
+
+        // Log para debug
+        if (result.rows.length > 0) {
+            console.log('Primeiro mentor - avg_rating:', result.rows[0].avg_rating, 'total_ratings:', result.rows[0].total_ratings);
+        }
+
         return res.json(result.rows);
     } catch (err) {
-        console.error(err);
+        console.error('Erro na consulta de mentores:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 });
