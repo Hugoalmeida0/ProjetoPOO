@@ -58,13 +58,25 @@ router.post('/:mentorId', async (req, res) => {
 
         // Buscar profiles.id (tabela que a FK realmente referencia!)
         const profileResult = await client.query('SELECT id FROM profiles WHERE id = $1 LIMIT 1', [mentorId]);
-        const profileId = profileResult.rows?.[0]?.id as string | undefined;
+        let profileId = profileResult.rows?.[0]?.id as string | undefined;
+        // Se não encontrou por id, tentar por user_id (schema comum em perfis)
+        if (!profileId) {
+            try {
+                const profileByUser = await client.query('SELECT id FROM profiles WHERE user_id = $1 LIMIT 1', [mentorId]);
+                profileId = profileByUser.rows?.[0]?.id as string | undefined;
+                if (profileId) {
+                    console.log('[DEBUG] profileId resolved via user_id:', profileId);
+                }
+            } catch (e) {
+                // ignora
+            }
+        }
 
         console.log('[DEBUG] mentorId (from params):', mentorId);
         console.log('[DEBUG] mentorProfileId (from DB):', mentorProfileId);
         console.log('[DEBUG] profileId (from DB):', profileId);
 
-        // Estratégia: A FK aponta para profiles.id! Tentar nesta ordem:
+    // Estratégia: A FK aponta para profiles.id! Tentar nesta ordem:
         // 1. profiles.id (descoberto via diagnóstico - é o correto!)
         // 2. mentor_profiles.id (fallback)
         // 3. users.id (último recurso)
@@ -72,7 +84,7 @@ router.post('/:mentorId', async (req, res) => {
         if (profileId) candidates.push(profileId);
         if (mentorProfileId) candidates.push(mentorProfileId);
         if (mentorId) candidates.push(mentorId);
-        
+
         console.log('[DEBUG] Will try keys in order:', candidates);
 
         if (candidates.length === 0) {
@@ -111,7 +123,7 @@ router.post('/:mentorId', async (req, res) => {
         let rows: any[] | null = null;
         let lastErr: any = null;
         let successKey: string | null = null;
-        
+
         for (const key of candidates) {
             console.log('[DEBUG] Attempting with key:', key);
             try {
@@ -127,7 +139,7 @@ router.post('/:mentorId', async (req, res) => {
                 // tenta próximo candidato
             }
         }
-        
+
         if (!rows) {
             const msg = (lastErr && lastErr.message) || 'Failed to set mentor subjects';
             console.error('[DEBUG] 🚨 ALL ATTEMPTS FAILED');
@@ -135,7 +147,7 @@ router.post('/:mentorId', async (req, res) => {
             console.error('[DEBUG] Tried keys:', candidates);
             throw new Error(`mentor_subjects set failed: ${msg}`);
         }
-        
+
         console.log('[DEBUG] Final success - used key:', successKey);
 
         res.json(rows || []);
