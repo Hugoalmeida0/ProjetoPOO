@@ -34,6 +34,25 @@ router.get('/:mentorId', async (req, res) => {
             }
         }
 
+        // Se ainda nada, tentar via profiles.id (FK real em produção)
+        if (result.rows.length === 0) {
+            const pr = await pool.query(
+                'SELECT id FROM profiles WHERE id = $1 OR user_id = $1 LIMIT 1',
+                [mentorId]
+            );
+            const profileId = pr.rows?.[0]?.id;
+            if (profileId) {
+                result = await pool.query(
+                    `SELECT s.* 
+                     FROM subjects s
+                     JOIN mentor_subjects ms ON s.id = ms.subject_id
+                     WHERE ms.mentor_id = $1
+                     ORDER BY s.name`,
+                    [profileId]
+                );
+            }
+        }
+
         res.json(result.rows);
     } catch (error: any) {
         console.error('Error fetching mentor subjects:', error);
