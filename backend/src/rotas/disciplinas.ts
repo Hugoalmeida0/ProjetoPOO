@@ -20,7 +20,8 @@ router.get('/by-graduation', async (req: Request, res: Response) => {
             `SELECT COUNT(DISTINCT s.id) AS total
              FROM subjects s
              JOIN mentor_subjects ms ON ms.subject_id = s.id
-             JOIN mentor_profiles mp ON (ms.mentor_id = mp.user_id OR ms.mentor_id = mp.id)
+             JOIN profiles p ON p.id = ms.mentor_id
+             JOIN mentor_profiles mp ON mp.user_id = p.user_id
              WHERE mp.graduation_id = $1`,
             [graduation_id]
         );
@@ -31,7 +32,8 @@ router.get('/by-graduation', async (req: Request, res: Response) => {
             `SELECT DISTINCT s.*
              FROM subjects s
              JOIN mentor_subjects ms ON ms.subject_id = s.id
-             JOIN mentor_profiles mp ON (ms.mentor_id = mp.user_id OR ms.mentor_id = mp.id)
+             JOIN profiles p ON p.id = ms.mentor_id
+             JOIN mentor_profiles mp ON mp.user_id = p.user_id
              WHERE mp.graduation_id = $1
              ORDER BY s.name
              LIMIT $2 OFFSET $3`,
@@ -57,7 +59,8 @@ router.get('/', async (req: Request, res: Response) => {
                 SELECT DISTINCT s.*
                 FROM subjects s
                 JOIN mentor_subjects ms ON ms.subject_id = s.id
-                JOIN mentor_profiles mp ON (ms.mentor_id = mp.user_id OR ms.mentor_id = mp.id)
+                JOIN profiles p ON p.id = ms.mentor_id
+                JOIN mentor_profiles mp ON mp.user_id = p.user_id
                 WHERE mp.graduation_id = $1
                 ORDER BY s.name
                 LIMIT 100
