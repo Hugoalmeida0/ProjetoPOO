@@ -117,7 +117,7 @@ router.post('/:mentorId', async (req, res) => {
                 );
                 return resSel.rows;
             } catch (e) {
-                await client.query('ROLLBACK').catch(() => {});
+                await client.query('ROLLBACK').catch(() => { });
                 throw e;
             }
         };
