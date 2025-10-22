@@ -8,12 +8,12 @@ import { Alert, AlertTitle, AlertDescription } from "@/componentes/ui/alert";
 import { useGraduations } from "@/hooks/useGraduacoes";
 import { useEffect, useMemo, useState } from "react";
 import { apiClient } from "@/integracoes/api/client";
-import { 
-  Calculator, 
-  Atom, 
-  Laptop, 
-  PenTool, 
-  Globe, 
+import {
+  Calculator,
+  Atom,
+  Laptop,
+  PenTool,
+  Globe,
   TrendingUp,
   Building,
   Zap,
@@ -79,19 +79,19 @@ const GraduationDetails = () => {
   return (
     <div className="min-h-screen bg-background">
       <Cabecalho />
-      
+
       {/* Hero Section */}
       <section className="py-20 bg-gradient-hero text-white">
         <div className="container mx-auto px-4">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => navigate("/")}
             className="mb-8 text-white hover:bg-white/10"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar às Graduações
           </Button>
-          
+
           <div className="max-w-4xl">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               {graduation.name}
