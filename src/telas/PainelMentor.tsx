@@ -191,8 +191,8 @@ export default function MentorDashboard() {
     const filteredSubjects = useMemo(() => {
         if (!searchTerm.trim()) return subjectsByName;
         const lower = searchTerm.toLowerCase();
-        return subjectsByName.filter((s: any) => 
-            s.name.toLowerCase().includes(lower) || 
+        return subjectsByName.filter((s: any) =>
+            s.name.toLowerCase().includes(lower) ||
             (s.description && s.description.toLowerCase().includes(lower))
         );
     }, [subjectsByName, searchTerm]);
