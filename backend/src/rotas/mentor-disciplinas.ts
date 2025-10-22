@@ -35,6 +35,16 @@ router.post('/:mentorId', async (req, res) => {
             return res.status(400).json({ error: 'subject_ids must be an array' });
         }
 
+        // Verificar se o user (mentor) existe
+        const userCheck = await client.query(
+            'SELECT id FROM users WHERE id = $1',
+            [mentorId]
+        );
+        
+        if (userCheck.rows.length === 0) {
+            return res.status(404).json({ error: 'Mentor not found' });
+        }
+
         await client.query('BEGIN');
 
         // Delete existing subjects for this mentor

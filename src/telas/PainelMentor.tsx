@@ -167,13 +167,27 @@ export default function MentorDashboard() {
                 full_name: fullName,
                 bio,
             });
-            // Atualizar mentor (campos profissionais)
-            await apiClient.mentors.update(user.id, {
-                location,
-                availability,
-                experience_years: typeof experienceYears === 'number' ? experienceYears : Number(experienceYears) || 0,
-                graduation_id: graduationId || null,
-            });
+            
+            // Se mentor não existe, criar primeiro
+            if (!mentorInfo) {
+                const newMentor = await apiClient.mentors.create({
+                    user_id: user.id,
+                    location,
+                    availability,
+                    experience_years: typeof experienceYears === 'number' ? experienceYears : Number(experienceYears) || 0,
+                    graduation_id: graduationId || null,
+                });
+                setMentorInfo(newMentor);
+            } else {
+                // Atualizar mentor (campos profissionais)
+                await apiClient.mentors.update(user.id, {
+                    location,
+                    availability,
+                    experience_years: typeof experienceYears === 'number' ? experienceYears : Number(experienceYears) || 0,
+                    graduation_id: graduationId || null,
+                });
+            }
+            
             // Atualizar especialidades (usando user_id ao invés de mentor.id)
             await apiClient.mentorSubjects.setSubjects(user.id, selectedSubjectIds);
 
