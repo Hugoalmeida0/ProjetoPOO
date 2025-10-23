@@ -25,6 +25,18 @@ router.get('/:mentorId', async (req, res) => {
                      ORDER BY s.name`, [mentorProfileId]);
             }
         }
+        // Se ainda nada, tentar via profiles.id (FK real em produção)
+        if (result.rows.length === 0) {
+            const pr = await db_1.pool.query('SELECT id FROM profiles WHERE id = $1 OR user_id = $1 LIMIT 1', [mentorId]);
+            const profileId = pr.rows?.[0]?.id;
+            if (profileId) {
+                result = await db_1.pool.query(`SELECT s.* 
+                     FROM subjects s
+                     JOIN mentor_subjects ms ON s.id = ms.subject_id
+                     WHERE ms.mentor_id = $1
+                     ORDER BY s.name`, [profileId]);
+            }
+        }
         res.json(result.rows);
     }
     catch (error) {
@@ -46,7 +58,20 @@ router.post('/:mentorId', async (req, res) => {
         const mentorProfileId = mp.rows?.[0]?.id;
         // Buscar profiles.id (tabela que a FK realmente referencia!)
         const profileResult = await client.query('SELECT id FROM profiles WHERE id = $1 LIMIT 1', [mentorId]);
-        const profileId = profileResult.rows?.[0]?.id;
+        let profileId = profileResult.rows?.[0]?.id;
+        // Se não encontrou por id, tentar por user_id (schema comum em perfis)
+        if (!profileId) {
+            try {
+                const profileByUser = await client.query('SELECT id FROM profiles WHERE user_id = $1 LIMIT 1', [mentorId]);
+                profileId = profileByUser.rows?.[0]?.id;
+                if (profileId) {
+                    console.log('[DEBUG] profileId resolved via user_id:', profileId);
+                }
+            }
+            catch (e) {
+                // ignora
+            }
+        }
         console.log('[DEBUG] mentorId (from params):', mentorId);
         console.log('[DEBUG] mentorProfileId (from DB):', mentorProfileId);
         console.log('[DEBUG] profileId (from DB):', profileId);
