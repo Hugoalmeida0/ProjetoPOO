@@ -40,10 +40,24 @@ const Header = () => {
           </div>
 
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#materias" className="text-foreground hover:text-primary transition-smooth">
+            <a
+              href="/#materias"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/#materias');
+              }}
+              className="text-foreground hover:text-primary transition-smooth"
+            >
               Matérias
             </a>
-            <a href="#mentores" className="text-foreground hover:text-primary transition-smooth">
+            <a
+              href="/#mentores"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/#mentores');
+              }}
+              className="text-foreground hover:text-primary transition-smooth"
+            >
               Mentores
             </a>
             {!user?.is_mentor && (
@@ -55,7 +69,14 @@ const Header = () => {
                 Ser Mentor
               </Button>
             )}
-            <a href="#sobre" className="text-foreground hover:text-primary transition-smooth">
+            <a
+              href="/#sobre"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/#sobre');
+              }}
+              className="text-foreground hover:text-primary transition-smooth"
+            >
               Sobre
             </a>
           </nav>
