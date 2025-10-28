@@ -5,7 +5,8 @@ import MentorCard from "@/componentes/CardMentor";
 import { Button } from "@/componentes/ui/button";
 import { useGraduations } from "@/hooks/useGraduacoes";
 import useMentors from "@/hooks/useMentores";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import {
   Calculator,
   Atom,
@@ -26,14 +27,40 @@ const Index = () => {
   const { data: graduations = [], isLoading: graduationsLoading } = useGraduations();
   const { mentors, loading: mentorsLoading } = useMentors();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Faz scroll programático quando houver hash na URL (ex: /#mentores)
+  useEffect(() => {
+    const hash = location.hash;
+    if (!hash) return;
+
+    const id = hash.replace('#', '');
+    let attempts = 0;
+
+    const tryScroll = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        // small delay to ensure any layout is ready
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      attempts += 1;
+      if (attempts < 6) {
+        setTimeout(tryScroll, 150);
+      }
+    };
+
+    // start after a micro delay to let React render the section
+    setTimeout(tryScroll, 50);
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-background">
       <Cabecalho />
       <Hero />
 
-  {/* Graduations Section */}
-  <section id="materias" className="py-20 bg-muted/20">
+      {/* Graduations Section */}
+      <section id="materias" className="py-20 bg-muted/20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">Graduações Disponíveis</h2>
@@ -119,8 +146,8 @@ const Index = () => {
         </div>
       </section>
 
-  {/* CTA Section */}
-  <section id="sobre" className="py-20 bg-gradient-hero text-white">
+      {/* CTA Section */}
+      <section id="sobre" className="py-20 bg-gradient-hero text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold mb-4">Pronto para Começar?</h2>
           <p className="text-xl mb-8 text-white/90 max-w-2xl mx-auto">
