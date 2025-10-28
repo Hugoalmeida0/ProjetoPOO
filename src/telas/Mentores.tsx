@@ -7,12 +7,24 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAutenticacao';
 import { apiClient } from '@/integracoes/api/client';
 import { useNavigate } from 'react-router-dom';
+import { Input } from '@/componentes/ui/input';
+import { cn } from '@/lib/utils';
 
 const Mentors = () => {
     const { mentors, loading, error } = useMentors();
     const { toast } = useToast();
     const { user } = useAuth();
     const navigate = useNavigate();
+
+    // Filtros
+    const [subjectQuery, setSubjectQuery] = useState('');
+    const [subjectSuggestions, setSubjectSuggestions] = useState<any[]>([]);
+    const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
+
+    const [graduationQuery, setGraduationQuery] = useState('');
+    const [graduationSuggestions, setGraduationSuggestions] = useState<string[]>([]);
+
+    const [mentorSubjectsMap, setMentorSubjectsMap] = useState<Record<string, any[]>>({});
 
     // Alerta para mentor logado com cadastro incompleto
     const [missingFields, setMissingFields] = useState<string[]>([]);
@@ -44,14 +56,86 @@ const Mentors = () => {
         checkMentorProfile();
     }, [user?.id, user?.is_mentor, toast]);
 
-    // Filtrar somente mentores com dados mínimos (nome e preço)
-    const visibleMentors = useMemo(() => {
-        return mentors.filter((m: any) => {
-            const hasName = !!(m.profiles?.full_name && String(m.profiles.full_name).trim());
-            const hasPrice = typeof m.price_per_hour === 'number' && m.price_per_hour > 0;
-            return hasName && hasPrice;
-        });
+    // Lista base: mostrar todos os mentores cadastrados (catálogo completo)
+    const allMentors = mentors || [];
+
+    // Buscar lista de matérias para autocomplete
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const subs = await apiClient.subjects.getAll();
+                if (mounted) setSubjectSuggestions(subs || []);
+            } catch (e) {
+                console.debug('Erro ao buscar subjects para autocomplete', e);
+            }
+        })();
+        return () => { mounted = false; };
+    }, []);
+
+    // Derivar opções de graduação a partir dos perfis dos mentores
+    useEffect(() => {
+        const grads = Array.from(new Set((mentors || []).map((m: any) => m.profiles?.graduation).filter(Boolean)));
+        setGraduationSuggestions(grads as string[]);
     }, [mentors]);
+
+    // Quando um assunto é selecionado, popular mentorSubjectsMap (para filtrar)
+    useEffect(() => {
+        if (!selectedSubject) {
+            setMentorSubjectsMap({});
+            return;
+        }
+        let mounted = true;
+        (async () => {
+            try {
+                const entries = await Promise.all(allMentors.map(async (m: any) => {
+                    try {
+                        const subs = await apiClient.mentorSubjects.getByMentorId(m.user_id || m.id);
+                        return [m.user_id || m.id, subs || []] as const;
+                    } catch (e) {
+                        return [m.user_id || m.id, []] as const;
+                    }
+                }));
+                if (!mounted) return;
+                const map: Record<string, any[]> = {};
+                for (const [k, v] of entries) map[k as string] = v as any[];
+                setMentorSubjectsMap(map);
+            } catch (e) {
+                console.debug('Erro ao popular mentorSubjectsMap', e);
+            }
+        })();
+        return () => { mounted = false; };
+    }, [selectedSubject, allMentors]);
+
+    // Aplicar filtros (nome da matéria e graduação)
+    const visibleMentors = useMemo(() => {
+        let list = allMentors.slice();
+
+        if (graduationQuery) {
+            const q = String(graduationQuery).toLowerCase();
+            list = list.filter((m: any) => String(m.profiles?.graduation || '').toLowerCase().includes(q));
+        }
+
+        if (selectedSubject) {
+            const subjectId = selectedSubject.id || selectedSubject._id || null;
+            if (subjectId) {
+                list = list.filter((m: any) => {
+                    const key = m.user_id || m.id;
+                    const subs = mentorSubjectsMap[key] || [];
+                    return subs.some((s: any) => String(s.id) === String(subjectId) || String(s.name).toLowerCase() === String(selectedSubject.name || '').toLowerCase());
+                });
+            } else {
+                const name = (selectedSubject.name || selectedSubject).toLowerCase();
+                list = list.filter((m: any) => {
+                    const key = m.user_id || m.id;
+                    const subs = mentorSubjectsMap[key] || [];
+                    return subs.some((s: any) => String(s.name || '').toLowerCase().includes(name));
+                });
+            }
+        }
+
+        return list;
+    }, [allMentors, graduationQuery, selectedSubject, mentorSubjectsMap]);
 
     return (
         <div className="container mx-auto p-4">
@@ -72,6 +156,71 @@ const Mentors = () => {
 
             {/* CRUD de mentor removido da UI pública */}
 
+            {/* Filtros: Matéria (autocomplete) e Graduação */}
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                <div className="relative">
+                    <label className="text-sm text-muted-foreground">Nome da Matéria</label>
+                    <Input
+                        placeholder="Digite uma matéria..."
+                        value={subjectQuery}
+                        onChange={(e) => {
+                            setSubjectQuery((e.target as HTMLInputElement).value);
+                            setSelectedSubject(null);
+                        }}
+                    />
+                    {subjectQuery && (
+                        <div className="absolute z-40 mt-1 w-full bg-card border rounded shadow-sm max-h-48 overflow-auto">
+                            {subjectSuggestions
+                                .filter(s => String(s.name || s).toLowerCase().includes(subjectQuery.toLowerCase()))
+                                .slice(0, 8)
+                                .map((s: any) => (
+                                    <div
+                                        key={s.id || s.name}
+                                        className="px-3 py-2 hover:bg-muted/50 cursor-pointer"
+                                        onClick={() => {
+                                            setSelectedSubject(s);
+                                            setSubjectQuery(s.name || s);
+                                        }}
+                                    >
+                                        {s.name || s}
+                                    </div>
+                                ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="relative">
+                    <label className="text-sm text-muted-foreground">Busca por Graduação</label>
+                    <Input
+                        placeholder="Digite uma graduação..."
+                        value={graduationQuery}
+                        onChange={(e) => setGraduationQuery((e.target as HTMLInputElement).value)}
+                    />
+                    {graduationQuery && (
+                        <div className="absolute z-40 mt-1 w-full bg-card border rounded shadow-sm max-h-48 overflow-auto">
+                            {graduationSuggestions
+                                .filter(g => String(g).toLowerCase().includes(graduationQuery.toLowerCase()))
+                                .slice(0, 8)
+                                .map((g: any) => (
+                                    <div
+                                        key={g}
+                                        className="px-3 py-2 hover:bg-muted/50 cursor-pointer"
+                                        onClick={() => setGraduationQuery(g)}
+                                    >
+                                        {g}
+                                    </div>
+                                ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex gap-2 items-end">
+                    <Button variant="outline" onClick={() => { setSubjectQuery(''); setSelectedSubject(null); setGraduationQuery(''); setMentorSubjectsMap({}); }}>
+                        Limpar filtros
+                    </Button>
+                </div>
+            </div>
+
             {loading && <p>Carregando...</p>}
             {error && <p className="text-red-500">{error}</p>}
 
@@ -83,7 +232,7 @@ const Mentors = () => {
                             name={m.profiles?.full_name || 'Sem nome'}
                             course={m.profiles?.graduation || 'N/A'}
                             period={m.experience_years ? `${m.experience_years} anos exp.` : '--'}
-                            subjects={[]}
+                            subjects={(mentorSubjectsMap[m.user_id || m.id] || []).map((s: any) => s.name || s)}
                             rating={m.avg_rating ?? 0}
                             reviews={m.total_ratings ?? 0}
                             location={m.location || '-'}
