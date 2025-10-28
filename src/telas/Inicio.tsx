@@ -32,8 +32,8 @@ const Index = () => {
       <Cabecalho />
       <Hero />
 
-      {/* Graduations Section */}
-      <section id="graduacoes" className="py-20 bg-muted/20">
+  {/* Graduations Section */}
+  <section id="materias" className="py-20 bg-muted/20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">Graduações Disponíveis</h2>
@@ -119,8 +119,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-hero text-white">
+  {/* CTA Section */}
+  <section id="sobre" className="py-20 bg-gradient-hero text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl font-bold mb-4">Pronto para Começar?</h2>
           <p className="text-xl mb-8 text-white/90 max-w-2xl mx-auto">
