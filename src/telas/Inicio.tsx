@@ -7,6 +7,7 @@ import { useGraduations } from "@/hooks/useGraduacoes";
 import useMentors from "@/hooks/useMentores";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { getFeaturedMentors } from "@/lib/mentors";
 import {
   Calculator,
   Atom,
@@ -22,6 +23,8 @@ import {
   Briefcase,
   Users
 } from "lucide-react";
+
+const TOP_MENTORS = 3; // Configurável: quantos mentores destacar
 
 const Index = () => {
   const { data: graduations = [], isLoading: graduationsLoading } = useGraduations();
@@ -107,6 +110,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">Mentores em Destaque</h2>
+            <p className="text-sm text-muted-foreground">Mostrando os {TOP_MENTORS} melhores mentores</p>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Conheça mentores cadastrados na plataforma
             </p>
@@ -120,20 +124,26 @@ const Index = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {mentors.slice(0, 6).map((m: any) => (
-                <MentorCard
-                  key={m.id}
-                  mentorId={m.user_id}
-                  name={m.profiles?.full_name || 'Sem nome'}
-                  course={m.profiles?.graduation || 'N/A'}
-                  period={m.experience_years ? `${m.experience_years} anos exp.` : '--'}
-                  subjects={[]}
-                  rating={m.avg_rating ?? 0}
-                  reviews={m.total_ratings ?? 0}
-                  location={m.location || '-'}
-                  avatar={m.profiles?.avatar_url}
-                />
-              ))}
+              {(() => {
+                // Ordena por avg_rating (decrescente) e pega top 3
+                // Usa utilitário para pegar os top N mentores
+                const featured = getFeaturedMentors(mentors, TOP_MENTORS);
+
+                return featured.map((m: any) => (
+                  <MentorCard
+                    key={m.id}
+                    mentorId={m.user_id}
+                    name={m.profiles?.full_name || 'Sem nome'}
+                    course={m.profiles?.graduation || 'N/A'}
+                    period={m.experience_years ? `${m.experience_years} anos exp.` : '--'}
+                    subjects={[]}
+                    rating={m.avg_rating ?? 0}
+                    reviews={m.total_ratings ?? 0}
+                    location={m.location || '-'}
+                    avatar={m.profiles?.avatar_url}
+                  />
+                ));
+              })()}
             </div>
           )}
 
