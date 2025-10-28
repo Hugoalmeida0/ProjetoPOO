@@ -107,6 +107,31 @@ const Mentors = () => {
         return () => { mounted = false; };
     }, [selectedSubject, allMentors]);
 
+    // Pré-popular especialidades para os mentores visíveis (para exibir em cards)
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const toFetch = (allMentors || []).slice(0, 50); // limite para evitar flood
+                const entries = await Promise.all(toFetch.map(async (m: any) => {
+                    try {
+                        const subs = await apiClient.mentorSubjects.getByMentorId(m.user_id || m.id);
+                        return [m.user_id || m.id, subs || []] as const;
+                    } catch (e) {
+                        return [m.user_id || m.id, []] as const;
+                    }
+                }));
+                if (!mounted) return;
+                const map: Record<string, any[]> = { ...mentorSubjectsMap };
+                for (const [k, v] of entries) map[k as string] = v as any[];
+                setMentorSubjectsMap(map);
+            } catch (e) {
+                console.debug('Erro ao pré-popular mentorSubjectsMap', e);
+            }
+        })();
+        return () => { mounted = false; };
+    }, [allMentors]);
+
     // Aplicar filtros (nome da matéria e graduação)
     const visibleMentors = useMemo(() => {
         let list = allMentors.slice();
@@ -149,7 +174,7 @@ const Mentors = () => {
                     <AlertTitle>Complete seu cadastro de mentor</AlertTitle>
                     <AlertDescription>
                         Para aparecer na lista e receber agendamentos, finalize os campos: {missingFields.join(', ')}.
-                        <Button variant="link" className="pl-2" onClick={() => navigate('/account')}>Ir para Minha Conta</Button>
+                        <Button variant="link" className="pl-2" onClick={() => navigate('/mentor/dashboard')}>Ir para Meu Cadastro</Button>
                     </AlertDescription>
                 </Alert>
             )}

@@ -19,21 +19,26 @@ const MentorDetails = () => {
   const [mentor, setMentor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [completedSessions, setCompletedSessions] = useState(0);
+  const [mentorSubjects, setMentorSubjects] = useState<any[]>([]);
 
   useEffect(() => {
     const loadMentor = async () => {
       if (!id) return;
       try {
         setLoading(true);
-        const [mentorData, profileData, bookingsData] = await Promise.all([
+        const [mentorData, profileData, bookingsData, subjectsData] = await Promise.all([
           getMentor(id).catch(() => null),
           apiClient.profiles.getByUserId(id).catch(() => null),
           apiClient.bookings.getByMentorId(id).catch(() => []),
+          apiClient.mentorSubjects.getByMentorId(id).catch(() => []),
         ]);
         if (!mentorData || !profileData) {
           throw new Error('Mentor não encontrado');
         }
         setMentor({ ...mentorData, profiles: profileData });
+
+  // Especialidades
+  setMentorSubjects(subjectsData || []);
 
         // Contar sessões exceto as canceladas
         const completedCount = (bookingsData || []).filter((b: any) => b.status !== 'cancelled').length;
@@ -143,6 +148,19 @@ const MentorDetails = () => {
                     <div>
                       <h3 className="font-semibold mb-3">Disponibilidade</h3>
                       <Badge variant="secondary">{mentor.availability || 'Flexível'}</Badge>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold mb-3">Especialidades</h3>
+                      {mentorSubjects.length === 0 ? (
+                        <p className="text-muted-foreground">Nenhuma especialidade cadastrada.</p>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {mentorSubjects.map((s: any) => (
+                            <Badge key={s.id || s.name} variant="secondary">{s.name || s}</Badge>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
