@@ -1,5 +1,5 @@
 import { Button } from "@/componentes/ui/button";
-import { GraduationCap, User, LogOut, Calendar, Settings, LayoutDashboard, Bell, X } from "lucide-react";
+import { GraduationCap, User, LogOut, Calendar, Settings, LayoutDashboard, Bell, X, Menu } from "lucide-react";
 import { useAuth } from "@/hooks/useAutenticacao";
 import { useNotifications } from "@/hooks/useNotificacoes";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/componentes/ui/dialog";
 import { Badge } from "@/componentes/ui/badge";
 import { ScrollArea } from "@/componentes/ui/scroll-area";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/componentes/ui/sheet";
 import { ModalAvaliacao } from "@/componentes/ModalAvaliacao";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ const Header = () => {
   const location = useLocation();
   const [isModalAvaliacaoOpen, setIsModalAvaliacaoOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -28,6 +30,11 @@ const Header = () => {
 
   // Verifica a rota atual para destacar o item ativo
   const isActive = (path: string) => location.pathname === path;
+
+  const handleMobileNavigation = (path: string) => {
+    navigate(path);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-50">
@@ -62,15 +69,17 @@ const Header = () => {
             >
               Mentores
             </button>
-            <button
-              onClick={() => navigate('/tornar-se-mentor')}
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                isActive('/tornar-se-mentor') ? "text-primary font-bold" : "text-foreground"
-              )}
-            >
-              Cadastrar como Mentor
-            </button>
+            {!user?.is_mentor && (
+              <button
+                onClick={() => navigate('/tornar-se-mentor')}
+                className={cn(
+                  "text-sm font-medium transition-colors hover:text-primary",
+                  isActive('/tornar-se-mentor') ? "text-primary font-bold" : "text-foreground"
+                )}
+              >
+                Cadastrar como Mentor
+              </button>
+            )}
             <button
               onClick={() => navigate('/saiba-mais')}
               className={cn(
@@ -83,6 +92,120 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-3">
+            {/* Menu Mobile */}
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <SheetHeader>
+                  <SheetTitle>Menu de Navegação</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-4 mt-8">
+                  <button
+                    onClick={() => handleMobileNavigation('/')}
+                    className={cn(
+                      "text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                      isActive('/') 
+                        ? "bg-primary text-primary-foreground font-bold" 
+                        : "hover:bg-muted"
+                    )}
+                  >
+                    Página Inicial
+                  </button>
+                  <button
+                    onClick={() => handleMobileNavigation('/mentors')}
+                    className={cn(
+                      "text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                      isActive('/mentors') 
+                        ? "bg-primary text-primary-foreground font-bold" 
+                        : "hover:bg-muted"
+                    )}
+                  >
+                    Mentores
+                  </button>
+                  {!user?.is_mentor && (
+                    <button
+                      onClick={() => handleMobileNavigation('/tornar-se-mentor')}
+                      className={cn(
+                        "text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                        isActive('/tornar-se-mentor') 
+                          ? "bg-primary text-primary-foreground font-bold" 
+                          : "hover:bg-muted"
+                      )}
+                    >
+                      Cadastrar como Mentor
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleMobileNavigation('/saiba-mais')}
+                    className={cn(
+                      "text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                      isActive('/saiba-mais') 
+                        ? "bg-primary text-primary-foreground font-bold" 
+                        : "hover:bg-muted"
+                    )}
+                  >
+                    Saiba Mais
+                  </button>
+
+                  {/* Itens do usuário no mobile */}
+                  {user && (
+                    <>
+                      <div className="border-t my-2"></div>
+                      {user?.is_mentor && (
+                        <button
+                          onClick={() => handleMobileNavigation('/mentor/dashboard')}
+                          className="text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-muted transition-colors flex items-center gap-2"
+                        >
+                          <LayoutDashboard className="h-4 w-4" />
+                          Painel do Mentor
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleMobileNavigation('/account')}
+                        className="text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-muted transition-colors flex items-center gap-2"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Minha Conta
+                      </button>
+                      <button
+                        onClick={() => handleMobileNavigation('/meus-agendamentos')}
+                        className="text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-muted transition-colors flex items-center gap-2"
+                      >
+                        <Calendar className="h-4 w-4" />
+                        Meus Agendamentos
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleSignOut();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="text-left px-4 py-3 rounded-lg text-sm font-medium hover:bg-destructive/10 text-destructive transition-colors flex items-center gap-2"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sair
+                      </button>
+                    </>
+                  )}
+
+                  {!user && (
+                    <>
+                      <div className="border-t my-2"></div>
+                      <Button variant="outline" onClick={() => handleMobileNavigation('/auth')}>
+                        Entrar
+                      </Button>
+                      <Button variant="hero" onClick={() => handleMobileNavigation('/auth')}>
+                        Cadastrar
+                      </Button>
+                    </>
+                  )}
+                </nav>
+              </SheetContent>
+            </Sheet>
+
             {user?.is_mentor && (
               <Dialog>
                 <DialogTrigger asChild>
