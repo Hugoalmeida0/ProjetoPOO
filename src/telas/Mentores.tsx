@@ -43,7 +43,7 @@ const Mentors = () => {
     useEffect(() => {
         const set = new Set<string>();
         for (const m of allMentors) {
-            const raw = m?.subjects;
+            const raw = (m as any)?.subjects;
             if (!raw) continue;
             if (typeof raw === 'string') {
                 for (const s of raw.split(',')) {
