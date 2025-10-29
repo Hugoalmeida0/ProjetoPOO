@@ -173,6 +173,20 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'status is required' });
         }
 
+        // Buscar status anterior para gerar notificação adequada
+        const previousBooking = await pool.query(
+            `SELECT status, mentor_id, student_id FROM bookings WHERE id = $1`,
+            [bookingId]
+        );
+
+        if (previousBooking.rows.length === 0) {
+            return res.status(404).json({ error: 'Booking not found' });
+        }
+
+        const oldStatus = previousBooking.rows[0].status;
+        const mentorId = previousBooking.rows[0].mentor_id;
+        const studentId = previousBooking.rows[0].student_id;
+
         let result;
 
         // If cancelling, also persist the cancel_reason
@@ -206,40 +220,65 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
 
         const booking = result.rows[0];
 
-        // Se for cancelamento com mensagem, criar notificação para a outra parte
-        if (status === 'cancelled' && cancel_message && user_id) {
-            // Determinar quem deve receber a notificação
-            const recipientId = booking.mentor_id === user_id ? booking.student_id : booking.mentor_id;
-
+        // 🔔 SISTEMA DE NOTIFICAÇÕES AUTOMÁTICAS POR MUDANÇA DE STATUS
+        const createNotification = async (recipientId: string, message: string) => {
             try {
                 await pool.query(
-                    `INSERT INTO notifications (user_id, message, booking_id, created_at)
-                     VALUES ($1, $2, $3, NOW())`,
-                    [recipientId, `Agendamento cancelado: ${cancel_message}`, bookingId]
+                    `INSERT INTO notifications (user_id, message, booking_id, created_at, read)
+                     VALUES ($1, $2, $3, NOW(), false)`,
+                    [recipientId, message, bookingId]
                 );
             } catch (notifErr) {
-                console.error('Erro ao criar notificação de cancelamento:', notifErr);
-                // Não falhar a requisição se a notificação falhar
+                console.error('Erro ao criar notificação:', notifErr);
+            }
+        };
+
+        // Apenas notificar se o status mudou
+        if (oldStatus !== status) {
+            // Determinar quem deve receber a notificação (sempre a outra parte)
+            const recipientId = user_id === mentorId ? studentId : mentorId;
+            const isRecipientMentor = recipientId === mentorId;
+
+            let notificationMessage = '';
+
+            switch (status) {
+                case 'cancelled':
+                    notificationMessage = cancel_message 
+                        ? `Agendamento cancelado: ${cancel_message}` 
+                        : 'Seu agendamento foi cancelado.';
+                    await createNotification(recipientId, notificationMessage);
+                    break;
+
+                case 'confirmed':
+                    if (oldStatus === 'pending') {
+                        notificationMessage = isRecipientMentor
+                            ? 'Você confirmou um agendamento.'
+                            : 'Seu agendamento foi confirmado pelo mentor!';
+                        await createNotification(recipientId, notificationMessage);
+                    }
+                    break;
+
+                case 'in-progress':
+                    notificationMessage = isRecipientMentor
+                        ? 'Um agendamento está em andamento.'
+                        : 'Sua mentoria está em andamento!';
+                    await createNotification(recipientId, notificationMessage);
+                    break;
+
+                case 'completed':
+                    // Notificar ambos
+                    await createNotification(studentId, 'Sua mentoria foi finalizada! Clique aqui para avaliar sua experiência.');
+                    if (studentId !== mentorId) {
+                        await createNotification(mentorId, 'Uma mentoria foi finalizada.');
+                    }
+                    break;
+
+                default:
+                    // Para outros status, notificação genérica
+                    notificationMessage = `Status do agendamento alterado para: ${status}`;
+                    await createNotification(recipientId, notificationMessage);
             }
         }
-
-        // Se for finalização, criar notificação para o estudante
-        if (status === 'completed' && user_id) {
-            // Determinar quem deve receber a notificação (sempre o estudante)
-            const recipientId = booking.student_id;
-
-            try {
-                await pool.query(
-                    `INSERT INTO notifications (user_id, message, booking_id, created_at)
-                     VALUES ($1, $2, $3, NOW())`,
-                    [recipientId, `Sua mentoria foi finalizada! Clique aqui para avaliar sua experiência.`, bookingId]
-                );
-            } catch (notifErr) {
-                console.error('Erro ao criar notificação de finalização:', notifErr);
-                // Não falhar a requisição se a notificação falhar
-            }
-        }
-
 
         return res.json(booking);
     } catch (err) {
