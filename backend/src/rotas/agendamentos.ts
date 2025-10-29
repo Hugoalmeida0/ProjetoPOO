@@ -156,7 +156,23 @@ router.post('/', async (req: Request, res: Response) => {
             }
         }
 
-        return res.status(201).json(result.rows[0]);
+        const newBooking = result.rows[0];
+
+        // 🔔 NOTIFICAÇÃO: Nova mentoria pendente para o mentor
+        if (status === 'pending') {
+            try {
+                await pool.query(
+                    `INSERT INTO notifications (user_id, message, booking_id, created_at, read)
+                     VALUES ($1, $2, $3, NOW(), false)`,
+                    [mentor_id, 'Você recebeu uma nova solicitação de mentoria! Clique aqui para revisar e confirmar o agendamento.', newBooking.id]
+                );
+            } catch (notifErr) {
+                console.error('Erro ao criar notificação de nova mentoria pendente:', notifErr);
+                // Não bloquear a criação do booking por erro na notificação
+            }
+        }
+
+        return res.status(201).json(newBooking);
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: 'Internal server error' });
@@ -186,6 +202,15 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
         const oldStatus = previousBooking.rows[0].status;
         const mentorId = previousBooking.rows[0].mentor_id;
         const studentId = previousBooking.rows[0].student_id;
+
+        // ✅ REGRA DE NEGÓCIO: Só pode finalizar mentoria após confirmação
+        if (status === 'completed') {
+            if (oldStatus !== 'confirmed' && oldStatus !== 'in-progress') {
+                return res.status(400).json({ 
+                    error: 'Não é possível finalizar uma mentoria que não foi confirmada. A mentoria deve estar com status "confirmada" ou "em andamento" para ser finalizada.' 
+                });
+            }
+        }
 
         let result;
 
@@ -235,48 +260,53 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
 
         // Apenas notificar se o status mudou
         if (oldStatus !== status) {
-            // Determinar quem deve receber a notificação (sempre a outra parte)
-            const recipientId = user_id === mentorId ? studentId : mentorId;
-            const isRecipientMentor = recipientId === mentorId;
+            // Determinar quem deve receber a notificação
+            // Para a maioria dos casos: notificar a outra parte
+            // Para alguns casos específicos: notificar ambas as partes
+            const isUserMentor = user_id === mentorId;
+            const isUserStudent = user_id === studentId;
 
             let notificationMessage = '';
 
             switch (status) {
                 case 'cancelled':
+                    // Notificar a parte que NÃO cancelou
+                    const recipientForCancel = user_id === mentorId ? studentId : mentorId;
                     notificationMessage = cancel_message 
                         ? `Agendamento cancelado: ${cancel_message}` 
                         : 'Seu agendamento foi cancelado.';
-                    await createNotification(recipientId, notificationMessage);
+                    await createNotification(recipientForCancel, notificationMessage);
                     break;
 
                 case 'confirmed':
                     if (oldStatus === 'pending') {
-                        notificationMessage = isRecipientMentor
-                            ? 'Você confirmou um agendamento.'
-                            : 'Seu agendamento foi confirmado pelo mentor!';
-                        await createNotification(recipientId, notificationMessage);
+                        // Notificar o estudante que o mentor confirmou
+                        notificationMessage = 'Seu agendamento foi confirmado pelo mentor!';
+                        await createNotification(studentId, notificationMessage);
                     }
                     break;
 
                 case 'in-progress':
-                    notificationMessage = isRecipientMentor
-                        ? 'Um agendamento está em andamento.'
-                        : 'Sua mentoria está em andamento!';
-                    await createNotification(recipientId, notificationMessage);
+                    // Notificar ambas as partes que a mentoria iniciou
+                    await createNotification(studentId, 'Sua mentoria está em andamento!');
+                    if (studentId !== mentorId) {
+                        await createNotification(mentorId, 'Sua mentoria está em andamento!');
+                    }
                     break;
 
                 case 'completed':
-                    // Notificar ambos
+                    // Notificar ambas as partes
                     await createNotification(studentId, 'Sua mentoria foi finalizada! Clique aqui para avaliar sua experiência.');
                     if (studentId !== mentorId) {
-                        await createNotification(mentorId, 'Uma mentoria foi finalizada.');
+                        await createNotification(mentorId, 'Uma mentoria foi finalizada com sucesso.');
                     }
                     break;
 
                 default:
-                    // Para outros status, notificação genérica
+                    // Para outros status, notificar a outra parte
+                    const recipientForOther = user_id === mentorId ? studentId : mentorId;
                     notificationMessage = `Status do agendamento alterado para: ${status}`;
-                    await createNotification(recipientId, notificationMessage);
+                    await createNotification(recipientForOther, notificationMessage);
             }
         }
 
