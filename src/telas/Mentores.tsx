@@ -143,16 +143,7 @@ const Mentors = () => {
                 </div>
             </div>
 
-            {/* Alerta de cadastro incompleto para mentor logado */}
-            {checkedProfile && user?.is_mentor && missingFields.length > 0 && (
-                <Alert className="mb-4">
-                    <AlertTitle>Complete seu cadastro de mentor</AlertTitle>
-                    <AlertDescription>
-                        Para aparecer na lista e receber agendamentos, finalize os campos: {missingFields.join(', ')}.
-                        <Button variant="link" className="pl-2" onClick={() => navigate('/mentor/dashboard')}>Ir para Meu Cadastro</Button>
-                    </AlertDescription>
-                </Alert>
-            )}
+            {/* Alerta removido: verificação de perfil de mentor era feita em outro lugar (Painel do Mentor) */}
 
             {/* CRUD de mentor removido da UI pública */}
 
