@@ -75,7 +75,22 @@ export default function MentorDashboard() {
                 if (mentorData) setMentorInfo(mentorData);
                 if (profileData) setProfile(profileData);
                 setSubjects(allSubjects || []);
-                const preSelected = (mentorSubjects || []).map((s: any) => s.id);
+                // Preferir coluna subjects (mentor_profiles.subjects) para popular seleção inicial.
+                let preSelected: string[] = [];
+                if (mentorData && mentorData.subjects) {
+                    // mentorData.subjects pode ser string com nomes separados por vírgula ou array de nomes
+                    const names = typeof mentorData.subjects === 'string'
+                        ? mentorData.subjects.split(',').map((s: string) => s.trim()).filter(Boolean)
+                        : Array.isArray(mentorData.subjects) ? mentorData.subjects : [];
+                    // Mapear nomes para ids usando allSubjects
+                    const nameToId: Record<string, string> = {};
+                    for (const s of (allSubjects || [])) {
+                        if (s && s.name) nameToId[String(s.name).toLowerCase()] = s.id;
+                    }
+                    preSelected = names.map((n: string) => nameToId[n.toLowerCase()]).filter(Boolean);
+                } else {
+                    preSelected = (mentorSubjects || []).map((s: any) => s.id);
+                }
                 setSelectedSubjectIds(preSelected);
 
                 // Notificar uma única vez que o cadastro ainda não foi concluído
@@ -199,8 +214,27 @@ export default function MentorDashboard() {
                 });
             }
 
-            // Atualizar especialidades (usando user_id ao invés de mentor.id)
-            await apiClient.mentorSubjects.setSubjects(user.id, selectedSubjectIds);
+            // Sincronizar coluna subjects em mentor_profiles (armazenar nomes) e também a tabela de relação para consistência
+            try {
+                const selectedNames = (selectedSubjectIds || []).map(id => {
+                    const found = (subjects || []).find((s: any) => s.id === id);
+                    return found ? found.name : null;
+                }).filter(Boolean) as string[];
+
+                // Atualizar mentor_profiles.subjects via endpoint de mentors (o endpoint já persiste subjects)
+                await apiClient.mentors.update(user.id, {
+                    location,
+                    availability,
+                    experience_years: typeof experienceYears === 'number' ? experienceYears : Number(experienceYears) || 0,
+                    graduation_id: graduationId || null,
+                    subjects: selectedNames.join(', '),
+                });
+
+                // Atualizar relação many-to-many para manter consistência (não obrigatório se preferir apenas coluna)
+                await apiClient.mentorSubjects.setSubjects(user.id, selectedSubjectIds);
+            } catch (err) {
+                console.warn('Erro ao sincronizar subjects em mentor_profiles/mentor_subjects', err);
+            }
 
             toast({ title: 'Cadastro atualizado', description: 'Suas informações foram salvas.' });
         } catch (err: any) {

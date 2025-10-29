@@ -18,32 +18,18 @@ const Mentors = () => {
 
     // Filtros
     const [subjectQuery, setSubjectQuery] = useState('');
-    const [subjectSuggestions, setSubjectSuggestions] = useState<any[]>([]);
-    const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
+    const [subjectSuggestions, setSubjectSuggestions] = useState<string[]>([]);
+    const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
 
     const [graduationQuery, setGraduationQuery] = useState('');
     const [graduationSuggestions, setGraduationSuggestions] = useState<string[]>([]);
-
-    const [mentorSubjectsMap, setMentorSubjectsMap] = useState<Record<string, any[]>>({});
 
     // (Removido) alerta de cadastro incompleto exibido indevidamente nesta rota.
 
     // Lista base: mostrar todos os mentores cadastrados (catálogo completo)
     const allMentors = mentors || [];
 
-    // Buscar lista de matérias para autocomplete
-    useEffect(() => {
-        let mounted = true;
-        (async () => {
-            try {
-                const subs = await apiClient.subjects.getAll();
-                if (mounted) setSubjectSuggestions(subs || []);
-            } catch (e) {
-                console.debug('Erro ao buscar subjects para autocomplete', e);
-            }
-        })();
-        return () => { mounted = false; };
-    }, []);
+    // (antigo) buscávamos subjects da API; agora derivamos as sugestões a partir da coluna subjects de cada mentor.
 
     // Derivar opções de graduação a partir dos perfis dos mentores
     useEffect(() => {
@@ -51,57 +37,21 @@ const Mentors = () => {
         setGraduationSuggestions(grads as string[]);
     }, [mentors]);
 
-    // Quando um assunto é selecionado, popular mentorSubjectsMap (para filtrar)
+    // Derivar sugestões de matérias a partir dos próprios mentores (coluna subjects em mentor_profiles).
     useEffect(() => {
-        if (!selectedSubject) {
-            setMentorSubjectsMap({});
-            return;
+        const set = new Set<string>();
+        for (const m of allMentors) {
+            const raw = m?.subjects;
+            if (!raw) continue;
+            if (typeof raw === 'string') {
+                for (const s of raw.split(',')) {
+                    const t = String(s || '').trim(); if (t) set.add(t);
+                }
+            } else if (Array.isArray(raw)) {
+                for (const s of raw) { const t = String(s || '').trim(); if (t) set.add(t); }
+            }
         }
-        let mounted = true;
-        (async () => {
-            try {
-                const entries = await Promise.all(allMentors.map(async (m: any) => {
-                    try {
-                        const subs = await apiClient.mentorSubjects.getByMentorId(m.user_id || m.id);
-                        return [m.user_id || m.id, subs || []] as const;
-                    } catch (e) {
-                        return [m.user_id || m.id, []] as const;
-                    }
-                }));
-                if (!mounted) return;
-                const map: Record<string, any[]> = {};
-                for (const [k, v] of entries) map[k as string] = v as any[];
-                setMentorSubjectsMap(map);
-            } catch (e) {
-                console.debug('Erro ao popular mentorSubjectsMap', e);
-            }
-        })();
-        return () => { mounted = false; };
-    }, [selectedSubject, allMentors]);
-
-    // Pré-popular especialidades para os mentores visíveis (para exibir em cards)
-    useEffect(() => {
-        let mounted = true;
-        (async () => {
-            try {
-                const toFetch = (allMentors || []).slice(0, 50); // limite para evitar flood
-                const entries = await Promise.all(toFetch.map(async (m: any) => {
-                    try {
-                        const subs = await apiClient.mentorSubjects.getByMentorId(m.user_id || m.id);
-                        return [m.user_id || m.id, subs || []] as const;
-                    } catch (e) {
-                        return [m.user_id || m.id, []] as const;
-                    }
-                }));
-                if (!mounted) return;
-                const map: Record<string, any[]> = { ...mentorSubjectsMap };
-                for (const [k, v] of entries) map[k as string] = v as any[];
-                setMentorSubjectsMap(map);
-            } catch (e) {
-                console.debug('Erro ao pré-popular mentorSubjectsMap', e);
-            }
-        })();
-        return () => { mounted = false; };
+        setSubjectSuggestions(Array.from(set).sort((a, b) => a.localeCompare(b)));
     }, [allMentors]);
 
     // Aplicar filtros (nome da matéria e graduação)
@@ -114,25 +64,22 @@ const Mentors = () => {
         }
 
         if (selectedSubject) {
-            const subjectId = selectedSubject.id || selectedSubject._id || null;
-            if (subjectId) {
-                list = list.filter((m: any) => {
-                    const key = m.user_id || m.id;
-                    const subs = mentorSubjectsMap[key] || [];
-                    return subs.some((s: any) => String(s.id) === String(subjectId) || String(s.name).toLowerCase() === String(selectedSubject.name || '').toLowerCase());
-                });
-            } else {
-                const name = (selectedSubject.name || selectedSubject).toLowerCase();
-                list = list.filter((m: any) => {
-                    const key = m.user_id || m.id;
-                    const subs = mentorSubjectsMap[key] || [];
-                    return subs.some((s: any) => String(s.name || '').toLowerCase().includes(name));
-                });
-            }
+            const name = String(selectedSubject).toLowerCase();
+            list = list.filter((m: any) => {
+                const raw = m?.subjects;
+                if (!raw) return false;
+                if (typeof raw === 'string') {
+                    return raw.split(',').map((s: string) => s.trim().toLowerCase()).some((s: string) => s.includes(name));
+                }
+                if (Array.isArray(raw)) {
+                    return raw.map((s: any) => String(s).toLowerCase()).some((s: string) => s.includes(name));
+                }
+                return false;
+            });
         }
 
         return list;
-    }, [allMentors, graduationQuery, selectedSubject, mentorSubjectsMap]);
+    }, [allMentors, graduationQuery, selectedSubject]);
 
     return (
         <div className="container mx-auto p-4">
@@ -162,18 +109,18 @@ const Mentors = () => {
                     {subjectQuery && (
                         <div className="absolute z-40 mt-1 w-full bg-card border rounded shadow-sm max-h-48 overflow-auto">
                             {subjectSuggestions
-                                .filter(s => String(s.name || s).toLowerCase().includes(subjectQuery.toLowerCase()))
+                                .filter(s => String(s || '').toLowerCase().includes(subjectQuery.toLowerCase()))
                                 .slice(0, 8)
                                 .map((s: any) => (
                                     <div
-                                        key={s.id || s.name}
+                                        key={s}
                                         className="px-3 py-2 hover:bg-muted/50 cursor-pointer"
                                         onClick={() => {
                                             setSelectedSubject(s);
-                                            setSubjectQuery(s.name || s);
+                                            setSubjectQuery(s);
                                         }}
                                     >
-                                        {s.name || s}
+                                        {s}
                                     </div>
                                 ))}
                         </div>
@@ -206,7 +153,7 @@ const Mentors = () => {
                 </div>
 
                 <div className="flex gap-2 items-end">
-                    <Button variant="outline" onClick={() => { setSubjectQuery(''); setSelectedSubject(null); setGraduationQuery(''); setMentorSubjectsMap({}); }}>
+                    <Button variant="outline" onClick={() => { setSubjectQuery(''); setSelectedSubject(null); setGraduationQuery(''); }}>
                         Limpar filtros
                     </Button>
                 </div>
@@ -229,7 +176,7 @@ const Mentors = () => {
                                 }
                             }
 
-                            const fallbackSubjects = (mentorSubjectsMap[m.user_id || m.id] || []).map((s: any) => s.name || s);
+                            const fallbackSubjects: string[] = [];
                             const displaySubjects = subjectsFromProfile.length > 0 ? subjectsFromProfile : fallbackSubjects;
 
                             return (

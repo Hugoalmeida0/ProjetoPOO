@@ -239,10 +239,7 @@ const MentorDetails = () => {
                   <Calendar className="mr-2 h-4 w-4" />
                   Agendar Mentoria
                 </Button>
-                <Button variant="outline" className="w-full" size="lg">
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Enviar Mensagem
-                </Button>
+                {/* Botão 'Enviar Mensagem' removido da interface conforme solicitado */}
               </div>
             </div>
           </div>
