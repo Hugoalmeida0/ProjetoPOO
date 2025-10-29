@@ -37,8 +37,8 @@ const MentorDetails = () => {
         }
         setMentor({ ...mentorData, profiles: profileData });
 
-  // Especialidades
-  setMentorSubjects(subjectsData || []);
+        // Especialidades
+        setMentorSubjects(subjectsData || []);
 
         // Contar sessões exceto as canceladas
         const completedCount = (bookingsData || []).filter((b: any) => b.status !== 'cancelled').length;
@@ -152,15 +152,32 @@ const MentorDetails = () => {
 
                     <div>
                       <h3 className="font-semibold mb-3">Especialidades</h3>
-                      {mentorSubjects.length === 0 ? (
-                        <p className="text-muted-foreground">Nenhuma especialidade cadastrada.</p>
-                      ) : (
-                        <div className="flex flex-wrap gap-2">
-                          {mentorSubjects.map((s: any) => (
-                            <Badge key={s.id || s.name} variant="secondary">{s.name || s}</Badge>
-                          ))}
-                        </div>
-                      )}
+                      {(() => {
+                        // Preferir coluna subjects de mentor_profiles quando disponível
+                        let subjectsFromProfile: string[] = [];
+                        if (mentor?.subjects) {
+                          if (typeof mentor.subjects === 'string') {
+                            subjectsFromProfile = mentor.subjects.split(',').map((s: string) => s.trim()).filter(Boolean);
+                          } else if (Array.isArray(mentor.subjects)) {
+                            subjectsFromProfile = mentor.subjects as string[];
+                          }
+                        }
+
+                        const fallback = mentorSubjects || [];
+                        const toDisplay = subjectsFromProfile.length > 0 ? subjectsFromProfile : fallback.map((s: any) => s.name || s);
+
+                        if (!toDisplay || toDisplay.length === 0) {
+                          return <p className="text-muted-foreground">Nenhuma especialidade cadastrada.</p>;
+                        }
+
+                        return (
+                          <div className="flex flex-wrap gap-2">
+                            {toDisplay.map((s: any, idx: number) => (
+                              <Badge key={s.id || s.name || idx} variant="secondary">{s}</Badge>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </CardContent>
