@@ -30,8 +30,10 @@ export default function MentorDashboard() {
     // Estado do cadastro
     const [profile, setProfile] = useState<any | null>(null);
     const [mentorInfo, setMentorInfo] = useState<any | null>(null);
-    const [subjects, setSubjects] = useState<any[]>([]);
-    const [selectedSubjectIds, setSelectedSubjectIds] = useState<string[]>([]);
+    // availableSubjects: lista derivada da coluna mentor_profiles.subjects de todos os mentores
+    const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
+    // selectedSubjects: nomes das especialidades selecionadas no painel (strings)
+    const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
     const [formLoading, setFormLoading] = useState(false);
     const [formSaving, setFormSaving] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -66,38 +68,35 @@ export default function MentorDashboard() {
             if (!user?.id) return;
             try {
                 setFormLoading(true);
-                const [mentorData, profileData, allSubjects, mentorSubjects] = await Promise.all([
+                const [mentorData, profileData, allMentors] = await Promise.all([
                     apiClient.mentors.getByUserId(user.id).catch(() => null),
                     apiClient.profiles.getByUserId(user.id).catch(() => null),
-                    apiClient.subjects.getAll().catch(() => []),
-                    apiClient.mentorSubjects.getByMentorId(user.id).catch(() => []),
+                    apiClient.mentors.getAll().catch(() => []),
                 ]);
                 if (mentorData) setMentorInfo(mentorData);
                 if (profileData) setProfile(profileData);
-                setSubjects(allSubjects || []);
-                // Preferir coluna subjects (mentor_profiles.subjects) para popular seleção inicial.
-                let preSelected: string[] = [];
-                if (mentorData && mentorData.subjects) {
-                    // mentorData.subjects pode ser string com nomes separados por vírgula ou array de nomes
-                    const names = typeof mentorData.subjects === 'string'
-                        ? mentorData.subjects.split(',').map((s: string) => s.trim()).filter(Boolean)
-                        : Array.isArray(mentorData.subjects) ? mentorData.subjects : [];
-                    // Mapear nomes para ids usando allSubjects (tolerante a pequenas diferenças)
-                    const lowerToId: Record<string, string> = {};
-                    for (const s of (allSubjects || [])) {
-                        if (s && s.name) lowerToId[String(s.name).toLowerCase()] = s.id;
+                // Derivar availableSubjects a partir da coluna subjects de cada mentor_profile
+                const subjSet = new Set<string>();
+                for (const mm of (allMentors || [])) {
+                    const raw = mm?.subjects;
+                    if (!raw) continue;
+                    if (typeof raw === 'string') {
+                        for (const s of raw.split(',')) { const t = String(s || '').trim(); if (t) subjSet.add(t); }
+                    } else if (Array.isArray(raw)) {
+                        for (const s of raw) { const t = String(s || '').trim(); if (t) subjSet.add(t); }
                     }
-                    preSelected = names.map((n: string) => {
-                        const key = n.toLowerCase();
-                        if (lowerToId[key]) return lowerToId[key];
-                        // tentativa fuzzy: encontrar subject cujo nome contenha o token
-                        const fuzzy = (allSubjects || []).find((s: any) => String(s.name).toLowerCase().includes(key));
-                        return fuzzy ? fuzzy.id : null;
-                    }).filter(Boolean) as string[];
-                } else {
-                    preSelected = (mentorSubjects || []).map((s: any) => s.id);
                 }
-                setSelectedSubjectIds(preSelected);
+                setAvailableSubjects(Array.from(subjSet).sort((a,b) => a.localeCompare(b)));
+                // Popular seleção inicial com os nomes salvos em mentor_profiles.subjects
+                let preSelectedNames: string[] = [];
+                if (mentorData && mentorData.subjects) {
+                    if (typeof mentorData.subjects === 'string') {
+                        preSelectedNames = mentorData.subjects.split(',').map((s: string) => s.trim()).filter(Boolean);
+                    } else if (Array.isArray(mentorData.subjects)) {
+                        preSelectedNames = mentorData.subjects as string[];
+                    }
+                }
+                setSelectedSubjects(preSelectedNames);
 
                 // Notificar uma única vez que o cadastro ainda não foi concluído
                 if (!mentorData && !incompleteNotified) {
@@ -186,16 +185,16 @@ export default function MentorDashboard() {
         toast({ title: 'Removido da lista', description: 'Este agendamento foi ocultado nesta interface.' });
     };
 
-    const toggleSubject = (id: string) => {
-        setSelectedSubjectIds((prev) => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    const toggleSubject = (name: string) => {
+        setSelectedSubjects((prev) => prev.includes(name) ? prev.filter(x => x !== name) : [...prev, name]);
     };
 
     // Handler que respeita o novo valor do checkbox (true=checked, false=unchecked)
-    const handleSubjectCheckboxChange = (id: string, checked: boolean) => {
+    const handleSubjectCheckboxChange = (name: string, checked: boolean) => {
         if (checked) {
-            setSelectedSubjectIds(prev => prev.includes(id) ? prev : [...prev, id]);
+            setSelectedSubjects(prev => prev.includes(name) ? prev : [...prev, name]);
         } else {
-            setSelectedSubjectIds(prev => prev.filter(x => x !== id));
+            setSelectedSubjects(prev => prev.filter(x => x !== name));
         }
     };
 
@@ -231,15 +230,11 @@ export default function MentorDashboard() {
 
             // Sincronizar coluna subjects em mentor_profiles (armazenar nomes) e também a tabela de relação para consistência
             try {
-                // Se não houver selectedSubjectIds mas já existirem subjects no mentorInfo, preserve-os
+                // Se não houver selectedSubjects mas já existirem subjects no mentorInfo, preserve-os
                 let selectedNames: string[] = [];
-                if ((selectedSubjectIds || []).length > 0) {
-                    selectedNames = (selectedSubjectIds || []).map(id => {
-                        const found = (subjects || []).find((s: any) => s.id === id);
-                        return found ? found.name : null;
-                    }).filter(Boolean) as string[];
+                if ((selectedSubjects || []).length > 0) {
+                    selectedNames = selectedSubjects;
                 } else if (mentorInfo && mentorInfo.subjects) {
-                    // Preservar o que já está salvo no mentor_profiles.subjects
                     if (typeof mentorInfo.subjects === 'string') {
                         selectedNames = mentorInfo.subjects.split(',').map((s: string) => s.trim()).filter(Boolean);
                     } else if (Array.isArray(mentorInfo.subjects)) {
@@ -247,7 +242,7 @@ export default function MentorDashboard() {
                     }
                 }
 
-                // Atualizar mentor_profiles.subjects via endpoint de mentors
+                // Atualizar mentor_profiles.subjects via endpoint de mentors (salvar nomes)
                 const updatedMentor = await apiClient.mentors.update(user.id, {
                     location,
                     availability,
@@ -256,15 +251,14 @@ export default function MentorDashboard() {
                     subjects: selectedNames.join(', '),
                 });
 
-                // Atualizar relação many-to-many para manter consistência
-                await apiClient.mentorSubjects.setSubjects(user.id, selectedSubjectIds);
+                // Não usar mais mentorSubjects.setSubjects (tabela subjects está obsoleta como fonte)
 
                 // Atualizar estado local para refletir mudanças imediatas na UI
                 setMentorInfo(updatedMentor);
                 const refreshedProfile = await apiClient.profiles.getByUserId(user.id).catch(() => null);
                 if (refreshedProfile) setProfile(refreshedProfile);
             } catch (err) {
-                console.warn('Erro ao sincronizar subjects em mentor_profiles/mentor_subjects', err);
+                console.warn('Erro ao sincronizar subjects em mentor_profiles', err);
             }
 
             toast({ title: 'Cadastro atualizado', description: 'Suas informações foram salvas.' });
