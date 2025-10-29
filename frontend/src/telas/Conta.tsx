@@ -4,7 +4,7 @@ import { Switch } from "@/componentes/ui/switch";
 import { Input } from "@/componentes/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/componentes/ui/card";
 import { useAuth } from "@/hooks/useAutenticacao";
-import { apiClient } from "@/integracoes/api/client";
+import { apiClient } from "@/services/api";
 import { useEffect, useState } from "react";
 import { toast } from "@/componentes/ui/use-toast";
 import { useNavigate } from "react-router-dom";

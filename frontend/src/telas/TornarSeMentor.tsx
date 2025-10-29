@@ -10,7 +10,7 @@ import { Badge } from "@/componentes/ui/badge";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/componentes/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/componentes/ui/popover";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/integracoes/api/client";
+import { apiClient } from "@/services/api";
 import { useAuth } from "@/hooks/useAutenticacao";
 import { ArrowLeft, GraduationCap, User, MapPin, BookOpen, X, Check } from "lucide-react";
 import { useGraduations } from "@/hooks/useGraduacoes";

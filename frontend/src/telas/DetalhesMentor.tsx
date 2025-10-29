@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/componentes/ui/card"
 import { Badge } from "@/componentes/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/componentes/ui/avatar";
 import { Separator } from "@/componentes/ui/separator";
-import { apiClient } from "@/integracoes/api/client";
+import { apiClient } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import useMentors from "@/hooks/useMentores";
 

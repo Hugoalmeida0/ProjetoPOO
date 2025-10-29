@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiClient } from '@/integracoes/api/client';
+import { apiClient } from '@/services/api';
 
 export interface MentorProfile {
     id: string; // mentor_profiles.id

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/integracoes/api/client";
+import { apiClient } from "@/services/api";
 
 export interface Graduation {
   id: string;

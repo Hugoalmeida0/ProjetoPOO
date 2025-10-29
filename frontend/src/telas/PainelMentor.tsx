@@ -2,7 +2,7 @@ import Cabecalho from '@/componentes/Cabecalho';
 import RequireMentor from '@/componentes/RequerMentor';
 import { useAuth } from '@/hooks/useAutenticacao';
 import { useEffect, useMemo, useState } from 'react';
-import { apiClient } from '@/integracoes/api/client';
+import { apiClient } from '@/services/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/componentes/ui/card';
 import { Button } from '@/componentes/ui/button';
 import { CheckCircle, Trash2, Search } from 'lucide-react';

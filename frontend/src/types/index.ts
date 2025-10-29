@@ -1,38 +1,16 @@
 /**
- * Models
+ * Types
  * 
- * Esta pasta contém as definições de modelos de dados e interfaces TypeScript
- * que representam as entidades do banco de dados.
- * 
- * Exemplo de uso:
- * 
- * export interface User {
- *   id: string;
- *   email: string;
- *   full_name?: string;
- *   is_mentor: boolean;
- *   created_at: Date;
- * }
- * 
- * export interface MentorProfile {
- *   user_id: string;
- *   bio?: string;
- *   experience_years: number;
- *   subjects: string;
- *   location?: string;
- *   graduation_id?: string;
- * }
+ * Esta pasta contém definições de tipos TypeScript compartilhados
+ * pela aplicação frontend.
  */
 
 // Tipos de usuário
 export interface User {
     id: string;
     email: string;
-    password_hash: string;
     full_name?: string;
     is_mentor: boolean;
-    created_at: Date;
-    updated_at: Date;
 }
 
 export interface Profile {
@@ -43,7 +21,6 @@ export interface Profile {
     graduation?: string;
     phone?: string;
     location?: string;
-    created_at: Date;
 }
 
 export interface MentorProfile {
@@ -53,8 +30,23 @@ export interface MentorProfile {
     subjects: string;
     location?: string;
     graduation_id?: string;
-    availability?: string;
-    created_at: Date;
+    avg_rating?: number;
+    total_ratings?: number;
+}
+
+// Tipos de graduação e disciplinas
+export interface Graduation {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+}
+
+export interface Subject {
+    id: string;
+    name: string;
+    graduation_id?: string;
+    description?: string;
 }
 
 // Tipos de agendamento
@@ -64,7 +56,7 @@ export interface Booking {
     mentor_id: string;
     subject_id?: string;
     subject_name?: string;
-    date: Date;
+    date: string;
     time: string;
     duration: number;
     status: BookingStatus;
@@ -73,28 +65,29 @@ export interface Booking {
     student_email: string;
     student_phone?: string;
     cancel_reason?: string;
-    created_at: Date;
-    updated_at: Date;
+    created_at: string;
+    updated_at: string;
 }
 
 export type BookingStatus = 'pending' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled';
 
-// Tipos de mensagens e notificações
+// Tipos de mensagens
 export interface Message {
     id: string;
     booking_id: string;
     sender_id: string;
     content: string;
-    created_at: Date;
+    created_at: string;
 }
 
+// Tipos de notificações
 export interface Notification {
     id: string;
     user_id: string;
     message: string;
     booking_id?: string;
     read: boolean;
-    created_at: Date;
+    created_at: string;
 }
 
 // Tipos de avaliação
@@ -105,7 +98,34 @@ export interface Rating {
     mentor_id: string;
     rating: number;
     comment?: string;
-    created_at: Date;
+    created_at: string;
 }
 
-export default {};
+export interface RatingStats {
+    avg_rating: number;
+    total_ratings: number;
+    distribution: {
+        1: number;
+        2: number;
+        3: number;
+        4: number;
+        5: number;
+    };
+}
+
+// Tipos de autenticação
+export interface AuthResponse {
+    token: string;
+    user: User;
+}
+
+export interface LoginCredentials {
+    email: string;
+    password: string;
+}
+
+export interface RegisterData {
+    email: string;
+    password: string;
+    full_name?: string;
+}

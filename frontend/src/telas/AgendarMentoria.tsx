@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/componentes/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAutenticacao";
 import { useBookings } from "@/hooks/useAgendamentos";
-import { apiClient } from "@/integracoes/api/client";
+import { apiClient } from "@/services/api";
 import { cn } from "@/lib/utils";
 
 const bookingSchema = z.object({

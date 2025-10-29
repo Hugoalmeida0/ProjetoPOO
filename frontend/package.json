@@ -1,43 +1,23 @@
-{{
-
-  "name": "uvv-mentor-connect",  "name": "vite_react_shadcn_ts",
-
-  "version": "1.0.0",  "private": true,
-
-  "description": "Plataforma de mentorias acadêmicas da UVV",  "version": "0.0.0",
-
-  "private": true,  "type": "module",
-
-  "scripts": {  "scripts": {
-
-    "dev:frontend": "cd frontend && npm run dev",    "dev": "vite",
-
-    "dev:backend": "cd backend && npm run dev",    "test": "vitest",
-
-    "build:frontend": "cd frontend && npm run build",    "build": "npm run build:backend && vite build",
-
-    "build:backend": "cd backend && npm run build",    "build:backend": "cd backend && npm install && npm run build",
-
-    "build": "npm run build:backend && npm run build:frontend",    "build:dev": "vite build --mode development",
-
-    "install:all": "cd frontend && npm install && cd ../backend && npm install"    "lint": "eslint .",
-
-  },    "preview": "vite preview"
-
-  "repository": {  },
-
-    "type": "git",  "dependencies": {
-
-    "url": "https://github.com/Hugoalmeida0/ProjetoPOO.git"    "@hookform/resolvers": "^3.10.0",
-
-  },    "@radix-ui/react-accordion": "^1.2.11",
-
-  "author": "Hugo Almeida",    "@radix-ui/react-alert-dialog": "^1.1.14",
-
-  "license": "MIT"    "@radix-ui/react-aspect-ratio": "^1.1.7",
-
-}    "@radix-ui/react-avatar": "^1.1.10",
-
+{
+  "name": "vite_react_shadcn_ts",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "test": "vitest",
+    "build": "npm run build:backend && vite build",
+    "build:backend": "cd backend && npm install && npm run build",
+    "build:dev": "vite build --mode development",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.10.0",
+    "@radix-ui/react-accordion": "^1.2.11",
+    "@radix-ui/react-alert-dialog": "^1.1.14",
+    "@radix-ui/react-aspect-ratio": "^1.1.7",
+    "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.2",
     "@radix-ui/react-collapsible": "^1.1.11",
     "@radix-ui/react-context-menu": "^2.2.15",

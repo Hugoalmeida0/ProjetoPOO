@@ -5,7 +5,7 @@ import { Textarea } from '@/componentes/ui/textarea';
 import { Label } from '@/componentes/ui/label';
 import { Star, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { apiClient } from '@/integracoes/api/client';
+import { apiClient } from '@/services/api';
 
 interface ModalAvaliacaoProps {
     isOpen: boolean;

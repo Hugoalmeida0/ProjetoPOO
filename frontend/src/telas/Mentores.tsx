@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/componentes/ui/alert';
 import { Button } from '@/componentes/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAutenticacao';
-import { apiClient } from '@/integracoes/api/client';
+import { apiClient } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/componentes/ui/input';
 import { useGraduations } from '@/hooks/useGraduacoes';

@@ -1,127 +1,197 @@
-# 🎓 UVV Mentor Connect
+# 🎓 UVV Mentor Connect# 🎓 UVV Mentor Connect
 
-> Plataforma de mentorias acadêmicas da Universidade Vila Velha (UVV) que conecta estudantes a mentores qualificados para aprimoramento do desempenho acadêmico através de sessões personalizadas de orientação e apoio educacional.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-## 📋 Sobre o Projeto
+## 📋 Descrição## 📋 Descrição
 
-O **UVV Mentor Connect** é uma plataforma web desenvolvida para facilitar o processo de mentorias acadêmicas na Universidade Vila Velha. O sistema permite que estudantes encontrem mentores especializados em diferentes disciplinas e graduações, agendando sessões de mentoria de forma intuitiva e eficiente.
 
-### ✨ Funcionalidades Principais
 
-- 🔍 **Busca de Mentores**: Filtros por disciplina, graduação e avaliações
-- 📅 **Agendamento de Mentorias**: Sistema completo de reservas com confirmação
-- 🔔 **Notificações em Tempo Real**: Alertas sobre status de agendamentos
-- ⭐ **Sistema de Avaliações**: Avaliações únicas e controladas após mentorias
-- 💬 **Chat Integrado**: Comunicação direta entre mentor e mentorado
-- 👤 **Perfis Personalizados**: Gerenciamento de perfis de estudantes e mentores
-- 📊 **Painel do Mentor**: Dashboard com estatísticas e gerenciamento de sessões
-- 🎯 **Especialidades Normalizadas**: Sistema inteligente de autocomplete para disciplinas
+Plataforma de mentorias acadêmicas da Universidade Vila Velha (UVV) que conecta estudantes a mentores qualificados para aprimoramento do desempenho acadêmico através de sessões personalizadas de orientação e apoio educacional.Plataforma de mentorias acadêmicas da Universidade Vila Velha (UVV) que conecta estudantes a mentores qualificados para aprimoramento do desempenho acadêmico através de sessões personalizadas de orientação e apoio educacional.
 
-### 🎯 Regras de Negócio
 
-- ✅ Notificações automáticas para todas as mudanças de status (pending, confirmed, in-progress, completed, cancelled)
-- ✅ Controle de avaliação única (cada mentoria só pode ser avaliada uma vez)
-- ✅ Validação: só é possível finalizar mentorias previamente confirmadas
-- ✅ Prevenção de auto-agendamento (usuário não pode agendar consigo mesmo)
-- ✅ Sistema de normalização de disciplinas (previne duplicatas)
 
-## 🚀 Tecnologias Utilizadas
+## 🚀 Tecnologias Utilizadas## 🚀 Tecnologias Utilizadas
 
-### **Frontend**
-- **React 18** - Biblioteca JavaScript para construção de interfaces
-- **TypeScript** - Superset JavaScript com tipagem estática
-- **Vite** - Build tool e dev server de alta performance
-- **React Router DOM v6** - Roteamento de páginas SPA
-- **TanStack Query (React Query)** - Gerenciamento de estado assíncrono e cache
-- **Tailwind CSS** - Framework CSS utility-first
-- **Shadcn/ui** - Componentes React acessíveis e customizáveis
-- **Radix UI** - Primitivos de UI acessíveis
-- **Lucide React** - Biblioteca de ícones
-- **React Hook Form** - Gerenciamento de formulários
-- **Zod** - Validação de schemas TypeScript-first
-- **date-fns** - Manipulação de datas
 
-### **Backend**
-- **Node.js** - Runtime JavaScript server-side
-- **Express.js** - Framework web minimalista
-- **TypeScript** - Tipagem estática para Node.js
-- **PostgreSQL** - Banco de dados relacional
-- **pg (node-postgres)** - Cliente PostgreSQL para Node.js
-- **JWT (jsonwebtoken)** - Autenticação baseada em tokens
-- **CORS** - Middleware para habilitar CORS
-- **dotenv** - Gerenciamento de variáveis de ambiente
-- **ts-node-dev** - Execução TypeScript com hot-reload
 
-### **Infraestrutura**
-- **Vercel** - Hospedagem e deploy do frontend
-- **Neon Database** - PostgreSQL serverless (banco de dados em nuvem)
-- **Git & GitHub** - Controle de versão e repositório
-- **ESLint** - Linter JavaScript/TypeScript
-- **Vitest** - Framework de testes unitários
+### **Front-end**### **Front-end**
 
-## 📂 Arquitetura do Projeto
+- React 18- React 18
 
-```
-projeto-poo/
-├── backend/                      # Servidor Node.js + Express
-│   ├── src/
-│   │   ├── rotas/               # Rotas/Controllers da API
-│   │   │   ├── autenticacao.ts  # Autenticação (login/registro)
-│   │   │   ├── usuarios.ts      # CRUD de usuários
-│   │   │   ├── perfis.ts        # Perfis de usuários
-│   │   │   ├── estudantes.ts    # Gerenciamento de estudantes
-│   │   │   ├── mentores.ts      # Gerenciamento de mentores
-│   │   │   ├── mentor-disciplinas.ts  # Relação mentor-disciplinas
-│   │   │   ├── disciplinas.ts   # CRUD de disciplinas
-│   │   │   ├── graduacoes.ts    # CRUD de graduações
-│   │   │   ├── agendamentos.ts  # Sistema de bookings
-│   │   │   ├── mensagens.ts     # Chat entre usuários
-│   │   │   ├── notificacoes.ts  # Sistema de notificações
-│   │   │   └── avaliacoes.ts    # Avaliações de mentorias
-│   │   ├── db.ts                # Configuração PostgreSQL
-│   │   ├── bootstrap.ts         # Inicialização do banco
-│   │   ├── realtime.ts          # WebSocket/Realtime features
-│   │   └── index.ts             # Entry point do servidor
-│   ├── dist/                    # Código compilado JavaScript
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── .env                     # Variáveis de ambiente (DATABASE_URL, JWT_SECRET)
-│
-├── frontend/ (root src/)         # Aplicação React
-│   ├── src/
-│   │   ├── componentes/         # Componentes React reutilizáveis
-│   │   │   ├── ui/              # Componentes base (shadcn/ui)
-│   │   │   │   ├── button.tsx
-│   │   │   │   ├── card.tsx
-│   │   │   │   ├── dialog.tsx
-│   │   │   │   ├── input.tsx
-│   │   │   │   └── ...
-│   │   │   ├── Cabecalho.tsx    # Header com navegação
-│   │   │   ├── CardMentor.tsx   # Card de exibição de mentor
-│   │   │   ├── CardDisciplina.tsx
-│   │   │   ├── CardGraduacao.tsx
-│   │   │   ├── ModalAvaliacao.tsx  # Modal de avaliação
-│   │   │   ├── DialogoChat.tsx  # Chat de mensagens
-│   │   │   └── ...
-│   │   ├── telas/               # Páginas/Views da aplicação
-│   │   │   ├── Inicio.tsx       # Página inicial
-│   │   │   ├── Autenticacao.tsx # Login/Registro
-│   │   │   ├── Mentores.tsx     # Lista de mentores
-│   │   │   ├── DetalhesMentor.tsx
-│   │   │   ├── Estudantes.tsx
-│   │   │   ├── AgendarMentoria.tsx
-│   │   │   ├── MeusAgendamentos.tsx
-│   │   │   ├── PainelMentor.tsx # Dashboard do mentor
-│   │   │   ├── TornarSeMentor.tsx
-│   │   │   ├── Conta.tsx        # Configurações de conta
-│   │   │   ├── SaibaMais.tsx
-│   │   │   ├── DetalhesGraduacao.tsx
-│   │   │   └── NaoEncontrado.tsx
+- TypeScript- TypeScript
+
+- Vite- Vite
+
+- React Router DOM v6- React Router DOM v6
+
+- TanStack Query (React Query)- TanStack Query (React Query)
+
+- Tailwind CSS- Tailwind CSS
+
+- Shadcn/ui- Shadcn/ui
+
+- Radix UI- Radix UI
+
+- Lucide React- Lucide React
+
+- React Hook Form- React Hook Form
+
+- Zod- Zod
+
+- date-fns- date-fns
+
+
+
+### **Back-end**### **Back-end**
+
+- Node.js- Node.js
+
+- Express.js- Express.js
+
+- TypeScript- TypeScript
+
+- PostgreSQL- PostgreSQL
+
+- pg (node-postgres)- pg (node-postgres)
+
+- JWT (jsonwebtoken)- JWT (jsonwebtoken)
+
+- CORS- CORS
+
+- dotenv- dotenv
+
+
+
+### **Infraestrutura**### **Infraestrutura**
+
+- Vercel (Hospedagem Frontend)- Vercel (Hospedagem Frontend)
+
+- Neon Database (PostgreSQL Serverless)- Neon Database (PostgreSQL Serverless)
+
+- Git & GitHub- Git & GitHub
+
+- ESLint- ESLint
+
+- Vitest- Vitest
+
+
+
+## 📂 Arquitetura do Projeto## 📂 Arquitetura do Projeto
+
+
+
+``````
+
+uvv-mentor-connect/projeto-poo/
+
+├── backend/                      # Servidor Node.js + Express├── backend/                      # Servidor Node.js + Express
+
+│   ├── src/│   ├── src/
+
+│   │   ├── config/              # Configurações (database)│   │   ├── rotas/               # Rotas/Controllers da API
+
+│   │   ├── middlewares/         # Middlewares Express│   │   │   ├── autenticacao.ts  # Autenticação (login/registro)
+
+│   │   ├── models/              # Interfaces TypeScript│   │   │   ├── usuarios.ts      # CRUD de usuários
+
+│   │   ├── routes/              # Rotas/Controllers da API│   │   │   ├── perfis.ts        # Perfis de usuários
+
+│   │   │   ├── autenticacao.ts│   │   │   ├── estudantes.ts    # Gerenciamento de estudantes
+
+│   │   │   ├── usuarios.ts│   │   │   ├── mentores.ts      # Gerenciamento de mentores
+
+│   │   │   ├── perfis.ts│   │   │   ├── mentor-disciplinas.ts  # Relação mentor-disciplinas
+
+│   │   │   ├── mentores.ts│   │   │   ├── disciplinas.ts   # CRUD de disciplinas
+
+│   │   │   ├── estudantes.ts│   │   │   ├── graduacoes.ts    # CRUD de graduações
+
+│   │   │   ├── disciplinas.ts│   │   │   ├── agendamentos.ts  # Sistema de bookings
+
+│   │   │   ├── graduacoes.ts│   │   │   ├── mensagens.ts     # Chat entre usuários
+
+│   │   │   ├── agendamentos.ts│   │   │   ├── notificacoes.ts  # Sistema de notificações
+
+│   │   │   ├── mensagens.ts│   │   │   └── avaliacoes.ts    # Avaliações de mentorias
+
+│   │   │   ├── notificacoes.ts│   │   ├── db.ts                # Configuração PostgreSQL
+
+│   │   │   └── avaliacoes.ts│   │   ├── bootstrap.ts         # Inicialização do banco
+
+│   │   ├── bootstrap.ts         # Inicialização do banco│   │   ├── realtime.ts          # WebSocket/Realtime features
+
+│   │   └── index.ts             # Entry point│   │   └── index.ts             # Entry point do servidor
+
+│   ├── package.json│   ├── dist/                    # Código compilado JavaScript
+
+│   └── tsconfig.json│   ├── package.json
+
+││   ├── tsconfig.json
+
+├── frontend/                     # Aplicação React│   └── .env                     # Variáveis de ambiente (DATABASE_URL, JWT_SECRET)
+
+│   ├── src/│
+
+│   │   ├── componentes/         # Componentes React├── frontend/ (root src/)         # Aplicação React
+
+│   │   │   ├── ui/              # Componentes base (shadcn/ui)│   ├── src/
+
+│   │   │   ├── Cabecalho.tsx│   │   ├── componentes/         # Componentes React reutilizáveis
+
+│   │   │   ├── CardMentor.tsx│   │   │   ├── ui/              # Componentes base (shadcn/ui)
+
+│   │   │   ├── ModalAvaliacao.tsx│   │   │   │   ├── button.tsx
+
+│   │   │   └── ...│   │   │   │   ├── card.tsx
+
+│   │   ├── telas/               # Páginas da aplicação│   │   │   │   ├── dialog.tsx
+
+│   │   │   ├── Inicio.tsx│   │   │   │   ├── input.tsx
+
+│   │   │   ├── Autenticacao.tsx│   │   │   │   └── ...
+
+│   │   │   ├── Mentores.tsx│   │   │   ├── Cabecalho.tsx    # Header com navegação
+
+│   │   │   ├── AgendarMentoria.tsx│   │   │   ├── CardMentor.tsx   # Card de exibição de mentor
+
+│   │   │   ├── MeusAgendamentos.tsx│   │   │   ├── CardDisciplina.tsx
+
+│   │   │   ├── PainelMentor.tsx│   │   │   ├── CardGraduacao.tsx
+
+│   │   │   └── ...│   │   │   ├── ModalAvaliacao.tsx  # Modal de avaliação
+
+│   │   ├── hooks/               # Custom React Hooks│   │   │   ├── DialogoChat.tsx  # Chat de mensagens
+
+│   │   ├── services/            # API client│   │   │   └── ...
+
+│   │   ├── types/               # TypeScript interfaces│   │   ├── telas/               # Páginas/Views da aplicação
+
+│   │   ├── utils/               # Funções auxiliares│   │   │   ├── Inicio.tsx       # Página inicial
+
+│   │   ├── lib/                 # Bibliotecas auxiliares│   │   │   ├── Autenticacao.tsx # Login/Registro
+
+│   │   └── assets/              # Imagens e ícones│   │   │   ├── Mentores.tsx     # Lista de mentores
+
+│   ├── public/│   │   │   ├── DetalhesMentor.tsx
+
+│   ├── index.html│   │   │   ├── Estudantes.tsx
+
+│   ├── package.json│   │   │   ├── AgendarMentoria.tsx
+
+│   ├── vite.config.ts│   │   │   ├── MeusAgendamentos.tsx
+
+│   └── tsconfig.json│   │   │   ├── PainelMentor.tsx # Dashboard do mentor
+
+││   │   │   ├── TornarSeMentor.tsx
+
+├── .gitignore│   │   │   ├── Conta.tsx        # Configurações de conta
+
+├── package.json                  # Scripts principais do projeto│   │   │   ├── SaibaMais.tsx
+
+└── README.md│   │   │   ├── DetalhesGraduacao.tsx
+
+```│   │   │   └── NaoEncontrado.tsx
+
 │   │   ├── hooks/               # Custom React Hooks
 │   │   │   ├── useAutenticacao.tsx
 │   │   │   ├── useMentores.tsx

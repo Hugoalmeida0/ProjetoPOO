@@ -1,7 +1,7 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAutenticacao';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '@/integracoes/api/client';
+import { apiClient } from '@/services/api';
 
 export default function RequerMentor({ children }: PropsWithChildren) {
     const { user, loading } = useAuth();

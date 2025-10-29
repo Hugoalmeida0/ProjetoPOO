@@ -6,7 +6,7 @@ import { Label } from "@/componentes/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/componentes/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/componentes/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/integracoes/api/client";
+import { apiClient } from "@/services/api";
 import { useAuth } from "@/hooks/useAutenticacao";
 import { GraduationCap, Mail, Lock, User, ArrowLeft } from "lucide-react";
 

@@ -7,7 +7,7 @@ import { Button } from "@/componentes/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/componentes/ui/alert";
 import { useGraduations } from "@/hooks/useGraduacoes";
 import { useEffect, useMemo, useState } from "react";
-import { apiClient } from "@/integracoes/api/client";
+import { apiClient } from "@/services/api";
 import {
   Calculator,
   Atom,
