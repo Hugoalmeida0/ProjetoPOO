@@ -7,6 +7,8 @@ import useMentors from "@/hooks/useMentores";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { getFeaturedMentors } from "@/lib/mentors";
+import { useAuth } from "@/hooks/useAutenticacao";
+import { useToast } from "@/hooks/use-toast";
 import {
   Calculator,
   Atom,
@@ -29,6 +31,8 @@ const Index = () => {
   const { mentors, loading: mentorsLoading } = useMentors();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
 
   // Faz scroll programático quando houver hash na URL (ex: /#mentores)
   useEffect(() => {
@@ -139,7 +143,17 @@ const Index = () => {
               variant="outline"
               size="lg"
               className="bg-white text-primary hover:bg-white/90"
-              onClick={() => navigate("/auth")}
+              disabled={authLoading}
+              onClick={() => {
+                if (!user) {
+                  navigate("/auth");
+                } else {
+                  toast({
+                    title: "Sessão ativa",
+                    description: "Você já está autenticado.",
+                  });
+                }
+              }}
             >
               Cadastrar-se Grátis
             </Button>
