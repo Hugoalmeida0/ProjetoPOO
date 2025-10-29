@@ -240,6 +240,7 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
             }
         }
 
+
         return res.json(booking);
     } catch (err) {
         console.error(err);
