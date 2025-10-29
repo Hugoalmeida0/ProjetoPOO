@@ -178,10 +178,25 @@ const Index = () => {
             Junte-se a centenas de alunos que já melhoraram suas notas com nossos mentores voluntários
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="outline" size="lg" className="bg-white text-primary hover:bg-white/90">
+            <Button
+              variant="outline"
+              size="lg"
+              className="bg-white text-primary hover:bg-white/90"
+              onClick={() => navigate("/auth")}
+            >
               Cadastrar-se Grátis
             </Button>
-            <Button variant="ghost" size="lg" className="text-white border-white hover:bg-white/10">
+            <Button
+              variant="ghost"
+              size="lg"
+              className="text-white border-white hover:bg-white/10"
+              onClick={() => {
+                const materiasSection = document.getElementById("materias");
+                if (materiasSection) {
+                  materiasSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }}
+            >
               Saiba Mais
             </Button>
           </div>
