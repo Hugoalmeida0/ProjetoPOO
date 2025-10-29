@@ -1,4 +1,4 @@
-import { pool } from './db';
+import { pool } from './config/db';
 
 export async function ensureSchema() {
   // Ensure users table exists (plaintext password for testing only)

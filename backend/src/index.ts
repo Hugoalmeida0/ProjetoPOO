@@ -1,18 +1,18 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import subjectsRouter from './rotas/disciplinas';
-import profilesRouter from './rotas/perfis';
-import graduationsRouter from './rotas/graduacoes';
-import mentorsRouter from './rotas/mentores';
-import mentorSubjectsRouter from './rotas/mentor-disciplinas';
-import studentsRouter from './rotas/estudantes';
-import bookingsRouter from './rotas/agendamentos';
-import authRouter from './rotas/autenticacao';
-import usersRouter from './rotas/usuarios';
-import messagesRouter from './rotas/mensagens';
-import notificationsRouter from './rotas/notificacoes';
-import ratingsRouter from './rotas/avaliacoes';
+import subjectsRouter from './routes/disciplinas';
+import profilesRouter from './routes/perfis';
+import graduationsRouter from './routes/graduacoes';
+import mentorsRouter from './routes/mentores';
+import mentorSubjectsRouter from './routes/mentor-disciplinas';
+import studentsRouter from './routes/estudantes';
+import bookingsRouter from './routes/agendamentos';
+import authRouter from './routes/autenticacao';
+import usersRouter from './routes/usuarios';
+import messagesRouter from './routes/mensagens';
+import notificationsRouter from './routes/notificacoes';
+import ratingsRouter from './routes/avaliacoes';
 import { ensureSchema } from './bootstrap';
 
 

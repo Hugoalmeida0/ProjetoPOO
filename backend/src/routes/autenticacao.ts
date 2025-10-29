@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
-import { pool } from '../db';
+import { pool } from '../config/db';
 
 const router = Router();
 
