@@ -2,7 +2,7 @@ import { Button } from "@/componentes/ui/button";
 import { GraduationCap, User, LogOut, Calendar, Settings, LayoutDashboard, Bell, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAutenticacao";
 import { useNotifications } from "@/hooks/useNotificacoes";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/componentes/ui/dropdown-menu";
@@ -17,6 +17,7 @@ const Header = () => {
   const { user, signOut } = useAuth();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isModalAvaliacaoOpen, setIsModalAvaliacaoOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
@@ -24,6 +25,9 @@ const Header = () => {
     await signOut();
     navigate("/");
   };
+
+  // Verifica a rota atual para destacar o item ativo
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-50">
@@ -40,45 +44,42 @@ const Header = () => {
           </div>
 
           <nav className="hidden md:flex items-center gap-6">
-            <a
-              href="/#materias"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate('/#materias');
-              }}
-              className="text-foreground hover:text-primary transition-smooth"
+            <button
+              onClick={() => navigate('/')}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-primary",
+                isActive('/') ? "text-primary font-bold" : "text-foreground"
+              )}
             >
-              Matérias
-            </a>
-            <a
-              href="/#mentores"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate('/#mentores');
-              }}
-              className="text-foreground hover:text-primary transition-smooth"
+              Página Inicial
+            </button>
+            <button
+              onClick={() => navigate('/mentors')}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-primary",
+                isActive('/mentors') ? "text-primary font-bold" : "text-foreground"
+              )}
             >
               Mentores
-            </a>
-            {!user?.is_mentor && (
-              <Button
-                variant="ghost"
-                onClick={() => navigate("/tornar-se-mentor")}
-                className="text-foreground hover:text-primary transition-smooth"
-              >
-                Ser Mentor
-              </Button>
-            )}
-            <a
-              href="/#sobre"
-              onClick={(e) => {
-                e.preventDefault();
-                navigate('/#sobre');
-              }}
-              className="text-foreground hover:text-primary transition-smooth"
+            </button>
+            <button
+              onClick={() => navigate('/tornar-se-mentor')}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-primary",
+                isActive('/tornar-se-mentor') ? "text-primary font-bold" : "text-foreground"
+              )}
             >
-              Sobre
-            </a>
+              Cadastrar como Mentor
+            </button>
+            <button
+              onClick={() => navigate('/saiba-mais')}
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-primary",
+                isActive('/saiba-mais') ? "text-primary font-bold" : "text-foreground"
+              )}
+            >
+              Saiba Mais
+            </button>
           </nav>
 
           <div className="flex items-center gap-3">
