@@ -417,11 +417,11 @@ export default function MentorDashboard() {
                             <Card className="lg:col-span-2">
                                 <CardHeader>
                                     <CardTitle className="flex items-center justify-between">
-                                            <span>Especialidades</span>
-                                            <span className="text-sm font-normal text-muted-foreground">
-                                                {selectedSubjects.length} selecionada{selectedSubjects.length !== 1 ? 's' : ''}
-                                            </span>
-                                        </CardTitle>
+                                        <span>Especialidades</span>
+                                        <span className="text-sm font-normal text-muted-foreground">
+                                            {selectedSubjects.length} selecionada{selectedSubjects.length !== 1 ? 's' : ''}
+                                        </span>
+                                    </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     {formLoading ? (
