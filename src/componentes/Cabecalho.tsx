@@ -206,7 +206,7 @@ const Header = () => {
               </SheetContent>
             </Sheet>
 
-            {user?.is_mentor && (
+            {user && (
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">
