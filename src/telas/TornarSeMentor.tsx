@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/componentes/ui/button";
 import { Input } from "@/componentes/ui/input";
@@ -6,25 +6,70 @@ import { Label } from "@/componentes/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/componentes/ui/card";
 import { Textarea } from "@/componentes/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/componentes/ui/select";
+import { Badge } from "@/componentes/ui/badge";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/componentes/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/componentes/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/integracoes/api/client";
 import { useAuth } from "@/hooks/useAutenticacao";
-import { ArrowLeft, GraduationCap, User, MapPin, BookOpen } from "lucide-react";
+import { ArrowLeft, GraduationCap, User, MapPin, BookOpen, X, Check } from "lucide-react";
 import { useGraduations } from "@/hooks/useGraduacoes";
+import useMentors from "@/hooks/useMentores";
+import Cabecalho from "@/componentes/Cabecalho";
+import { normalizeSubject, uniqueSubjects } from "@/lib/normalizeSubject";
+import { cn } from "@/lib/utils";
 
 const BecomeMentor = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [subjects, setSubjects] = useState<string>("");
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [subjectInput, setSubjectInput] = useState("");
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
   const { data: graduations = [] } = useGraduations();
+  const { mentors } = useMentors();
+  
+  // Extrai e normaliza todas as especialidades existentes dos mentores
+  const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
+  
+  useEffect(() => {
+    if (mentors.length > 0) {
+      const allSubjects: string[] = [];
+      mentors.forEach((mentor: any) => {
+        if (mentor.subjects) {
+          const subjectsArray = typeof mentor.subjects === 'string' 
+            ? mentor.subjects.split(',').map(s => s.trim())
+            : mentor.subjects;
+          allSubjects.push(...subjectsArray);
+        }
+      });
+      setAvailableSubjects(uniqueSubjects(allSubjects));
+    }
+  }, [mentors]);
 
   // Regra 1: Precisa estar logado para se cadastrar como mentor
   if (!user) {
     navigate('/auth');
     return null;
   }
+
+  const addSubject = (subject: string) => {
+    const normalized = normalizeSubject(subject);
+    if (normalized && !selectedSubjects.some(s => normalizeSubject(s) === normalized)) {
+      setSelectedSubjects([...selectedSubjects, normalized]);
+      setSubjectInput("");
+      setOpen(false);
+    }
+  };
+
+  const removeSubject = (subject: string) => {
+    setSelectedSubjects(selectedSubjects.filter(s => s !== subject));
+  };
+
+  const filteredSubjects = availableSubjects.filter(subject =>
+    normalizeSubject(subject).toLowerCase().includes(normalizeSubject(subjectInput).toLowerCase())
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,7 +83,7 @@ const BecomeMentor = () => {
       return;
     }
 
-    if (!subjects.trim()) {
+    if (selectedSubjects.length === 0) {
       toast({
         title: "Erro",
         description: "Informe pelo menos uma matéria que você pode ensinar.",
@@ -63,14 +108,14 @@ const BecomeMentor = () => {
         bio: bio
       });
 
-      // Create mentor profile with subjects as text
+      // Create mentor profile with normalized subjects as text
       await apiClient.mentors.create({
         user_id: user.id,
         graduation_id: graduationId,
         location: location,
         experience_years: experienceYears,
         availability: availability,
-        subjects: subjects.trim() // Save subjects as plain text
+        subjects: selectedSubjects.join(', ') // Save normalized subjects
       });
 
       toast({
@@ -91,18 +136,10 @@ const BecomeMentor = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle p-4">
-      <div className="container mx-auto max-w-2xl">
+    <div className="min-h-screen bg-background">
+      <Cabecalho />
+      <div className="container mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Voltar ao início
-          </Button>
-
           <div className="flex items-center gap-3 mb-2">
             <div className="p-3 bg-gradient-primary rounded-lg">
               <GraduationCap className="h-6 w-6 text-white" />
@@ -140,18 +177,84 @@ const BecomeMentor = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="subjects">Matérias que você pode ensinar *</Label>
-                <Textarea
-                  id="subjects"
-                  placeholder="Ex: Cálculo I, Física Mecânica, Programação Orientada a Objetos..."
-                  className="min-h-[100px]"
-                  value={subjects}
-                  onChange={(e) => setSubjects(e.target.value)}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Digite as matérias separadas por vírgula
-                </p>
+                <Label htmlFor="subjects">Especialidades que você pode ensinar *</Label>
+                <div className="space-y-2">
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-full justify-between"
+                      >
+                        Adicionar especialidade...
+                        <Check className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0" align="start">
+                      <Command>
+                        <CommandInput 
+                          placeholder="Buscar ou digitar nova especialidade..." 
+                          value={subjectInput}
+                          onValueChange={setSubjectInput}
+                        />
+                        <CommandEmpty>
+                          <div className="p-4 text-sm text-center">
+                            <p className="mb-2">Nenhuma especialidade encontrada.</p>
+                            {subjectInput && (
+                              <Button
+                                size="sm"
+                                onClick={() => addSubject(subjectInput)}
+                              >
+                                Adicionar "{normalizeSubject(subjectInput)}"
+                              </Button>
+                            )}
+                          </div>
+                        </CommandEmpty>
+                        <CommandGroup className="max-h-64 overflow-auto">
+                          {filteredSubjects.map((subject) => (
+                            <CommandItem
+                              key={subject}
+                              value={subject}
+                              onSelect={() => addSubject(subject)}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedSubjects.some(s => normalizeSubject(s) === normalizeSubject(subject))
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {subject}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  
+                  {selectedSubjects.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-3 border rounded-md bg-muted/50">
+                      {selectedSubjects.map((subject) => (
+                        <Badge key={subject} variant="secondary" className="pl-3 pr-1">
+                          {subject}
+                          <button
+                            type="button"
+                            onClick={() => removeSubject(subject)}
+                            className="ml-2 hover:bg-destructive/20 rounded-full p-0.5"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-muted-foreground">
+                    {selectedSubjects.length} selecionadas. Clique no botão acima para adicionar especialidades.
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">

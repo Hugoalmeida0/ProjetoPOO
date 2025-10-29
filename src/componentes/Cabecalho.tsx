@@ -108,8 +108,8 @@ const Header = () => {
                     onClick={() => handleMobileNavigation('/')}
                     className={cn(
                       "text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                      isActive('/') 
-                        ? "bg-primary text-primary-foreground font-bold" 
+                      isActive('/')
+                        ? "bg-primary text-primary-foreground font-bold"
                         : "hover:bg-muted"
                     )}
                   >
@@ -119,8 +119,8 @@ const Header = () => {
                     onClick={() => handleMobileNavigation('/mentors')}
                     className={cn(
                       "text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                      isActive('/mentors') 
-                        ? "bg-primary text-primary-foreground font-bold" 
+                      isActive('/mentors')
+                        ? "bg-primary text-primary-foreground font-bold"
                         : "hover:bg-muted"
                     )}
                   >
@@ -131,8 +131,8 @@ const Header = () => {
                       onClick={() => handleMobileNavigation('/tornar-se-mentor')}
                       className={cn(
                         "text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                        isActive('/tornar-se-mentor') 
-                          ? "bg-primary text-primary-foreground font-bold" 
+                        isActive('/tornar-se-mentor')
+                          ? "bg-primary text-primary-foreground font-bold"
                           : "hover:bg-muted"
                       )}
                     >
@@ -143,8 +143,8 @@ const Header = () => {
                     onClick={() => handleMobileNavigation('/saiba-mais')}
                     className={cn(
                       "text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                      isActive('/saiba-mais') 
-                        ? "bg-primary text-primary-foreground font-bold" 
+                      isActive('/saiba-mais')
+                        ? "bg-primary text-primary-foreground font-bold"
                         : "hover:bg-muted"
                     )}
                   >

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import useMentors from '@/hooks/useMentores';
 import MentorCard from '@/componentes/CardMentor';
+import Cabecalho from '@/componentes/Cabecalho';
 import { Alert, AlertDescription, AlertTitle } from '@/componentes/ui/alert';
 import { Button } from '@/componentes/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -90,12 +91,12 @@ const Mentors = () => {
     }, [allMentors, graduationQuery, selectedSubject]);
 
     return (
-        <div className="container mx-auto p-4">
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl font-bold">Mentores</h1>
-                <div>
-                    <Button variant="ghost" onClick={() => navigate('/')}>Voltar à Home</Button>
-                </div>
+        <div className="min-h-screen bg-background">
+            <Cabecalho />
+            <div className="container mx-auto px-4 py-8">
+            <div className="mb-8">
+                <h1 className="text-4xl font-bold mb-2">Mentores</h1>
+                <p className="text-muted-foreground">Encontre o mentor ideal para suas necessidades</p>
             </div>
 
             {/* Alerta removido: verificação de perfil de mentor era feita em outro lugar (Painel do Mentor) */}
@@ -203,6 +204,7 @@ const Mentors = () => {
                         })()}
                     </div>
                 ))}
+            </div>
             </div>
         </div>
     );

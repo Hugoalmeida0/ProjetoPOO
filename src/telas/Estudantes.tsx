@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStudents } from '@/hooks/useEstudantes';
+import Cabecalho from '@/componentes/Cabecalho';
 import { Card, CardContent, CardHeader } from '@/componentes/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/componentes/ui/avatar';
 import { Button } from '@/componentes/ui/button';
@@ -58,9 +59,14 @@ const Students = () => {
     };
 
     return (
-        <div className="container mx-auto p-4">
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl font-bold">Estudantes</h1>
+        <div className="min-h-screen bg-background">
+            <Cabecalho />
+            <div className="container mx-auto px-4 py-8">
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-4xl font-bold mb-2">Estudantes</h1>
+                    <p className="text-muted-foreground">Gerenciar cadastro de estudantes</p>
+                </div>
                 <Button onClick={openCreate}>Novo Estudante</Button>
             </div>
 
@@ -132,6 +138,7 @@ const Students = () => {
                         </CardContent>
                     </Card>
                 ))}
+            </div>
             </div>
         </div>
     );
