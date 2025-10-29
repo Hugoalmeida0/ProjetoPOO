@@ -16,6 +16,7 @@ import Mentors from "./telas/Mentores";
 import NotFound from "./telas/NaoEncontrado";
 import Account from "./telas/Conta";
 import MentorDashboard from "./telas/PainelMentor";
+import SaibaMais from "./telas/SaibaMais";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/agendar/:id" element={<BookingMentorship />} />
             <Route path="/mentors" element={<Mentors />} />
             <Route path="/students" element={<Students />} />
+            <Route path="/saiba-mais" element={<SaibaMais />} />
             <Route path="/meus-agendamentos" element={<MyBookings />} />
             <Route path="/tornar-se-mentor" element={<BecomeMentor />} />
             <Route path="/mentor/dashboard" element={<MentorDashboard />} />

@@ -147,12 +147,7 @@ const Index = () => {
               variant="ghost"
               size="lg"
               className="text-white border-white hover:bg-white/10"
-              onClick={() => {
-                const materiasSection = document.getElementById("materias");
-                if (materiasSection) {
-                  materiasSection.scrollIntoView({ behavior: "smooth", block: "start" });
-                }
-              }}
+              onClick={() => navigate('/saiba-mais')}
             >
               Saiba Mais
             </Button>
@@ -163,18 +158,16 @@ const Index = () => {
       {/* Footer */}
       <footer className="py-12 bg-card border-t">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-gradient-primary rounded-lg">
-                  <Calculator className="h-5 w-5 text-white" />
-                </div>
-                <h3 className="font-bold text-lg">UVV Mentor</h3>
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="p-2 bg-gradient-primary rounded-lg">
+                <Calculator className="h-5 w-5 text-white" />
               </div>
-              <p className="text-muted-foreground">
-                Conectando alunos aos melhores mentores da UVV para uma educação colaborativa e eficiente.
-              </p>
+              <h3 className="font-bold text-lg">UVV Mentor</h3>
             </div>
+            <p className="text-muted-foreground">
+              Conectando alunos aos melhores mentores da UVV para uma educação colaborativa e eficiente.
+            </p>
           </div>
 
           <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
