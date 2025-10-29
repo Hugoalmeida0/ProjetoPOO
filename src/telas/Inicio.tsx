@@ -203,37 +203,10 @@ const Index = () => {
                 Conectando alunos aos melhores mentores da UVV para uma educação colaborativa e eficiente.
               </p>
             </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Plataforma</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-smooth">Como Funciona</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Para Mentores</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Guias de Estudo</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Suporte</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-smooth">Central de Ajuda</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Contato</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">FAQ</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-smooth">Termos de Uso</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Privacidade</a></li>
-                <li><a href="#" className="hover:text-primary transition-smooth">Cookies</a></li>
-              </ul>
-            </div>
           </div>
 
           <div className="border-t mt-8 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2024 UVV Mentor. Todos os direitos reservados.</p>
+            <p>&copy; 2025 UVV Mentor. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>
