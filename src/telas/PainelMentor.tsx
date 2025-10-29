@@ -190,6 +190,15 @@ export default function MentorDashboard() {
         setSelectedSubjectIds((prev) => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
     };
 
+    // Handler que respeita o novo valor do checkbox (true=checked, false=unchecked)
+    const handleSubjectCheckboxChange = (id: string, checked: boolean) => {
+        if (checked) {
+            setSelectedSubjectIds(prev => prev.includes(id) ? prev : [...prev, id]);
+        } else {
+            setSelectedSubjectIds(prev => prev.filter(x => x !== id));
+        }
+    };
+
     const handleSaveCadastro = async () => {
         if (!user?.id) return;
         setFormSaving(true);
@@ -222,10 +231,21 @@ export default function MentorDashboard() {
 
             // Sincronizar coluna subjects em mentor_profiles (armazenar nomes) e também a tabela de relação para consistência
             try {
-                const selectedNames = (selectedSubjectIds || []).map(id => {
-                    const found = (subjects || []).find((s: any) => s.id === id);
-                    return found ? found.name : null;
-                }).filter(Boolean) as string[];
+                // Se não houver selectedSubjectIds mas já existirem subjects no mentorInfo, preserve-os
+                let selectedNames: string[] = [];
+                if ((selectedSubjectIds || []).length > 0) {
+                    selectedNames = (selectedSubjectIds || []).map(id => {
+                        const found = (subjects || []).find((s: any) => s.id === id);
+                        return found ? found.name : null;
+                    }).filter(Boolean) as string[];
+                } else if (mentorInfo && mentorInfo.subjects) {
+                    // Preservar o que já está salvo no mentor_profiles.subjects
+                    if (typeof mentorInfo.subjects === 'string') {
+                        selectedNames = mentorInfo.subjects.split(',').map((s: string) => s.trim()).filter(Boolean);
+                    } else if (Array.isArray(mentorInfo.subjects)) {
+                        selectedNames = mentorInfo.subjects as string[];
+                    }
+                }
 
                 // Atualizar mentor_profiles.subjects via endpoint de mentors
                 const updatedMentor = await apiClient.mentors.update(user.id, {
@@ -241,7 +261,6 @@ export default function MentorDashboard() {
 
                 // Atualizar estado local para refletir mudanças imediatas na UI
                 setMentorInfo(updatedMentor);
-                // Se o profile foi modificado em backend, recarregar
                 const refreshedProfile = await apiClient.profiles.getByUserId(user.id).catch(() => null);
                 if (refreshedProfile) setProfile(refreshedProfile);
             } catch (err) {
@@ -432,17 +451,35 @@ export default function MentorDashboard() {
                                                 {filteredSubjects.length === 0 ? (
                                                     <p className="col-span-full text-sm text-muted-foreground">Nenhuma especialidade encontrada.</p>
                                                 ) : (
-                                                    filteredSubjects.map((s: any) => (
-                                                        <label key={s.id} className="flex items-center gap-3 border rounded p-3 hover:bg-muted/50 cursor-pointer">
-                                                            <Checkbox checked={selectedSubjectIds.includes(s.id)} onCheckedChange={() => toggleSubject(s.id)} />
-                                                            <div>
-                                                                <div className="font-medium">{s.name}</div>
-                                                                {s.description ? (
-                                                                    <div className="text-xs text-muted-foreground line-clamp-2">{s.description}</div>
-                                                                ) : null}
-                                                            </div>
-                                                        </label>
-                                                    ))
+                                                    (() => {
+                                                        // Construir set de nomes vindos de mentor_profiles.subjects para exibição quando não há mapeamento por id
+                                                        const profileNamesSet = new Set<string>();
+                                                        if (mentorInfo && mentorInfo.subjects) {
+                                                            if (typeof mentorInfo.subjects === 'string') {
+                                                                for (const s of mentorInfo.subjects.split(',')) {
+                                                                    const t = String(s || '').trim().toLowerCase(); if (t) profileNamesSet.add(t);
+                                                                }
+                                                            } else if (Array.isArray(mentorInfo.subjects)) {
+                                                                for (const s of mentorInfo.subjects) { const t = String(s || '').trim().toLowerCase(); if (t) profileNamesSet.add(t); }
+                                                            }
+                                                        }
+
+                                                        return filteredSubjects.map((s: any) => {
+                                                            const sNameLower = String(s.name || '').toLowerCase();
+                                                            const checked = selectedSubjectIds.includes(s.id) || profileNamesSet.has(sNameLower);
+                                                            return (
+                                                                <label key={s.id} className="flex items-center gap-3 border rounded p-3 hover:bg-muted/50 cursor-pointer">
+                                                                    <Checkbox checked={checked} onCheckedChange={(c) => handleSubjectCheckboxChange(s.id, Boolean(c))} />
+                                                                    <div>
+                                                                        <div className="font-medium">{s.name}</div>
+                                                                        {s.description ? (
+                                                                            <div className="text-xs text-muted-foreground line-clamp-2">{s.description}</div>
+                                                                        ) : null}
+                                                                    </div>
+                                                                </label>
+                                                            );
+                                                        });
+                                                    })()
                                                 )}
                                             </div>
                                         </>
