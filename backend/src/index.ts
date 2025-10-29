@@ -14,7 +14,7 @@ import messagesRouter from './rotas/mensagens';
 import notificationsRouter from './rotas/notificacoes';
 import ratingsRouter from './rotas/avaliacoes';
 import { ensureSchema } from './bootstrap';
- 
+
 
 dotenv.config();
 

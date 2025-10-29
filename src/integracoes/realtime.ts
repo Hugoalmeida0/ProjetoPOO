@@ -5,7 +5,7 @@ export async function ensureRealtime() {
 }
 
 export async function onEvent(_event: string, _handler: (...args: any[]) => void) {
-    return () => {};
+    return () => { };
 }
 
 export async function emitEvent(_event: string, _payload: any) {
