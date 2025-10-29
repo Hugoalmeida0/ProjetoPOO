@@ -1,5 +1,5 @@
 import { Button } from "@/componentes/ui/button";
-import { GraduationCap, Search, User, LogOut, Calendar, Settings, LayoutDashboard, Bell, X } from "lucide-react";
+import { GraduationCap, User, LogOut, Calendar, Settings, LayoutDashboard, Bell, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAutenticacao";
 import { useNotifications } from "@/hooks/useNotificacoes";
 import { useNavigate } from "react-router-dom";
@@ -82,10 +82,6 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon">
-              <Search className="h-4 w-4" />
-            </Button>
-
             {user?.is_mentor && (
               <Dialog>
                 <DialogTrigger asChild>
