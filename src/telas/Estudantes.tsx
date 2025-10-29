@@ -62,83 +62,83 @@ const Students = () => {
         <div className="min-h-screen bg-background">
             <Cabecalho />
             <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h1 className="text-4xl font-bold mb-2">Estudantes</h1>
-                    <p className="text-muted-foreground">Gerenciar cadastro de estudantes</p>
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-4xl font-bold mb-2">Estudantes</h1>
+                        <p className="text-muted-foreground">Gerenciar cadastro de estudantes</p>
+                    </div>
+                    <Button onClick={openCreate}>Novo Estudante</Button>
                 </div>
-                <Button onClick={openCreate}>Novo Estudante</Button>
-            </div>
 
-            {isCreating && (
-                <Card className="mb-6">
-                    <CardHeader>
-                        <h2 className="text-lg font-semibold">{editingUserId ? 'Editar Estudante' : 'Criar Estudante'}</h2>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-3">
-                            {!editingUserId && (
-                                <div>
-                                    <Label htmlFor="user_id">User ID (UUID)</Label>
-                                    <Input id="user_id" value={form.user_id} onChange={(e) => setForm({ ...form, user_id: e.target.value })} required />
-                                </div>
-                            )}
-                            <div>
-                                <Label htmlFor="full_name">Nome</Label>
-                                <Input id="full_name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-                            </div>
-                            <div>
-                                <Label htmlFor="email">Email</Label>
-                                <Input id="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-                            </div>
-                            <div>
-                                <Label htmlFor="phone">Telefone</Label>
-                                <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-                            </div>
-                            <div>
-                                <Label htmlFor="avatar_url">Avatar URL</Label>
-                                <Input id="avatar_url" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} />
-                            </div>
-                            <div>
-                                <Label htmlFor="bio">Bio</Label>
-                                <Textarea id="bio" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
-                            </div>
-
-                            <div className="flex gap-2">
-                                <Button type="submit">Salvar</Button>
-                                <Button variant="outline" onClick={() => setIsCreating(false)}>Cancelar</Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
-            )}
-
-            {loading && <p>Carregando...</p>}
-            {error && <p className="text-red-500">{error}</p>}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {students.map((s: any) => (
-                    <Card key={s.id}>
-                        <CardHeader className="flex items-center gap-3">
-                            <Avatar>
-                                <AvatarImage src={s.avatar_url} alt={s.full_name || 'Aluno'} />
-                                <AvatarFallback>{(s.full_name || 'A').slice(0, 2)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <div className="font-semibold">{s.full_name}</div>
-                                <div className="text-sm text-muted-foreground">{s.email}</div>
-                            </div>
+                {isCreating && (
+                    <Card className="mb-6">
+                        <CardHeader>
+                            <h2 className="text-lg font-semibold">{editingUserId ? 'Editar Estudante' : 'Criar Estudante'}</h2>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm">{s.bio}</p>
-                            <div className="mt-4 flex gap-2">
-                                <Button size="sm" variant="outline" onClick={() => openEdit(s)}>Editar</Button>
-                                <Button size="sm" variant="destructive" onClick={() => handleDelete(s.user_id)}>Remover</Button>
-                            </div>
+                            <form onSubmit={handleSubmit} className="space-y-3">
+                                {!editingUserId && (
+                                    <div>
+                                        <Label htmlFor="user_id">User ID (UUID)</Label>
+                                        <Input id="user_id" value={form.user_id} onChange={(e) => setForm({ ...form, user_id: e.target.value })} required />
+                                    </div>
+                                )}
+                                <div>
+                                    <Label htmlFor="full_name">Nome</Label>
+                                    <Input id="full_name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+                                </div>
+                                <div>
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input id="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                                </div>
+                                <div>
+                                    <Label htmlFor="phone">Telefone</Label>
+                                    <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                                </div>
+                                <div>
+                                    <Label htmlFor="avatar_url">Avatar URL</Label>
+                                    <Input id="avatar_url" value={form.avatar_url} onChange={(e) => setForm({ ...form, avatar_url: e.target.value })} />
+                                </div>
+                                <div>
+                                    <Label htmlFor="bio">Bio</Label>
+                                    <Textarea id="bio" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+                                </div>
+
+                                <div className="flex gap-2">
+                                    <Button type="submit">Salvar</Button>
+                                    <Button variant="outline" onClick={() => setIsCreating(false)}>Cancelar</Button>
+                                </div>
+                            </form>
                         </CardContent>
                     </Card>
-                ))}
-            </div>
+                )}
+
+                {loading && <p>Carregando...</p>}
+                {error && <p className="text-red-500">{error}</p>}
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {students.map((s: any) => (
+                        <Card key={s.id}>
+                            <CardHeader className="flex items-center gap-3">
+                                <Avatar>
+                                    <AvatarImage src={s.avatar_url} alt={s.full_name || 'Aluno'} />
+                                    <AvatarFallback>{(s.full_name || 'A').slice(0, 2)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <div className="font-semibold">{s.full_name}</div>
+                                    <div className="text-sm text-muted-foreground">{s.email}</div>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm">{s.bio}</p>
+                                <div className="mt-4 flex gap-2">
+                                    <Button size="sm" variant="outline" onClick={() => openEdit(s)}>Editar</Button>
+                                    <Button size="sm" variant="destructive" onClick={() => handleDelete(s.user_id)}>Remover</Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
             </div>
         </div>
     );

@@ -206,8 +206,8 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
         // ✅ REGRA DE NEGÓCIO: Só pode finalizar mentoria após confirmação
         if (status === 'completed') {
             if (oldStatus !== 'confirmed' && oldStatus !== 'in-progress') {
-                return res.status(400).json({ 
-                    error: 'Não é possível finalizar uma mentoria que não foi confirmada. A mentoria deve estar com status "confirmada" ou "em andamento" para ser finalizada.' 
+                return res.status(400).json({
+                    error: 'Não é possível finalizar uma mentoria que não foi confirmada. A mentoria deve estar com status "confirmada" ou "em andamento" para ser finalizada.'
                 });
             }
         }
@@ -272,8 +272,8 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
                 case 'cancelled':
                     // Notificar a parte que NÃO cancelou
                     const recipientForCancel = user_id === mentorId ? studentId : mentorId;
-                    notificationMessage = cancel_message 
-                        ? `Agendamento cancelado: ${cancel_message}` 
+                    notificationMessage = cancel_message
+                        ? `Agendamento cancelado: ${cancel_message}`
                         : 'Seu agendamento foi cancelado.';
                     await createNotification(recipientForCancel, notificationMessage);
                     break;

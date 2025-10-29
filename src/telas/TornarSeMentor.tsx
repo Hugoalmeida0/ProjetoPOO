@@ -29,16 +29,16 @@ const BecomeMentor = () => {
   const { user } = useAuth();
   const { data: graduations = [] } = useGraduations();
   const { mentors } = useMentors();
-  
+
   // Extrai e normaliza todas as especialidades existentes dos mentores
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([]);
-  
+
   useEffect(() => {
     if (mentors.length > 0) {
       const allSubjects: string[] = [];
       mentors.forEach((mentor: any) => {
         if (mentor.subjects) {
-          const subjectsArray = typeof mentor.subjects === 'string' 
+          const subjectsArray = typeof mentor.subjects === 'string'
             ? mentor.subjects.split(',').map(s => s.trim())
             : mentor.subjects;
           allSubjects.push(...subjectsArray);
@@ -193,8 +193,8 @@ const BecomeMentor = () => {
                     </PopoverTrigger>
                     <PopoverContent className="w-full p-0" align="start">
                       <Command>
-                        <CommandInput 
-                          placeholder="Buscar ou digitar nova especialidade..." 
+                        <CommandInput
+                          placeholder="Buscar ou digitar nova especialidade..."
                           value={subjectInput}
                           onValueChange={setSubjectInput}
                         />
@@ -233,7 +233,7 @@ const BecomeMentor = () => {
                       </Command>
                     </PopoverContent>
                   </Popover>
-                  
+
                   {selectedSubjects.length > 0 && (
                     <div className="flex flex-wrap gap-2 p-3 border rounded-md bg-muted/50">
                       {selectedSubjects.map((subject) => (
@@ -250,7 +250,7 @@ const BecomeMentor = () => {
                       ))}
                     </div>
                   )}
-                  
+
                   <p className="text-xs text-muted-foreground">
                     {selectedSubjects.length} selecionadas. Clique no botão acima para adicionar especialidades.
                   </p>

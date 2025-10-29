@@ -108,7 +108,7 @@ const Index = () => {
                         mentorId={m.user_id}
                         name={m.profiles?.full_name || 'Sem nome'}
                         course={m.profiles?.graduation || 'N/A'}
-                        period={m.experience_years ? `${m.experience_years} anos exp.` : '--'}
+                        period={m.experience_years ? `${m.experience_years} anos de exp.` : '1 ano de exp.'}
                         subjects={subjectsFromProfile}
                         rating={m.avg_rating ?? 0}
                         reviews={m.total_ratings ?? 0}

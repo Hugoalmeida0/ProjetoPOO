@@ -27,7 +27,7 @@ export const ModalAvaliacao = ({ isOpen, onClose, bookingId, mentorName }: Modal
     useEffect(() => {
         const checkExistingRating = async () => {
             if (!isOpen || !bookingId) return;
-            
+
             setIsLoading(true);
             try {
                 const rating = await apiClient.ratings.getByBookingId(bookingId);
@@ -106,8 +106,8 @@ export const ModalAvaliacao = ({ isOpen, onClose, bookingId, mentorName }: Modal
                 <DialogHeader>
                     <DialogTitle>Avaliar Mentoria</DialogTitle>
                     <DialogDescription>
-                        {existingRating 
-                            ? "Você já avaliou esta mentoria." 
+                        {existingRating
+                            ? "Você já avaliou esta mentoria."
                             : `Como foi sua experiência com ${mentorName || 'o mentor'}? Sua avaliação nos ajuda a melhorar o serviço.`
                         }
                     </DialogDescription>
@@ -125,15 +125,15 @@ export const ModalAvaliacao = ({ isOpen, onClose, bookingId, mentorName }: Modal
                                 <CheckCircle2 className="h-5 w-5 text-green-600" />
                                 <h3 className="font-semibold text-green-900">Avaliação já enviada</h3>
                             </div>
-                            
+
                             {/* Estrelas da avaliação existente */}
                             <div className="flex space-x-1 mb-2">
                                 {[1, 2, 3, 4, 5].map((star) => (
                                     <Star
                                         key={star}
                                         className={`w-6 h-6 ${star <= existingRating.rating
-                                                ? 'fill-yellow-400 text-yellow-400'
-                                                : 'text-gray-300'
+                                            ? 'fill-yellow-400 text-yellow-400'
+                                            : 'text-gray-300'
                                             }`}
                                     />
                                 ))}
@@ -149,9 +149,9 @@ export const ModalAvaliacao = ({ isOpen, onClose, bookingId, mentorName }: Modal
                             )}
 
                             <p className="text-xs text-gray-500 mt-3">
-                                Avaliado em {new Date(existingRating.created_at).toLocaleDateString('pt-BR', { 
-                                    day: '2-digit', 
-                                    month: 'long', 
+                                Avaliado em {new Date(existingRating.created_at).toLocaleDateString('pt-BR', {
+                                    day: '2-digit',
+                                    month: 'long',
                                     year: 'numeric',
                                     hour: '2-digit',
                                     minute: '2-digit'
@@ -167,71 +167,71 @@ export const ModalAvaliacao = ({ isOpen, onClose, bookingId, mentorName }: Modal
                     </div>
                 ) : (
                     <div className="space-y-6">
-                    {/* Sistema de Estrelas */}
-                    <div className="space-y-2">
-                        <Label htmlFor="rating">Avaliação</Label>
-                        <div className="flex space-x-1" id="rating">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    type="button"
-                                    onClick={() => handleStarClick(star)}
-                                    onMouseEnter={() => handleStarHover(star)}
-                                    onMouseLeave={handleStarLeave}
-                                    className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-                                    disabled={isSubmitting}
-                                >
-                                    <Star
-                                        className={`w-8 h-8 transition-colors ${star <= (hoveredRating || rating)
+                        {/* Sistema de Estrelas */}
+                        <div className="space-y-2">
+                            <Label htmlFor="rating">Avaliação</Label>
+                            <div className="flex space-x-1" id="rating">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        type="button"
+                                        onClick={() => handleStarClick(star)}
+                                        onMouseEnter={() => handleStarHover(star)}
+                                        onMouseLeave={handleStarLeave}
+                                        className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                                        disabled={isSubmitting}
+                                    >
+                                        <Star
+                                            className={`w-8 h-8 transition-colors ${star <= (hoveredRating || rating)
                                                 ? 'fill-yellow-400 text-yellow-400'
                                                 : 'text-gray-300 hover:text-yellow-400'
-                                            }`}
-                                    />
-                                </button>
-                            ))}
+                                                }`}
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                            {rating > 0 && (
+                                <p className="text-sm text-gray-600">
+                                    {rating === 1 && "Péssimo"}
+                                    {rating === 2 && "Ruim"}
+                                    {rating === 3 && "Regular"}
+                                    {rating === 4 && "Bom"}
+                                    {rating === 5 && "Excelente"}
+                                </p>
+                            )}
                         </div>
-                        {rating > 0 && (
-                            <p className="text-sm text-gray-600">
-                                {rating === 1 && "Péssimo"}
-                                {rating === 2 && "Ruim"}
-                                {rating === 3 && "Regular"}
-                                {rating === 4 && "Bom"}
-                                {rating === 5 && "Excelente"}
-                            </p>
-                        )}
-                    </div>
 
-                    {/* Campo de Comentário */}
-                    <div className="space-y-2">
-                        <Label htmlFor="comment">Comentário (opcional)</Label>
-                        <Textarea
-                            id="comment"
-                            placeholder="Conte-nos mais sobre sua experiência..."
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            disabled={isSubmitting}
-                            className="min-h-[100px]"
-                        />
-                    </div>
+                        {/* Campo de Comentário */}
+                        <div className="space-y-2">
+                            <Label htmlFor="comment">Comentário (opcional)</Label>
+                            <Textarea
+                                id="comment"
+                                placeholder="Conte-nos mais sobre sua experiência..."
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                                disabled={isSubmitting}
+                                className="min-h-[100px]"
+                            />
+                        </div>
 
-                    {/* Botões */}
-                    <div className="flex justify-end space-x-2">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={handleClose}
-                            disabled={isSubmitting}
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            type="button"
-                            onClick={handleSubmit}
-                            disabled={isSubmitting || rating === 0}
-                        >
-                            {isSubmitting ? "Enviando..." : "Enviar Avaliação"}
-                        </Button>
-                    </div>
+                        {/* Botões */}
+                        <div className="flex justify-end space-x-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleClose}
+                                disabled={isSubmitting}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={handleSubmit}
+                                disabled={isSubmitting || rating === 0}
+                            >
+                                {isSubmitting ? "Enviando..." : "Enviar Avaliação"}
+                            </Button>
+                        </div>
                     </div>
                 )}
             </DialogContent>
