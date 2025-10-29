@@ -1,22 +1,42 @@
-{{
+{{{
 
-  "name": "uvv-mentor-connect",  "name": "vite_react_shadcn_ts",
+  "name": "uvv-mentor-connect",
 
-  "version": "1.0.0",  "private": true,
+  "version": "1.0.0",  "name": "uvv-mentor-connect",  "name": "vite_react_shadcn_ts",
 
-  "description": "Plataforma de mentorias acadêmicas da UVV",  "version": "0.0.0",
+  "description": "Plataforma de mentorias acadêmicas da UVV",
 
-  "private": true,  "type": "module",
+  "private": true,  "version": "1.0.0",  "private": true,
 
-  "scripts": {  "scripts": {
+  "scripts": {
 
-    "dev:frontend": "cd frontend && npm run dev",    "dev": "vite",
+    "dev:frontend": "cd frontend && npm run dev",  "description": "Plataforma de mentorias acadêmicas da UVV",  "version": "0.0.0",
 
-    "dev:backend": "cd backend && npm run dev",    "test": "vitest",
+    "dev:backend": "cd backend && npm run dev",
 
-    "build:frontend": "cd frontend && npm run build",    "build": "npm run build:backend && vite build",
+    "build:frontend": "cd frontend && npm run build",  "private": true,  "type": "module",
 
-    "build:backend": "cd backend && npm run build",    "build:backend": "cd backend && npm install && npm run build",
+    "build:backend": "cd backend && npm run build",
+
+    "build": "npm run build:backend && npm run build:frontend",  "scripts": {  "scripts": {
+
+    "install:all": "cd frontend && npm install && cd ../backend && npm install"
+
+  },    "dev:frontend": "cd frontend && npm run dev",    "dev": "vite",
+
+  "repository": {
+
+    "type": "git",    "dev:backend": "cd backend && npm run dev",    "test": "vitest",
+
+    "url": "https://github.com/Hugoalmeida0/ProjetoPOO.git"
+
+  },    "build:frontend": "cd frontend && npm run build",    "build": "npm run build:backend && vite build",
+
+  "author": "Hugo Almeida",
+
+  "license": "MIT"    "build:backend": "cd backend && npm run build",    "build:backend": "cd backend && npm install && npm run build",
+
+}
 
     "build": "npm run build:backend && npm run build:frontend",    "build:dev": "vite build --mode development",
 
