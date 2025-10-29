@@ -270,18 +270,14 @@ export default function MentorDashboard() {
         }
     };
 
-    const subjectsByName = useMemo(() => (subjects || []).sort((a, b) => a.name.localeCompare(b.name)), [subjects]);
-
+    // availableSubjects é um array de strings (nomes). Filtrar por texto de busca.
     const filteredSubjects = useMemo(() => {
-        if (!searchTerm.trim()) return subjectsByName;
+        if (!searchTerm.trim()) return availableSubjects;
         const lower = searchTerm.toLowerCase();
-        return subjectsByName.filter((s: any) =>
-            s.name.toLowerCase().includes(lower) ||
-            (s.description && s.description.toLowerCase().includes(lower))
-        );
-    }, [subjectsByName, searchTerm]);
+        return (availableSubjects || []).filter((s: string) => String(s).toLowerCase().includes(lower));
+    }, [availableSubjects, searchTerm]);
 
-    const isSaveDisabled = formSaving || formLoading || !graduationId || selectedSubjectIds.length === 0;
+    const isSaveDisabled = formSaving || formLoading || !graduationId || selectedSubjects.length === 0;
 
     return (
         <RequireMentor>
@@ -421,11 +417,11 @@ export default function MentorDashboard() {
                             <Card className="lg:col-span-2">
                                 <CardHeader>
                                     <CardTitle className="flex items-center justify-between">
-                                        <span>Especialidades</span>
-                                        <span className="text-sm font-normal text-muted-foreground">
-                                            {selectedSubjectIds.length} selecionada{selectedSubjectIds.length !== 1 ? 's' : ''}
-                                        </span>
-                                    </CardTitle>
+                                            <span>Especialidades</span>
+                                            <span className="text-sm font-normal text-muted-foreground">
+                                                {selectedSubjects.length} selecionada{selectedSubjects.length !== 1 ? 's' : ''}
+                                            </span>
+                                        </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     {formLoading ? (
@@ -446,7 +442,7 @@ export default function MentorDashboard() {
                                                     <p className="col-span-full text-sm text-muted-foreground">Nenhuma especialidade encontrada.</p>
                                                 ) : (
                                                     (() => {
-                                                        // Construir set de nomes vindos de mentor_profiles.subjects para exibição quando não há mapeamento por id
+                                                        // Construir set de nomes vindos de mentor_profiles.subjects para exibição e marcação
                                                         const profileNamesSet = new Set<string>();
                                                         if (mentorInfo && mentorInfo.subjects) {
                                                             if (typeof mentorInfo.subjects === 'string') {
@@ -459,16 +455,14 @@ export default function MentorDashboard() {
                                                         }
 
                                                         return filteredSubjects.map((s: any) => {
-                                                            const sNameLower = String(s.name || '').toLowerCase();
-                                                            const checked = selectedSubjectIds.includes(s.id) || profileNamesSet.has(sNameLower);
+                                                            const sName = String(s || '');
+                                                            const sNameLower = sName.toLowerCase();
+                                                            const checked = selectedSubjects.includes(sName) || profileNamesSet.has(sNameLower);
                                                             return (
-                                                                <label key={s.id} className="flex items-center gap-3 border rounded p-3 hover:bg-muted/50 cursor-pointer">
-                                                                    <Checkbox checked={checked} onCheckedChange={(c) => handleSubjectCheckboxChange(s.id, Boolean(c))} />
+                                                                <label key={sName} className="flex items-center gap-3 border rounded p-3 hover:bg-muted/50 cursor-pointer">
+                                                                    <Checkbox checked={checked} onCheckedChange={(c) => handleSubjectCheckboxChange(sName, Boolean(c))} />
                                                                     <div>
-                                                                        <div className="font-medium">{s.name}</div>
-                                                                        {s.description ? (
-                                                                            <div className="text-xs text-muted-foreground line-clamp-2">{s.description}</div>
-                                                                        ) : null}
+                                                                        <div className="font-medium">{sName}</div>
                                                                     </div>
                                                                 </label>
                                                             );
@@ -480,7 +474,7 @@ export default function MentorDashboard() {
                                     )}
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-6 gap-3">
                                         <p className="text-sm text-muted-foreground">
-                                            {(!graduationId || selectedSubjectIds.length === 0) ? 'Selecione uma graduação e ao menos uma especialidade para salvar.' : 'Pronto para salvar.'}
+                                            {(!graduationId || selectedSubjects.length === 0) ? 'Selecione uma graduação e ao menos uma especialidade para salvar.' : 'Pronto para salvar.'}
                                         </p>
                                         <Button onClick={handleSaveCadastro} disabled={isSaveDisabled}>
                                             {formSaving ? 'Salvando...' : 'Salvar cadastro'}
