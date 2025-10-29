@@ -1,1 +1,21 @@
-{"name":"uvv-mentor-connect","version":"1.0.0","description":"Plataforma de mentorias academicas da UVV","private":true,"scripts":{"dev:frontend":"cd frontend && npm run dev","dev:backend":"cd backend && npm run dev","build:frontend":"cd frontend && npm run build","build:backend":"cd backend && npm run build","build":"npm run build:backend && npm run build:frontend","install:all":"cd frontend && npm install && cd ../backend && npm install"},"repository":{"type":"git","url":"https://github.com/Hugoalmeida0/ProjetoPOO.git"},"author":"Hugo Almeida","license":"MIT"}
+{
+  "name": "uvv-mentor-connect",
+  "version": "1.0.0",
+  "description": "Plataforma de mentorias academicas da UVV",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "vercel-build": "cd frontend && npm install && npm run build",
+    "install:all": "cd frontend && npm install && cd ../backend && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hugoalmeida0/ProjetoPOO.git"
+  },
+  "author": "Hugo Almeida",
+  "license": "MIT"
+}
