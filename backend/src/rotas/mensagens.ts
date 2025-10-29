@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { pool } from '../db';
+import { getIO } from '../realtime';
 
 const router = Router();
 
@@ -89,7 +90,21 @@ router.post('/', auth, async (req: Request & { userId?: string }, res: Response)
             [result.rows[0].id]
         );
 
-        res.status(201).json(messageWithSender.rows[0]);
+        const message = messageWithSender.rows[0];
+
+        // Emitir evento realtime (se disponível)
+        try {
+            const io = getIO();
+            if (io) {
+                // emitir globalmente e por booking
+                io.emit('message:new', message);
+                io.to(`booking-${message.booking_id}`).emit('message:new', message);
+            }
+        } catch (e) {
+            console.warn('Realtime emit failed for message:new', String(e));
+        }
+
+        res.status(201).json(message);
     } catch (error) {
         console.error('Erro ao criar mensagem:', error);
         res.status(500).json({ error: 'Erro ao criar mensagem' });

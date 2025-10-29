@@ -31,9 +31,7 @@ const bookingSchema = z.object({
   duration: z.string().min(1, "Selecione a duração"),
   subject: z.string().min(1, "Selecione uma matéria"),
   objective: z.string().min(10, "Descreva o objetivo da mentoria (mínimo 10 caracteres)"),
-  studentName: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  studentEmail: z.string().email("Email inválido"),
-  studentPhone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos"),
+  // student info will be inferred from logged-in account
 });
 
 type BookingFormData = z.infer<typeof bookingSchema>;
@@ -168,9 +166,6 @@ const BookingMentorship = () => {
   const form = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
     defaultValues: {
-      studentName: (user as any)?.full_name || "",
-      studentEmail: user?.email || "",
-      studentPhone: "",
       objective: "",
     },
   });
@@ -193,6 +188,15 @@ const BookingMentorship = () => {
       const subjectName = data.subject;
 
       // Passo 2: Montar o objeto final do agendamento
+      // Inferir informações do estudante a partir da conta logada
+      let studentPhone = '';
+      try {
+        const prof = await apiClient.profiles.getByUserId(user.id).catch(() => null);
+        studentPhone = prof?.phone || '';
+      } catch {
+        studentPhone = '';
+      }
+
       const bookingData = {
         student_id: user.id,
         mentor_id: id,
@@ -201,9 +205,9 @@ const BookingMentorship = () => {
         time: data.time,
         duration: parseInt(data.duration),
         objective: data.objective,
-        student_name: data.studentName,
-        student_email: data.studentEmail,
-        student_phone: data.studentPhone,
+        student_name: user.full_name,
+        student_email: user.email,
+        student_phone: studentPhone,
         status: 'pending' as const
       };
 
@@ -514,57 +518,7 @@ const BookingMentorship = () => {
                           )}
                         />
 
-                        {/* Student Information */}
-                        <div className="space-y-4">
-                          <h3 className="text-lg font-semibold flex items-center gap-2">
-                            <MessageSquare className="h-5 w-5" />
-                            Suas Informações
-                          </h3>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="studentName"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Nome Completo</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="Seu nome completo" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={form.control}
-                              name="studentEmail"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Email</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="seu.email@uvv.br" type="email" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <FormField
-                            control={form.control}
-                            name="studentPhone"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Telefone/WhatsApp</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="(27) 99999-9999" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
+                        {/* Student information is inferred from the logged-in account and not editable here */}
 
                         {/* Submit Button */}
                         <div className="pt-6">

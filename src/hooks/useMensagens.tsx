@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '@/integracoes/api/client';
 import { useAuth } from './useAutenticacao';
+import { onEvent, ensureRealtime } from '@/integracoes/realtime';
 
 export interface Message {
     id: string;
@@ -50,6 +51,41 @@ export const useMessages = (bookingId: string | null) => {
 
     useEffect(() => {
         fetchMessages();
+        let off: (() => void) | null = null;
+        // Inscrever em mensagens realtime (se disponível) e fazer join em rooms
+        (async () => {
+            try {
+                const s = await ensureRealtime();
+                if (s) {
+                    // juntar-se a sala do booking e do usuário para receber apenas mensagens relevantes
+                    if (bookingId) s.emit('join:booking', bookingId);
+                    if (user?.id) s.emit('join:user', user.id);
+
+                    off = await onEvent('message:new', (msg: any) => {
+                        if (!bookingId) return;
+                        if (msg.booking_id === bookingId) {
+                            setMessages(prev => [...prev, msg]);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Realtime not available for messages:', String(e));
+            }
+        })();
+
+        return () => {
+            try {
+                if (off) off();
+                // deixar salas
+                (async () => {
+                    const s = await ensureRealtime();
+                    if (s) {
+                        if (bookingId) s.emit('leave:booking', bookingId);
+                        // not leaving user room to allow other flows (optional)
+                    }
+                })();
+            } catch { /* ignore */ }
+        };
     }, [fetchMessages]);
 
     return {

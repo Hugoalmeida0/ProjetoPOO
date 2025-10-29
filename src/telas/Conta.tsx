@@ -1,5 +1,6 @@
 import Cabecalho from "@/componentes/Cabecalho";
 import { Button } from "@/componentes/ui/button";
+import { Switch } from "@/componentes/ui/switch";
 import { Input } from "@/componentes/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/componentes/ui/card";
 import { useAuth } from "@/hooks/useAutenticacao";
@@ -70,30 +71,17 @@ const Account = () => {
         }
     };
 
-    const handleLeaveMentor = async () => {
+    const handleToggleMentor = async (value: boolean) => {
         if (!user) return;
-        const ok = window.confirm('Tem certeza que deseja parar de ser mentor? Seu perfil de mentor será removido e você perderá acesso às telas de mentor.');
-        if (!ok) return;
-
         try {
             setLoading(true);
-            // 1) remover mentor_profile (se existir)
-            try {
-                await apiClient.mentors.delete(user.id);
-            } catch (err: any) {
-                // se retornar 404 ou outro erro, continuar para atualizar o profile
-                console.warn('Erro ao deletar mentor_profile (pode não existir):', err?.message || err);
-            }
-
-            // 2) atualizar profile.is_mentor = false
-            try {
-                await apiClient.profiles.update(user.id, { is_mentor: false });
-            } catch (err: any) {
-                console.warn('Erro ao atualizar profile.is_mentor:', err?.message || err);
-            }
-
-            toast({ title: 'Você não é mais mentor', description: 'Seu perfil de mentor foi removido.' });
-            // força recarregamento para atualizar contexto de autenticação e rotas
+            // Apenas atualizar flag is_mentor no profile para permitir reativação posterior
+            await apiClient.profiles.update(user.id, { is_mentor: value });
+            // atualizar estado local
+            setProfile((p: any) => ({ ...(p || {}), is_mentor: value }));
+            toast({ title: value ? 'Você é mentor novamente' : 'Você não é mais mentor', description: value ? 'Seu perfil de mentor foi reativado.' : 'Seu perfil de mentor foi desativado.' });
+            // Atualizar contexto: recarregar para garantir rotas/menus atualizados.
+            // Preferimos reload simples aqui; posso implementar refresh via AuthProvider se preferir.
             window.location.reload();
         } catch (e: any) {
             toast({ title: 'Erro ao processar', description: e?.message || '' });
@@ -142,10 +130,15 @@ const Account = () => {
                             <Button variant="destructive" onClick={handleDelete} disabled={loading}>
                                 Excluir conta
                             </Button>
-                            {(profile?.is_mentor || user?.is_mentor) && (
-                                <Button variant="outline" onClick={handleLeaveMentor} disabled={loading}>
-                                    Parar de ser Mentor
-                                </Button>
+                            {(profile || user) && (
+                                <div className="flex items-center gap-2">
+                                    <label className="text-sm">Sou Mentor</label>
+                                    <Switch
+                                        checked={Boolean(profile?.is_mentor || user?.is_mentor)}
+                                        onCheckedChange={(v: any) => handleToggleMentor(Boolean(v))}
+                                        disabled={loading}
+                                    />
+                                </div>
                             )}
                         </div>
                     </CardContent>

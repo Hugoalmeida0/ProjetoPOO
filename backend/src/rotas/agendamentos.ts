@@ -156,7 +156,23 @@ router.post('/', async (req: Request, res: Response) => {
             }
         }
 
-        return res.status(201).json(result.rows[0]);
+        const booking = result.rows[0];
+
+        // Emitir evento realtime para notificar mentor/aluno (se disponível)
+        try {
+            // importação dinâmica para evitar dependência obrigatória
+            const { getIO } = require('../realtime');
+            const io = getIO();
+            if (io) {
+                io.emit('booking:new', booking);
+                io.to(`user-${booking.mentor_id}`).emit('booking:new', booking);
+                io.to(`user-${booking.student_id}`).emit('booking:new', booking);
+            }
+        } catch (e) {
+            console.warn('Realtime emit failed for booking:new', String(e));
+        }
+
+        return res.status(201).json(booking);
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: 'Internal server error' });
@@ -240,6 +256,22 @@ router.put('/:bookingId', async (req: Request, res: Response) => {
             }
         }
 
+
+        // Emitir evento realtime de atualização de agendamento
+        try {
+            const { getIO } = require('../realtime');
+            const io = getIO();
+            if (io) {
+                io.emit('booking:updated', booking);
+                // Notificar especificamente o estudante e o mentor
+                io.to(`user-${booking.mentor_id}`).emit('booking:updated', booking);
+                io.to(`user-${booking.student_id}`).emit('booking:updated', booking);
+                // Notificar room do booking
+                io.to(`booking-${booking.id}`).emit('booking:updated', booking);
+            }
+        } catch (e) {
+            console.warn('Realtime emit failed for booking:updated', String(e));
+        }
         return res.json(booking);
     } catch (err) {
         console.error(err);
