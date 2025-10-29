@@ -27,9 +27,9 @@ const Heroi = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button 
-              variant="hero" 
-              size="lg" 
+            <Button
+              variant="hero"
+              size="lg"
               className="text-lg px-8 py-4"
               onClick={() => navigate('/mentors')}
             >
