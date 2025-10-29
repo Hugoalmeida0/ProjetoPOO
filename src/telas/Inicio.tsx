@@ -1,9 +1,8 @@
 import Cabecalho from "@/componentes/Cabecalho";
 import Hero from "@/componentes/Heroi";
-import GraduationCard from "@/componentes/CardGraduacao";
 import MentorCard from "@/componentes/CardMentor";
 import { Button } from "@/componentes/ui/button";
-import { useGraduations } from "@/hooks/useGraduacoes";
+// Graduation section removed per request
 import useMentors from "@/hooks/useMentores";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
@@ -27,7 +26,6 @@ import {
 const TOP_MENTORS = 3; // Configurável: quantos mentores destacar
 
 const Index = () => {
-  const { data: graduations = [], isLoading: graduationsLoading } = useGraduations();
   const { mentors, loading: mentorsLoading } = useMentors();
   const navigate = useNavigate();
   const location = useLocation();
@@ -62,48 +60,7 @@ const Index = () => {
       <Cabecalho />
       <Hero />
 
-      {/* Graduations Section */}
-      <section id="materias" className="py-20 bg-muted/20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Graduações Disponíveis</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Explore as graduações e encontre mentores especializados na sua área de estudo
-            </p>
-          </div>
-
-          {graduationsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {graduations.map((graduation) => (
-                <GraduationCard
-                  key={graduation.id}
-                  name={graduation.name}
-                  description={graduation.description}
-                  students={graduation.students_count}
-                  subjects={graduation.subjects_count}
-                  mentors={graduation.mentors_count}
-                  color={graduation.color}
-                  icon={graduation.icon}
-                  slug={graduation.slug}
-                />
-              ))}
-            </div>
-          )}
-
-          <div className="text-center">
-            <Button variant="outline" size="lg">
-              Ver Todas as Graduações
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </section>
+      {/* Graduations section removed per project decision */}
 
       {/* Featured Mentors */}
       <section id="mentores" className="py-20">
