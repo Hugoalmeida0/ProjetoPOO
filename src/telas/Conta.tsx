@@ -12,6 +12,7 @@ const Account = () => {
     const { user, signOut } = useAuth();
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
+    const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -25,6 +26,15 @@ const Account = () => {
                 const me = await apiClient.users.getMe();
                 setFullName(me.full_name || user?.full_name || "");
                 setEmail(me.email || user?.email || "");
+
+                // carregar profile (opcional) para mostrar mais campos da conta
+                try {
+                    const prof = await apiClient.profiles.getByUserId(user!.id);
+                    setProfile(prof);
+                } catch (err) {
+                    // perfil pode não existir ainda; ignorar
+                    setProfile(null);
+                }
             } catch (e: any) {
                 toast({ title: "Erro ao carregar conta", description: e?.message || "" });
             }
@@ -60,6 +70,38 @@ const Account = () => {
         }
     };
 
+    const handleLeaveMentor = async () => {
+        if (!user) return;
+        const ok = window.confirm('Tem certeza que deseja parar de ser mentor? Seu perfil de mentor será removido e você perderá acesso às telas de mentor.');
+        if (!ok) return;
+
+        try {
+            setLoading(true);
+            // 1) remover mentor_profile (se existir)
+            try {
+                await apiClient.mentors.delete(user.id);
+            } catch (err: any) {
+                // se retornar 404 ou outro erro, continuar para atualizar o profile
+                console.warn('Erro ao deletar mentor_profile (pode não existir):', err?.message || err);
+            }
+
+            // 2) atualizar profile.is_mentor = false
+            try {
+                await apiClient.profiles.update(user.id, { is_mentor: false });
+            } catch (err: any) {
+                console.warn('Erro ao atualizar profile.is_mentor:', err?.message || err);
+            }
+
+            toast({ title: 'Você não é mais mentor', description: 'Seu perfil de mentor foi removido.' });
+            // força recarregamento para atualizar contexto de autenticação e rotas
+            window.location.reload();
+        } catch (e: any) {
+            toast({ title: 'Erro ao processar', description: e?.message || '' });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div>
             <Cabecalho />
@@ -77,6 +119,22 @@ const Account = () => {
                             <label className="text-sm">Email</label>
                             <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="seu@email.com" />
                         </div>
+                        {profile && (
+                            <>
+                                <div>
+                                    <label className="text-sm">Telefone</label>
+                                    <Input value={profile.phone || ''} disabled />
+                                </div>
+                                <div>
+                                    <label className="text-sm">Bio</label>
+                                    <Input value={profile.bio || ''} disabled />
+                                </div>
+                                <div>
+                                    <label className="text-sm">Mentor?</label>
+                                    <div className="text-sm">{profile.is_mentor ? 'Sim' : 'Não'}</div>
+                                </div>
+                            </>
+                        )}
                         <div className="flex gap-2">
                             <Button onClick={handleSave} disabled={loading}>
                                 Salvar
@@ -84,6 +142,11 @@ const Account = () => {
                             <Button variant="destructive" onClick={handleDelete} disabled={loading}>
                                 Excluir conta
                             </Button>
+                            {(profile?.is_mentor || user?.is_mentor) && (
+                                <Button variant="outline" onClick={handleLeaveMentor} disabled={loading}>
+                                    Parar de ser Mentor
+                                </Button>
+                            )}
                         </div>
                     </CardContent>
                 </Card>

@@ -61,6 +61,11 @@ router.post('/', async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
+        // Business rule: impedir que um usuário agende com ele mesmo
+        if (student_id === mentor_id) {
+            return res.status(400).json({ error: 'Você não pode agendar uma mentoria consigo mesmo.' });
+        }
+
         // Resolver subject_id quando vier apenas subject_name
         let finalSubjectId = subject_id as string | null;
         const finalSubjectName = subject_name || null;
