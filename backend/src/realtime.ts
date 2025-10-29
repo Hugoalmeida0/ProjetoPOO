@@ -1,11 +1,6 @@
-let ioInstance: any = null;
-
-export function setIO(io: any) {
-    ioInstance = io;
-}
-
+// Realtime helper removed — stub implementations to avoid runtime errors if imported elsewhere.
 export function getIO() {
-    return ioInstance;
+    return null;
 }
 
-export default { setIO, getIO };
+export default { getIO };
