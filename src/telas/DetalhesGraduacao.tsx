@@ -164,10 +164,20 @@ const GraduationDetails = () => {
             Conecte-se com os melhores mentores de {graduation.name} e acelere seu aprendizado
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="outline" size="lg" className="bg-white text-primary hover:bg-white/90">
+            <Button
+              variant="outline"
+              size="lg"
+              className="bg-white text-primary hover:bg-white/90"
+              onClick={() => navigate("/mentors")}
+            >
               Encontrar Mentor
             </Button>
-            <Button variant="ghost" size="lg" className="text-white border-white hover:bg-white/10">
+            <Button
+              variant="ghost"
+              size="lg"
+              className="text-white border-white hover:bg-white/10"
+              onClick={() => navigate("/tornar-se-mentor")}
+            >
               Ser Mentor
             </Button>
           </div>
