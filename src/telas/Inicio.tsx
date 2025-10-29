@@ -130,18 +130,32 @@ const Index = () => {
                 const featured = getFeaturedMentors(mentors, TOP_MENTORS);
 
                 return featured.map((m: any) => (
-                  <MentorCard
-                    key={m.id}
-                    mentorId={m.user_id}
-                    name={m.profiles?.full_name || 'Sem nome'}
-                    course={m.profiles?.graduation || 'N/A'}
-                    period={m.experience_years ? `${m.experience_years} anos exp.` : '--'}
-                    subjects={[]}
-                    rating={m.avg_rating ?? 0}
-                    reviews={m.total_ratings ?? 0}
-                    location={m.location || '-'}
-                    avatar={m.profiles?.avatar_url}
-                  />
+                  (() => {
+                    // Preferir coluna subjects de mentor_profiles quando disponível
+                    let subjectsFromProfile: string[] = [];
+                    if (m.subjects) {
+                      if (typeof m.subjects === 'string') {
+                        subjectsFromProfile = m.subjects.split(',').map((s: string) => s.trim()).filter(Boolean);
+                      } else if (Array.isArray(m.subjects)) {
+                        subjectsFromProfile = m.subjects as string[];
+                      }
+                    }
+
+                    return (
+                      <MentorCard
+                        key={m.id}
+                        mentorId={m.user_id}
+                        name={m.profiles?.full_name || 'Sem nome'}
+                        course={m.profiles?.graduation || 'N/A'}
+                        period={m.experience_years ? `${m.experience_years} anos exp.` : '--'}
+                        subjects={subjectsFromProfile}
+                        rating={m.avg_rating ?? 0}
+                        reviews={m.total_ratings ?? 0}
+                        location={m.location || '-'}
+                        avatar={m.profiles?.avatar_url}
+                      />
+                    );
+                  })()
                 ));
               })()}
             </div>
