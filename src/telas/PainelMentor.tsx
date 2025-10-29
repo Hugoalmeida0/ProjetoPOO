@@ -86,7 +86,7 @@ export default function MentorDashboard() {
                         for (const s of raw) { const t = String(s || '').trim(); if (t) subjSet.add(t); }
                     }
                 }
-                setAvailableSubjects(Array.from(subjSet).sort((a,b) => a.localeCompare(b)));
+                setAvailableSubjects(Array.from(subjSet).sort((a, b) => a.localeCompare(b)));
                 // Popular seleção inicial com os nomes salvos em mentor_profiles.subjects
                 let preSelectedNames: string[] = [];
                 if (mentorData && mentorData.subjects) {
