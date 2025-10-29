@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAutenticacao';
 import { apiClient } from '@/integracoes/api/client';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/componentes/ui/input';
+import { useGraduations } from '@/hooks/useGraduacoes';
 import { cn } from '@/lib/utils';
 
 const Mentors = () => {
@@ -23,6 +24,7 @@ const Mentors = () => {
 
     const [graduationQuery, setGraduationQuery] = useState('');
     const [graduationSuggestions, setGraduationSuggestions] = useState<string[]>([]);
+    const { data: graduations } = useGraduations();
 
     // (Removido) alerta de cadastro incompleto exibido indevidamente nesta rota.
 
@@ -31,11 +33,11 @@ const Mentors = () => {
 
     // (antigo) buscávamos subjects da API; agora derivamos as sugestões a partir da coluna subjects de cada mentor.
 
-    // Derivar opções de graduação a partir dos perfis dos mentores
+    // Derivar opções de graduação a partir do endpoint central de graduações (mais confiável)
     useEffect(() => {
-        const grads = Array.from(new Set((mentors || []).map((m: any) => m.profiles?.graduation).filter(Boolean)));
-        setGraduationSuggestions(grads as string[]);
-    }, [mentors]);
+        if (!graduations) return;
+        setGraduationSuggestions((graduations || []).map((g: any) => g.name));
+    }, [graduations]);
 
     // Derivar sugestões de matérias a partir dos próprios mentores (coluna subjects em mentor_profiles).
     useEffect(() => {
@@ -60,7 +62,13 @@ const Mentors = () => {
 
         if (graduationQuery) {
             const q = String(graduationQuery).toLowerCase();
-            list = list.filter((m: any) => String(m.profiles?.graduation || '').toLowerCase().includes(q));
+            // Se existir uma graduação com esse nome, use seu id também
+            const matchedGrad = (graduations || []).find((g: any) => g.name.toLowerCase() === q || g.id === graduationQuery);
+            if (matchedGrad) {
+                list = list.filter((m: any) => String(m.graduation_id || m.profiles?.graduation_id || '').toLowerCase() === String(matchedGrad.id).toLowerCase() || String(m.profiles?.graduation || '').toLowerCase().includes(matchedGrad.name.toLowerCase()));
+            } else {
+                list = list.filter((m: any) => String(m.profiles?.graduation || '').toLowerCase().includes(q));
+            }
         }
 
         if (selectedSubject) {

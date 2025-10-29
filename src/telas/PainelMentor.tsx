@@ -82,12 +82,18 @@ export default function MentorDashboard() {
                     const names = typeof mentorData.subjects === 'string'
                         ? mentorData.subjects.split(',').map((s: string) => s.trim()).filter(Boolean)
                         : Array.isArray(mentorData.subjects) ? mentorData.subjects : [];
-                    // Mapear nomes para ids usando allSubjects
-                    const nameToId: Record<string, string> = {};
+                    // Mapear nomes para ids usando allSubjects (tolerante a pequenas diferenças)
+                    const lowerToId: Record<string, string> = {};
                     for (const s of (allSubjects || [])) {
-                        if (s && s.name) nameToId[String(s.name).toLowerCase()] = s.id;
+                        if (s && s.name) lowerToId[String(s.name).toLowerCase()] = s.id;
                     }
-                    preSelected = names.map((n: string) => nameToId[n.toLowerCase()]).filter(Boolean);
+                    preSelected = names.map((n: string) => {
+                        const key = n.toLowerCase();
+                        if (lowerToId[key]) return lowerToId[key];
+                        // tentativa fuzzy: encontrar subject cujo nome contenha o token
+                        const fuzzy = (allSubjects || []).find((s: any) => String(s.name).toLowerCase().includes(key));
+                        return fuzzy ? fuzzy.id : null;
+                    }).filter(Boolean) as string[];
                 } else {
                     preSelected = (mentorSubjects || []).map((s: any) => s.id);
                 }
@@ -221,8 +227,8 @@ export default function MentorDashboard() {
                     return found ? found.name : null;
                 }).filter(Boolean) as string[];
 
-                // Atualizar mentor_profiles.subjects via endpoint de mentors (o endpoint já persiste subjects)
-                await apiClient.mentors.update(user.id, {
+                // Atualizar mentor_profiles.subjects via endpoint de mentors
+                const updatedMentor = await apiClient.mentors.update(user.id, {
                     location,
                     availability,
                     experience_years: typeof experienceYears === 'number' ? experienceYears : Number(experienceYears) || 0,
@@ -230,8 +236,14 @@ export default function MentorDashboard() {
                     subjects: selectedNames.join(', '),
                 });
 
-                // Atualizar relação many-to-many para manter consistência (não obrigatório se preferir apenas coluna)
+                // Atualizar relação many-to-many para manter consistência
                 await apiClient.mentorSubjects.setSubjects(user.id, selectedSubjectIds);
+
+                // Atualizar estado local para refletir mudanças imediatas na UI
+                setMentorInfo(updatedMentor);
+                // Se o profile foi modificado em backend, recarregar
+                const refreshedProfile = await apiClient.profiles.getByUserId(user.id).catch(() => null);
+                if (refreshedProfile) setProfile(refreshedProfile);
             } catch (err) {
                 console.warn('Erro ao sincronizar subjects em mentor_profiles/mentor_subjects', err);
             }
