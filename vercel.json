@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "buildCommand": "npm ci --prefix backend && npm ci --prefix frontend && npm run build",
+    "buildCommand": "cd backend && npm install && cd ../frontend && npm install && cd .. && npm run build",
     "outputDirectory": "frontend/dist",
     "functions": {
         "api/index.js": {
