@@ -1,5 +1,6 @@
 // API client com suporte a Auth (JWT)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+// Em produção (Vercel), usar URL relativa (mesmo domínio). Em dev, usar localhost:4000
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.MODE === 'production' ? '' : 'http://localhost:4000');
 
 // Armazenamento simples do token no localStorage
 const TOKEN_KEY = 'auth_token';
