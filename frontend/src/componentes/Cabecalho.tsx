@@ -1,5 +1,5 @@
 import { Button } from "@/componentes/ui/button";
-import { GraduationCap, User, LogOut, Calendar, Settings, LayoutDashboard, Bell, X, Menu } from "lucide-react";
+import { GraduationCap, User, LogOut, Calendar, Settings, LayoutDashboard, Bell, X, Menu, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAutenticacao";
 import { useNotifications } from "@/hooks/useNotificacoes";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -89,6 +89,18 @@ const Header = () => {
             >
               Saiba Mais
             </button>
+            {user?.is_admin && (
+              <button
+                onClick={() => navigate('/admin')}
+                className={cn(
+                  "text-sm font-medium transition-colors hover:text-primary flex items-center gap-1",
+                  isActive('/admin') ? "text-primary font-bold" : "text-foreground"
+                )}
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Admin
+              </button>
+            )}
           </nav>
 
           <div className="flex items-center gap-3">
@@ -150,6 +162,20 @@ const Header = () => {
                   >
                     Saiba Mais
                   </button>
+                  {user?.is_admin && (
+                    <button
+                      onClick={() => handleMobileNavigation('/admin')}
+                      className={cn(
+                        "text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-2",
+                        isActive('/admin')
+                          ? "bg-primary text-primary-foreground font-bold"
+                          : "hover:bg-muted"
+                      )}
+                    >
+                      <ShieldCheck className="h-4 w-4" />
+                      Admin
+                    </button>
+                  )}
 
                   {/* Itens do usuário no mobile */}
                   {user && (
@@ -299,6 +325,12 @@ const Header = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  {user?.is_admin && (
+                    <DropdownMenuItem onClick={() => navigate("/admin")}>
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Painel Admin
+                    </DropdownMenuItem>
+                  )}
                   {user?.is_mentor && (
                     <DropdownMenuItem onClick={() => navigate("/mentor/dashboard")}>
                       <LayoutDashboard className="mr-2 h-4 w-4" />

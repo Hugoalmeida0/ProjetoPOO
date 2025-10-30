@@ -13,6 +13,7 @@ import usersRouter from './routes/usuarios';
 import messagesRouter from './routes/mensagens';
 import notificationsRouter from './routes/notificacoes';
 import ratingsRouter from './routes/avaliacoes';
+import adminRouter from './routes/admin';
 import { ensureSchema } from './bootstrap';
 
 
@@ -50,6 +51,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/messages', messagesRouter);
 app.use('/api/notifications', notificationsRouter);
 app.use('/api/ratings', ratingsRouter);
+app.use('/api/admin', adminRouter);
 
 // Para desenvolvimento local
 if (process.env.NODE_ENV !== 'production') {

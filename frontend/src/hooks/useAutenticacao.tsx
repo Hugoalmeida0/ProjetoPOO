@@ -1,7 +1,13 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { apiClient, setToken } from "@/services/api";
 
-type AuthUser = { id: string; email: string; full_name?: string; is_mentor?: boolean } | null;
+type AuthUser = { 
+  id: string; 
+  email: string; 
+  full_name?: string; 
+  is_mentor?: boolean;
+  is_admin?: boolean;
+} | null;
 
 interface AuthContextType {
   user: AuthUser;
@@ -22,7 +28,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const bootstrap = async () => {
       try {
         const me = await apiClient.auth.me();
-        setUser(me.user);
+        const userData = {
+          ...me.user,
+          is_admin: me.user.email === 'admin@gmail.com'
+        };
+        setUser(userData);
       } catch {
         setUser(null);
       } finally {
@@ -35,13 +45,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     const { token, user } = await apiClient.auth.login({ email, password });
     setToken(token);
-    setUser(user);
+    const userData = {
+      ...user,
+      is_admin: user.email === 'admin@gmail.com'
+    };
+    setUser(userData);
   };
 
   const signUp = async (email: string, password: string, full_name?: string) => {
     const { token, user } = await apiClient.auth.register({ email, password, full_name });
     setToken(token);
-    setUser(user);
+    const userData = {
+      ...user,
+      is_admin: user.email === 'admin@gmail.com'
+    };
+    setUser(userData);
   };
 
   const signOut = async () => {

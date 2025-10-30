@@ -17,6 +17,7 @@ import NotFound from "./telas/NaoEncontrado";
 import Account from "./telas/Conta";
 import MentorDashboard from "./telas/PainelMentor";
 import SaibaMais from "./telas/SaibaMais";
+import Admin from "./telas/Admin";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/tornar-se-mentor" element={<BecomeMentor />} />
             <Route path="/mentor/dashboard" element={<MentorDashboard />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/admin" element={<Admin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

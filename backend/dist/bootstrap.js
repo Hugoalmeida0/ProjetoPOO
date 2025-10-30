@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ensureSchema = ensureSchema;
-const db_1 = require("./db");
+const db_1 = require("./config/db");
 async function ensureSchema() {
     // Ensure users table exists (plaintext password for testing only)
     await db_1.pool.query(`

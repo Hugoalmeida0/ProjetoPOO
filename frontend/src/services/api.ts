@@ -195,4 +195,10 @@ export const apiClient = {
         getByBookingId: (bookingId: string) => fetchAPI<any>(`/api/ratings/booking/${bookingId}`),
         getMentorStats: (mentorId: string) => fetchAPI<any>(`/api/ratings/mentor/${mentorId}/stats`),
     },
+
+    // Admin
+    admin: {
+        getAllUsers: () => fetchAPI<any[]>('/api/admin/users'),
+        getAllMentorships: () => fetchAPI<any[]>('/api/admin/mentorships'),
+    },
 };
