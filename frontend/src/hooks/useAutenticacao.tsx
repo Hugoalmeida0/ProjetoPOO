@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { apiClient, setToken } from "@/services/api";
 
-type AuthUser = { 
-  id: string; 
-  email: string; 
-  full_name?: string; 
+type AuthUser = {
+  id: string;
+  email: string;
+  full_name?: string;
   is_mentor?: boolean;
   is_admin?: boolean;
 } | null;

@@ -26,16 +26,16 @@ async function adminOnly(req: Request & { userId?: string }, res: Response, next
             'SELECT email FROM users WHERE id = $1',
             [req.userId]
         );
-        
+
         if (rows.length === 0) {
             return res.status(404).json({ error: 'user not found' });
         }
-        
+
         // Verificar se o email é do admin
         if (rows[0].email !== 'admin@gmail.com') {
             return res.status(403).json({ error: 'access denied - admin only' });
         }
-        
+
         next();
     } catch (err) {
         console.error(err);
@@ -69,7 +69,7 @@ router.get('/users', auth, adminOnly, async (req: Request, res: Response) => {
             LEFT JOIN graduations g ON mp.graduation_id = g.id
             ORDER BY u.created_at DESC
         `);
-        
+
         return res.json(rows);
     } catch (err) {
         console.error(err);
@@ -111,7 +111,7 @@ router.get('/mentorships', auth, adminOnly, async (req: Request, res: Response) 
             LEFT JOIN ratings r ON b.id = r.booking_id
             ORDER BY b.created_at DESC
         `);
-        
+
         return res.json(rows);
     } catch (err) {
         console.error(err);
