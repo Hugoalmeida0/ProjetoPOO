@@ -6,7 +6,7 @@
 
 
 
-Plataforma de mentorias acadêmicas da Universidade Vila Velha (UVV) que conecta estudantes a mentores qualificados para aprimoramento do desempenho acadêmico através de sessões personalizadas de orientação e apoio educacional.Plataforma de mentorias acadêmicas da Universidade Vila Velha (UVV) que conecta estudantes a mentores qualificados para aprimoramento do desempenho acadêmico através de sessões personalizadas de orientação e apoio educacional.
+Plataforma de mentorias acadêmicas da Universidade Vila Velha (UVV) que conecta estudantes a mentores qualificados para aprimoramento do desempenho acadêmico através de sessões personalizadas de orientação e apoio educacional.
 
 
 
