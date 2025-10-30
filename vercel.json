@@ -1,16 +1,16 @@
 {
     "version": 2,
-    "buildCommand": "npm run build",
-    "outputDirectory": "frontend/dist",
-    "framework": null,
     "builds": [
         {
-            "src": "api/index.js",
-            "use": "@vercel/node",
+            "src": "package.json",
+            "use": "@vercel/static-build",
             "config": {
-                "maxLambdaSize": "50mb",
-                "includeFiles": ["backend/dist/**"]
+                "distDir": "frontend/dist"
             }
+        },
+        {
+            "src": "api/index.js",
+            "use": "@vercel/node"
         }
     ],
     "routes": [
@@ -23,10 +23,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "/index.html"
+            "dest": "/frontend/dist/index.html"
         }
-    ],
-    "env": {
-        "NODE_ENV": "production"
-    }
+    ]
 }
