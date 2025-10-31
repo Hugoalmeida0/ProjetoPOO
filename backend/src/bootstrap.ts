@@ -38,6 +38,67 @@ export async function ensureSchema() {
       );
     `);
 
+  // Ensure graduations table exists
+  await pool.query(`
+      CREATE TABLE IF NOT EXISTS graduations (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name TEXT NOT NULL,
+        description TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+  // Ensure profiles table exists
+  await pool.query(`
+      CREATE TABLE IF NOT EXISTS profiles (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        bio TEXT,
+        phone TEXT,
+        location TEXT,
+        avatar_url TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+  // Ensure mentor_profiles table exists
+  await pool.query(`
+      CREATE TABLE IF NOT EXISTS mentor_profiles (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        graduation_id UUID REFERENCES graduations(id) ON DELETE SET NULL,
+        experience_years INTEGER,
+        subjects TEXT,
+        avg_rating DECIMAL(3,2) DEFAULT 0,
+        total_ratings INTEGER DEFAULT 0,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+  // Ensure bookings table exists
+  await pool.query(`
+      CREATE TABLE IF NOT EXISTS bookings (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        student_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        mentor_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        subject_id UUID REFERENCES subjects(id) ON DELETE SET NULL,
+        subject_name TEXT,
+        date DATE NOT NULL,
+        time TIME NOT NULL,
+        duration INTEGER NOT NULL DEFAULT 60,
+        status TEXT NOT NULL DEFAULT 'pending',
+        objective TEXT,
+        student_name TEXT,
+        student_email TEXT,
+        student_phone TEXT,
+        cancel_reason TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
   // Add subjects column to mentor_profiles if it doesn't exist
   await pool.query(`
       DO $$
