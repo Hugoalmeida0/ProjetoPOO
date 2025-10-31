@@ -39,7 +39,7 @@ async function adminOnly(req: Request & { userId?: string }, res: Response, next
         next();
     } catch (err) {
         console.error('adminOnly middleware error:', err);
-        return res.status(500).json({ 
+        return res.status(500).json({
             error: 'Internal server error',
             message: err instanceof Error ? err.message : 'Unknown error'
         });
