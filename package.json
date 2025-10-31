@@ -9,7 +9,7 @@
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && npm run build",
     "build": "npm run build:backend && npm run build:frontend",
-    "vercel-build": "cd backend && npm ci && npx tsc -p tsconfig.json && cd ../frontend && npm ci && npm run build",
+    "vercel-build": "cd backend && npm ci && ./node_modules/.bin/tsc -p tsconfig.json && cd ../frontend && npm ci && npm run build",
     "install:all": "cd frontend && npm install && cd ../backend && npm install"
   },
   "repository": {
