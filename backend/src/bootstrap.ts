@@ -104,6 +104,32 @@ export async function ensureSchema() {
       END $$;
     `);
 
+  // Add avg_rating column to mentor_profiles if it doesn't exist
+  await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='mentor_profiles' AND column_name='avg_rating'
+        ) THEN
+          ALTER TABLE mentor_profiles ADD COLUMN avg_rating DECIMAL(3,2) DEFAULT 0;
+        END IF;
+      END $$;
+    `);
+
+  // Add total_ratings column to mentor_profiles if it doesn't exist
+  await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='mentor_profiles' AND column_name='total_ratings'
+        ) THEN
+          ALTER TABLE mentor_profiles ADD COLUMN total_ratings INTEGER DEFAULT 0;
+        END IF;
+      END $$;
+    `);
+
   // Ensure bookings table exists
   await pool.query(`
       CREATE TABLE IF NOT EXISTS bookings (
