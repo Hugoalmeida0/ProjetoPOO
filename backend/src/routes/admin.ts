@@ -63,7 +63,7 @@ router.get('/users', auth, adminOnly, async (req: Request, res: Response) => {
                     ELSE false 
                 END as is_mentor,
                 mp.experience_years,
-                mp.avg_rating,
+                CAST(mp.avg_rating AS FLOAT) as avg_rating,
                 mp.total_ratings,
                 g.name as graduation_name
             FROM users u
