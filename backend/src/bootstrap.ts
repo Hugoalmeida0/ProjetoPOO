@@ -62,6 +62,19 @@ export async function ensureSchema() {
       );
     `);
 
+  // Add location column to profiles if it doesn't exist
+  await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='profiles' AND column_name='location'
+        ) THEN
+          ALTER TABLE profiles ADD COLUMN location TEXT;
+        END IF;
+      END $$;
+    `);
+
   // Ensure mentor_profiles table exists
   await pool.query(`
       CREATE TABLE IF NOT EXISTS mentor_profiles (
