@@ -72,8 +72,12 @@ router.get('/users', auth, adminOnly, async (req: Request, res: Response) => {
 
         return res.json(rows);
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Internal server error' });
+        console.error('Error fetching users:', err);
+        return res.status(500).json({ 
+            error: 'Internal server error',
+            message: err instanceof Error ? err.message : 'Unknown error',
+            stack: process.env.NODE_ENV === 'development' ? (err instanceof Error ? err.stack : undefined) : undefined
+        });
     }
 });
 

@@ -23,15 +23,21 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Middleware para garantir schema no cold start (Vercel)
+// Middleware para garantir schema (executa sempre)
 let schemaInitialized = false;
+let schemaInitializing = false;
 app.use(async (req, res, next) => {
-    if (!schemaInitialized && process.env.NODE_ENV === 'production') {
+    if (!schemaInitialized && !schemaInitializing) {
+        schemaInitializing = true;
         try {
+            console.log('Initializing database schema...');
             await ensureSchema();
             schemaInitialized = true;
+            console.log('Database schema initialized successfully');
         } catch (err) {
             console.error('Schema initialization failed:', err);
+            schemaInitializing = false;
+            // Não retorna erro, deixa a requisição continuar
         }
     }
     next();
