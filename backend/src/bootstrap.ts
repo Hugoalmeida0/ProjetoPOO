@@ -28,22 +28,22 @@ export async function ensureSchema() {
       END $$;
     `);
 
-  // Ensure subjects table exists (minimal schema)
-  await pool.query(`
-      CREATE TABLE IF NOT EXISTS subjects (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name TEXT NOT NULL,
-        graduation_id UUID,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-      );
-    `);
-
-  // Ensure graduations table exists
+  // Ensure graduations table exists (must be before subjects due to FK)
   await pool.query(`
       CREATE TABLE IF NOT EXISTS graduations (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         name TEXT NOT NULL,
         description TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+
+  // Ensure subjects table exists (minimal schema)
+  await pool.query(`
+      CREATE TABLE IF NOT EXISTS subjects (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name TEXT NOT NULL,
+        graduation_id UUID REFERENCES graduations(id) ON DELETE SET NULL,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
@@ -97,45 +97,6 @@ export async function ensureSchema() {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
-    `);
-
-  // Add subjects column to mentor_profiles if it doesn't exist
-  await pool.query(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name='mentor_profiles' AND column_name='subjects'
-        ) THEN
-          ALTER TABLE mentor_profiles ADD COLUMN subjects TEXT;
-        END IF;
-      END $$;
-    `);
-
-  // Add subject_name column to bookings if it doesn't exist
-  await pool.query(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name='bookings' AND column_name='subject_name'
-        ) THEN
-          ALTER TABLE bookings ADD COLUMN subject_name TEXT;
-        END IF;
-      END $$;
-    `);
-
-  // Add cancel_reason column to bookings if it doesn't exist
-  await pool.query(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (
-          SELECT 1 FROM information_schema.columns 
-          WHERE table_name='bookings' AND column_name='cancel_reason'
-        ) THEN
-          ALTER TABLE bookings ADD COLUMN cancel_reason TEXT;
-        END IF;
-      END $$;
     `);
 
   // Ensure mentor_subjects junction table exists
