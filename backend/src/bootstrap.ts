@@ -154,4 +154,16 @@ export async function ensureSchema() {
   await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_ratings_mentor_id ON ratings(mentor_id);
     `);
+
+  // Create admin user if it doesn't exist
+  await pool.query(`
+      INSERT INTO users (id, email, password, full_name)
+      VALUES (
+        '00000000-0000-0000-0000-000000000001',
+        'admin@gmail.com',
+        'admin1234',
+        'Administrador'
+      )
+      ON CONFLICT (email) DO NOTHING;
+    `);
 }
