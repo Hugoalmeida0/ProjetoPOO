@@ -63,8 +63,8 @@ router.get('/users', auth, adminOnly, async (req: Request, res: Response) => {
                     ELSE false 
                 END as is_mentor,
                 mp.experience_years,
-                CAST(mp.avg_rating AS FLOAT) as avg_rating,
-                mp.total_ratings,
+                COALESCE(CAST(mp.avg_rating AS FLOAT), 0) as avg_rating,
+                COALESCE(mp.total_ratings, 0) as total_ratings,
                 g.name as graduation_name
             FROM users u
             LEFT JOIN profiles p ON u.id = p.user_id
