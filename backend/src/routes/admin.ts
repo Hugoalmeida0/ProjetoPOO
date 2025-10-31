@@ -57,7 +57,7 @@ router.get('/users', auth, adminOnly, async (req: Request, res: Response) => {
                 u.created_at,
                 p.bio,
                 p.phone,
-                p.location,
+                mp.location,
                 CASE 
                     WHEN mp.user_id IS NOT NULL THEN true 
                     ELSE false 

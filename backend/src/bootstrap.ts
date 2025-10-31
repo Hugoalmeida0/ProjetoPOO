@@ -83,11 +83,25 @@ export async function ensureSchema() {
         graduation_id UUID REFERENCES graduations(id) ON DELETE SET NULL,
         experience_years INTEGER,
         subjects TEXT,
+        location TEXT,
         avg_rating DECIMAL(3,2) DEFAULT 0,
         total_ratings INTEGER DEFAULT 0,
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+    `);
+
+  // Add location column to mentor_profiles if it doesn't exist
+  await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name='mentor_profiles' AND column_name='location'
+        ) THEN
+          ALTER TABLE mentor_profiles ADD COLUMN location TEXT;
+        END IF;
+      END $$;
     `);
 
   // Ensure bookings table exists
