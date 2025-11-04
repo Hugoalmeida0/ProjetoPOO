@@ -27,14 +27,8 @@ Para explorar e testar as funcionalidades da plataforma em ambiente de desenvolv
 | **Senha:** | `admin1234` |
 
 
-## 🎬 Apresentação do Projeto
+## 🎬 Apresentação do Projeto UVV Mentor
 
-Assista a um breve vídeo de demonstração e introdução ao UVV Mentor:
+Assista abaixo ao vídeo de introdução e apresentação da ideia do **UVV Mentor**:
 
-<div align="center">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/oEvOwG0eaME?si=PX2EZwtVpP19Nzik" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</div>
-
-_Para melhor visualização, você também pode abrir o vídeo diretamente no YouTube [clicando aqui](https://youtu.be/oEvOwG0eaME)._
-
-...
+link: https://www.youtube.com/embed/oEvOwG0eaME?si=PX2EZwtVpP19Nzik
