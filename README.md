@@ -32,7 +32,7 @@ Para explorar e testar as funcionalidades da plataforma em ambiente de desenvolv
 Assista a um breve vídeo de demonstração e introdução ao UVV Mentor:
 
 <div align="center">
-  <iframe width="700" height="400" src="https://youtu.be/oEvOwG0eaME" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/oEvOwG0eaME?si=PX2EZwtVpP19Nzik" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </div>
 
 _Para melhor visualização, você também pode abrir o vídeo diretamente no YouTube [clicando aqui](https://youtu.be/oEvOwG0eaME)._
