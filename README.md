@@ -25,3 +25,16 @@ Para explorar e testar as funcionalidades da plataforma em ambiente de desenvolv
 | :--- | :--- |
 | **Login (E-mail):** | `admin@gmail.com` |
 | **Senha:** | `admin1234` |
+
+
+## 🎬 Apresentação do Projeto
+
+Assista a um breve vídeo de demonstração e introdução ao UVV Mentor:
+
+<div align="center">
+  <iframe width="700" height="400" src="https://youtu.be/oEvOwG0eaME" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+_Para melhor visualização, você também pode abrir o vídeo diretamente no YouTube [clicando aqui](https://youtu.be/oEvOwG0eaME)._
+
+...
